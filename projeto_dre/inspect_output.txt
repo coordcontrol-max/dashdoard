@@ -1,0 +1,763 @@
+==========================================================================================
+### BASE  →  00 - Base.xlsx   (17.12 MB)
+==========================================================================================
+
+  -- Aba: 'Quebra_Sobra'  (dim=A1:E39876, max_row≈39876, max_col=5)
+
+  -- Aba: 'Compra Transf'  (dim=A1:G660, max_row≈660, max_col=7)
+
+  -- Aba: 'class'  (dim=A1:I102, max_row≈102, max_col=9)
+
+  -- Aba: 'Consumo Interno'  (dim=A1:D116, max_row≈116, max_col=4)
+
+  -- Aba: 'Cesta Básica'  (dim=A1:C85, max_row≈85, max_col=3)
+
+  -- Aba: 'Material de Expediente'  (dim=A1:F5844, max_row≈5844, max_col=6)
+
+  -- Aba: 'Transf Consumo'  (dim=A1:G69, max_row≈69, max_col=7)
+
+  -- Aba: 'Perdas e Quebras'  (dim=A1:C2248, max_row≈2248, max_col=3)
+
+  -- Aba: 'Inventario'  (dim=A1:C121, max_row≈121, max_col=3)
+
+  -- Aba: 'Receitas Comerciais'  (dim=A1:Q10281, max_row≈10281, max_col=17)
+
+  -- Aba: 'Juros Recebidos'  (dim=A1:S427, max_row≈427, max_col=19)
+
+  -- Aba: 'Juros Pagos Emp'  (dim=A1:S77, max_row≈77, max_col=19)
+
+  -- Aba: 'Juros Pagos'  (dim=A1:S206, max_row≈206, max_col=19)
+
+  -- Aba: 'Descontos Obtidos'  (dim=A1:D61626, max_row≈61626, max_col=4)
+
+  -- Aba: 'Despesas (2)'  (dim=A1:M12392, max_row≈12392, max_col=13)
+
+  -- Aba: 'Despesas'  (dim=A1:N61367, max_row≈61367, max_col=14)
+
+  -- Aba: 'Operação Financeira'  (dim=A1:AG11038, max_row≈11038, max_col=33)
+
+  -- Aba: 'Venda Bruta'  (dim=A1:G118, max_row≈118, max_col=7)
+
+  -- Aba: 'Compra de Funcionários'  (dim=A1:D113, max_row≈113, max_col=4)
+
+  -- Aba: 'Material de Expediente da Opera'  (dim=A1:E184, max_row≈184, max_col=5)
+
+  -- Aba: 'Despesas C_ Vendas'  (dim=A1:E50655, max_row≈50655, max_col=5)
+
+   [Quebra_Sobra] colunas (5):
+       - 'ANO'  dtype=int64
+       - 'MES'  dtype=int64
+       - 'NROEMPRESA'  dtype=int64
+       - 'ATRIBUTO'  dtype=str
+       - 'VALOR'  dtype=float64
+   primeiras linhas:
+ ANO  MES  NROEMPRESA         ATRIBUTO  VALOR
+2026    1           5 (-) Quebra Caixa  -1.03
+2026    1           5 (-) Quebra Caixa  -0.11
+2026    1           5 (-) Quebra Caixa  -0.02
+
+   [Compra Transf] colunas (7):
+       - 'ANO'  dtype=int64
+       - 'MES'  dtype=int64
+       - 'NROEMPRESA'  dtype=int64
+       - 'COD'  dtype=int64
+       - 'PRODUTO'  dtype=str
+       - 'VLRENTRADA'  dtype=float64
+       - 'Class'  dtype=str
+   primeiras linhas:
+ ANO  MES  NROEMPRESA  COD                                PRODUTO  VLRENTRADA              Class
+2026    1           5 6559 ALM RIBON IMPRESSORA USO INTERN 110X65      135.20 Etiquetas e Ribbon
+2026    1           5 6563     ALM ETIQUETA GONDOLA TLP 2844 30MM      621.25 Etiquetas e Ribbon
+2026    1           5 6568   ALM BOBINA VIVENDAS 80X40M TS/COTEPE      551.25         Bobina PDV
+
+   [class] colunas (9):
+       - 'SEQPRODUTO'  dtype=int64
+       - 'DESCCOMPLETA'  dtype=str
+       - 'class'  dtype=str
+       - 'Unnamed: 3'  dtype=float64
+       - 'CODESPECIE'  dtype=str
+       - 'Linhas'  dtype=str
+       - 'Unnamed: 6'  dtype=float64
+       - 'CODESPECIE.1'  dtype=str
+       - 'Linhas.1'  dtype=str
+   primeiras linhas:
+ SEQPRODUTO                             DESCCOMPLETA                  class  Unnamed: 3 CODESPECIE                  Linhas  Unnamed: 6 CODESPECIE.1                       Linhas.1
+       5502   ALM TINTA METIQ USO INTERN 500ML PRETA Cartaz Faixa e Outdoor         NaN     ACRA25 Acordo Aniversário 2023         NaN       CARTAO      Desagio Cartao de Credito
+       5503 ALM TINTA METIQ USO INTERN 500ML VERM... Cartaz Faixa e Outdoor         NaN     ACRCOM        Acordo Comercial         NaN       CARDEB       Desagio Cartao de Debito
+       5505 ALM TINTA SICOLTEX USO INTERN 3.6L AZ... Cartaz Faixa e Outdoor         NaN     ACRMGM       Acordo de Compras         NaN       CARDIG Desagio Sobre Carteira Digital
+
+   [Consumo Interno] colunas (3):
+       - 'SEQDETALHE1'  dtype=int64
+       - 'MES'  dtype=datetime64[us]
+       - 'CONSUMO'  dtype=float64
+   primeiras linhas:
+ SEQDETALHE1        MES      CONSUMO
+          21 2026-01-01 -7406.757006
+          28 2026-01-01 -7381.000597
+         125 2026-01-01 -9871.929871
+
+   [Cesta Básica] colunas (3):
+       - 'NROEMPRESA'  dtype=int64
+       - 'MES'  dtype=datetime64[us]
+       - 'CESTA'  dtype=float64
+   primeiras linhas:
+ NROEMPRESA        MES        CESTA
+         21 2026-01-01 -5767.164429
+        222 2026-01-01 -4881.907371
+         28 2026-01-01 -5020.655900
+
+   [Material de Expediente] colunas (6):
+       - 'NROEMPRESA'  dtype=int64
+       - 'DTAENTRADA'  dtype=datetime64[us]
+       - 'SEQPRODUTO'  dtype=int64
+       - 'DESCCOMPLETA'  dtype=str
+       - 'COMPRA'  dtype=int64
+       - 'Class'  dtype=str
+   primeiras linhas:
+ NROEMPRESA DTAENTRADA  SEQPRODUTO                             DESCCOMPLETA  COMPRA                  Class
+        215 2026-01-30        5505 ALM TINTA SICOLTEX USO INTERN 3.6L AZ...     125 Cartaz Faixa e Outdoor
+         10 2026-02-05        5505 ALM TINTA SICOLTEX USO INTERN 3.6L AZ...     125 Cartaz Faixa e Outdoor
+         27 2026-02-06        5505 ALM TINTA SICOLTEX USO INTERN 3.6L AZ...     125 Cartaz Faixa e Outdoor
+
+   [Transf Consumo] colunas (7):
+       - 'ANO'  dtype=int64
+       - 'MES'  dtype=int64
+       - 'NROEMPRESA'  dtype=int64
+       - 'PLU'  dtype=int64
+       - 'PRODUTO'  dtype=str
+       - 'VLRVENDA'  dtype=float64
+       - 'class'  dtype=str
+   primeiras linhas:
+ ANO  MES  NROEMPRESA   PLU                                  PRODUTO  VLRVENDA              class
+2026    1         112  6573 ALM ETIQUETA BALANCA USO INTERN 40X30...   4493.88 Etiquetas e Ribbon
+2026    1         112 20638        ALM SACO KRAFT 10KG BRANCO C/ MIL    546.00     Sacolas Outros
+2026    3         112  7557    ALM BOBINA ESTRELA FLV 38X55 C/06 UND   7632.45         Bobina FLV
+
+   [Perdas e Quebras] colunas (3):
+       - 'LOJA'  dtype=int64
+       - 'DATA'  dtype=datetime64[us]
+       - 'VLRLIQUIDO'  dtype=float64
+   primeiras linhas:
+ LOJA       DATA  VLRLIQUIDO
+  106 2026-02-25  465.996321
+  131 2026-02-23  308.473021
+   17 2026-02-20  210.800047
+
+   [Inventario] colunas (3):
+       - 'NROEMPRESA'  dtype=int64
+       - 'VLRCTOLIQUIDO'  dtype=float64
+       - "TRUNC(L3.DTAENTRADASAIDA,'MM')"  dtype=datetime64[us]
+   primeiras linhas:
+ NROEMPRESA  VLRCTOLIQUIDO TRUNC(L3.DTAENTRADASAIDA,'MM')
+         21  -16759.841530                     2026-01-01
+         28  -12286.415338                     2026-01-01
+        219  -17438.725494                     2026-01-01
+
+   [Receitas Comerciais] colunas (17):
+       - 'DTAOPERACAO'  dtype=datetime64[us]
+       - 'DTACONTABILIZA'  dtype=datetime64[us]
+       - 'VLROPERACAO'  dtype=float64
+       - 'NROPROCESSO'  dtype=int64
+       - 'CODESPECIE'  dtype=str
+       - 'NROEMPRESA'  dtype=int64
+       - 'SEQPESSOA'  dtype=int64
+       - 'NOMERAZAO'  dtype=str
+       - 'OBRIGDIREITO'  dtype=str
+       - 'NROTITULO'  dtype=int64
+       - 'SERIETITULO'  dtype=str
+       - 'NROPARCELA'  dtype=int64
+       - 'QTDPARCELA'  dtype=int64
+       - 'DTAVENCIMENTO'  dtype=datetime64[us]
+       - 'ABERTOQUITADO'  dtype=str
+       - 'OBSERVACAO'  dtype=float64
+       - 'CLASS'  dtype=str
+   primeiras linhas:
+DTAOPERACAO DTACONTABILIZA  VLROPERACAO  NROPROCESSO CODESPECIE  NROEMPRESA  SEQPESSOA                                NOMERAZAO OBRIGDIREITO  NROTITULO SERIETITULO  NROPARCELA  QTDPARCELA DTAVENCIMENTO ABERTOQUITADO  OBSERVACAO                   CLASS
+ 2026-01-02     2026-01-02        98.90    181463395     ACRA25         106       1420 BRASLUZ INDUSTRIA COMERCIO ALIMENTOS ...            D         33         ACO           2           4    2025-12-28             Q         NaN Acordo Aniversário 2023
+ 2026-01-02     2026-01-02       159.73    181228198     ACRA25          12       1162                    FUGINI ALIMENTOS LTDA            D      24683         ACO           6          12    2026-01-08             Q         NaN Acordo Aniversário 2023
+ 2026-01-02     2026-01-02        73.76    181228210     ACRA25          12       1242 M & E DISTRIBUIDORA DE CALCADOS E UTI...            D      23907         ACO           5           6    2025-12-02             Q         NaN Acordo Aniversário 2023
+
+   [Juros Recebidos] colunas (19):
+       - 'DTAOPERACAO'  dtype=datetime64[us]
+       - 'DTACONTABILIZA'  dtype=datetime64[us]
+       - 'VLROPERACAO'  dtype=float64
+       - 'NROPROCESSO'  dtype=int64
+       - 'CODESPECIE'  dtype=str
+       - 'NROEMPRESA'  dtype=int64
+       - 'SEQPESSOA'  dtype=int64
+       - 'NOMERAZAO'  dtype=str
+       - 'OBRIGDIREITO'  dtype=str
+       - 'NROTITULO'  dtype=int64
+       - 'SERIETITULO'  dtype=str
+       - 'NROPARCELA'  dtype=int64
+       - 'QTDPARCELA'  dtype=int64
+       - 'DTAVENCIMENTO'  dtype=datetime64[us]
+       - 'ABERTOQUITADO'  dtype=str
+       - 'OBSERVACAO'  dtype=str
+       - 'CLASS'  dtype=str
+       - 'Unnamed: 17'  dtype=float64
+       - 'Juros e Multas Recebidos'  dtype=float64
+   primeiras linhas:
+DTAOPERACAO DTACONTABILIZA  VLROPERACAO  NROPROCESSO CODESPECIE  NROEMPRESA  SEQPESSOA                       NOMERAZAO OBRIGDIREITO  NROTITULO SERIETITULO  NROPARCELA  QTDPARCELA DTAVENCIMENTO ABERTOQUITADO                               OBSERVACAO                    CLASS  Unnamed: 17  Juros e Multas Recebidos
+ 2026-03-17     2026-03-17        20.00    187482218     ACRPRE         106       7258 AJL - AGRONEGOCIO JOSIDITH LTDA            D       1633         ACO           1           1    2026-03-02             Q ACORDO DE 1% DE QUEBRA REF DEZEMBRO A... Juros e Multas Recebidos          NaN                       NaN
+ 2026-03-17     2026-03-17        20.58    187482218     ACRPRE         106       7258 AJL - AGRONEGOCIO JOSIDITH LTDA            D       1634         ACO           1           1    2026-03-02             Q     ACORDO REF 1% DE QUEBRA PEDIDO 02-02 Juros e Multas Recebidos          NaN                       NaN
+ 2026-03-17     2026-03-17        20.00    187482218     ACRPRE         106       7258 AJL - AGRONEGOCIO JOSIDITH LTDA            D       1633         ACO           1           1    2026-03-02             Q ACORDO DE 1% DE QUEBRA REF DEZEMBRO A... Juros e Multas Recebidos          NaN                       NaN
+
+   [Juros Pagos Emp] colunas (19):
+       - 'DTAOPERACAO'  dtype=datetime64[us]
+       - 'DTACONTABILIZA'  dtype=datetime64[us]
+       - 'VLROPERACAO'  dtype=float64
+       - 'NROPROCESSO'  dtype=int64
+       - 'CODESPECIE'  dtype=str
+       - 'NROEMPRESA'  dtype=int64
+       - 'SEQPESSOA'  dtype=int64
+       - 'NOMERAZAO'  dtype=str
+       - 'OBRIGDIREITO'  dtype=str
+       - 'NROTITULO'  dtype=int64
+       - 'SERIETITULO'  dtype=int64
+       - 'NROPARCELA'  dtype=int64
+       - 'QTDPARCELA'  dtype=int64
+       - 'DTAVENCIMENTO'  dtype=datetime64[us]
+       - 'ABERTOQUITADO'  dtype=str
+       - 'OBSERVACAO'  dtype=str
+       - 'CLASS'  dtype=str
+       - 'Unnamed: 17'  dtype=float64
+       - 'Unnamed: 18'  dtype=str
+   primeiras linhas:
+DTAOPERACAO DTACONTABILIZA  VLROPERACAO  NROPROCESSO CODESPECIE  NROEMPRESA  SEQPESSOA           NOMERAZAO OBRIGDIREITO  NROTITULO  SERIETITULO  NROPARCELA  QTDPARCELA DTAVENCIMENTO ABERTOQUITADO                               OBSERVACAO                          CLASS  Unnamed: 17                    Unnamed: 18
+ 2026-01-12     2026-01-12      5985.70    182308114     EMPRE2          15       2836 BANCO SANTANDER S.A            O   10452996            1           1           1    2026-01-12             Q EMPRESTIMO CAPITAL DE GIRO - OPERACAO... Juros e Multas Pagos Sobre Emp          NaN Juros e Multas Pagos Sobre Emp
+ 2026-01-12     2026-01-12      5985.70    182308130     EMPRE2           7       2836 BANCO SANTANDER S.A            O   10452996            1           1           1    2026-01-12             Q EMPRESTIMO CAPITAL DE GIRO - OPERACAO... Juros e Multas Pagos Sobre Emp          NaN                            NaN
+ 2026-01-15     2026-01-15     11839.28    182617004     EMPRE2          16       2836 BANCO SANTANDER S.A            O     413116            7           1           1    2026-01-15             Q REF OPERACAO FECHADA RES 4131_x000D_\... Juros e Multas Pagos Sobre Emp          NaN                            NaN
+
+   [Juros Pagos] colunas (19):
+       - 'DTAOPERACAO'  dtype=datetime64[us]
+       - 'DTACONTABILIZA'  dtype=datetime64[us]
+       - 'VLROPERACAO'  dtype=float64
+       - 'NROPROCESSO'  dtype=int64
+       - 'CODESPECIE'  dtype=str
+       - 'NROEMPRESA'  dtype=int64
+       - 'SEQPESSOA'  dtype=int64
+       - 'NOMERAZAO'  dtype=str
+       - 'OBRIGDIREITO'  dtype=str
+       - 'NROTITULO'  dtype=int64
+       - 'SERIETITULO'  dtype=int64
+       - 'NROPARCELA'  dtype=int64
+       - 'QTDPARCELA'  dtype=int64
+       - 'DTAVENCIMENTO'  dtype=datetime64[us]
+       - 'ABERTOQUITADO'  dtype=str
+       - 'OBSERVACAO'  dtype=str
+       - 'CLASS'  dtype=str
+       - 'Unnamed: 17'  dtype=float64
+       - 'Unnamed: 18'  dtype=str
+   primeiras linhas:
+DTAOPERACAO DTACONTABILIZA  VLROPERACAO  NROPROCESSO CODESPECIE  NROEMPRESA  SEQPESSOA                          NOMERAZAO OBRIGDIREITO  NROTITULO  SERIETITULO  NROPARCELA  QTDPARCELA DTAVENCIMENTO ABERTOQUITADO                              OBSERVACAO          CLASS  Unnamed: 17    Unnamed: 18
+ 2026-01-02     2026-01-02         1.35    180945786       DUPP          20       1130 BRASILIA COMERCIAL DE BEBIDAS LTDA            O     854002            8           1           1    2026-01-02             Q                                 _x000D_ Juros e Multas          NaN Juros e Multas
+ 2026-01-02     2026-01-02         0.01    180985918       DUPP          16       1105           BRASAL REFRIGERANTES S/A            O   17184435           10           1           1    2026-01-02             Q                                 _x000D_ Juros e Multas          NaN            NaN
+ 2026-01-02     2026-01-02         0.01    181460798       DUPP          18       1084                             SOBEBE            O     475776            1           1           3    2026-01-02             Q 2% DESCONTO NEGOCIADO (CTR: 464)_x000D_ Juros e Multas          NaN            NaN
+
+   [Descontos Obtidos] colunas (4):
+       - 'CODESPECIE'  dtype=str
+       - 'DTACONTABILIZA'  dtype=datetime64[us]
+       - 'VLROPERACAO'  dtype=float64
+       - 'NROEMPRESA'  dtype=int64
+   primeiras linhas:
+CODESPECIE DTACONTABILIZA  VLROPERACAO  NROEMPRESA
+     DESPU     2026-01-02         7.86          23
+     DESPU     2026-01-02        10.02          23
+     DESPU     2026-01-02        12.24          23
+
+   [Despesas (2)] colunas (13):
+       - 'ANO'  dtype=int64
+       - 'MÊS'  dtype=int64
+       - 'DTA_CONTABIL'  dtype=datetime64[us]
+       - 'NROEMPRESA'  dtype=int64
+       - 'DTA_VENCIMENTO'  dtype=datetime64[us]
+       - 'NOMERAZAO'  dtype=str
+       - 'DESCRICAO'  dtype=str
+       - 'NROTITULO'  dtype=int64
+       - 'CODESPECIE'  dtype=str
+       - 'USUARIO'  dtype=str
+       - 'VLRNOMINAL'  dtype=int64
+       - 'VALOR_LIQUIDO'  dtype=int64
+       - 'OBSERVACAO'  dtype=str
+   primeiras linhas:
+ ANO  MÊS DTA_CONTABIL  NROEMPRESA DTA_VENCIMENTO          NOMERAZAO            DESCRICAO  NROTITULO CODESPECIE   USUARIO  VLRNOMINAL  VALOR_LIQUIDO                   OBSERVACAO
+2026    1   2026-01-02         112     2026-01-02 SPASSO MENDES LTDA      Alimentação ADM        710     ALIADM JESSICA.L         930            930  REF ALIMENTACAO PESSOAL ADM
+2026    1   2026-01-02           5     2026-01-02 SPASSO MENDES LTDA Alimentacao Operaçao        705     ALIMEN ORLANDY.C         368            368 REF ALIMENTACAO PESSOAL LOJA
+2026    1   2026-01-02          14     2026-01-02        MEU TEMPERO Alimentacao Operaçao        293     ALIMEN JESSICA.L         646            646 REF ALIMENTACAO PESSOAL LOJA
+
+   [Despesas] colunas (14):
+       - 'ANO'  dtype=int64
+       - 'MÊS'  dtype=int64
+       - 'DTA_CONTABIL'  dtype=str
+       - 'EMPRESA'  dtype=int64
+       - 'DTA_VENC'  dtype=str
+       - 'SEQPESSOA'  dtype=int64
+       - 'NOMERAZAO'  dtype=str
+       - 'DESCRICAO'  dtype=str
+       - 'NROTITULO'  dtype=int64
+       - 'CODESPECIE'  dtype=str
+       - 'USUALTERACAO'  dtype=str
+       - 'VLRNOMINAL'  dtype=float64
+       - 'VLROPERACAO'  dtype=float64
+       - 'OBSERVACAO'  dtype=str
+   primeiras linhas:
+ ANO  MÊS DTA_CONTABIL  EMPRESA   DTA_VENC  SEQPESSOA                                NOMERAZAO                          DESCRICAO  NROTITULO CODESPECIE USUALTERACAO  VLRNOMINAL  VLROPERACAO                               OBSERVACAO
+2025    1   01/01/2025       12 10/01/2025       1380 SECRETARIA DE ESTADO DE ECONOMIA DO D...              Parcelamento Estadual     738807     ICMSPA      LUCAS.G     7388.07      7388.07 PARCELAMENTO DIVIDA ATIVA MAPA ATACAD...
+2025    1   10/01/2025       11 06/01/2025      23432                    JULIANA FEITOSA COSTA Custas Judiciais  Civis e Criminal     205487     CUSTJU    DANUBIA.B     2054.87      2054.87 VALDECI MARTINS DE LIMA X RAWL ALIMEN...
+2025    2   10/02/2025       11 05/02/2025      23432                    JULIANA FEITOSA COSTA Custas Judiciais  Civis e Criminal     205487     CUSTJU    DANUBIA.B     2054.87      2054.87 VALDECI MARTINS DE LIMA X RAWL ALIMEN...
+
+   [Operação Financeira] colunas (33):
+       - 'SEQLANCTO'  dtype=int64
+       - 'NROEMPRESA'  dtype=int64
+       - 'CODOPERACAO'  dtype=int64
+       - 'NROEMPRESAMAE'  dtype=int64
+       - 'CONTA'  dtype=float64
+       - 'SEQCTACORRENTE'  dtype=int64
+       - 'NRODOCUMENTO'  dtype=int64
+       - 'SERIEDOCUMENTO'  dtype=float64
+       - 'NRODOCORIGEM'  dtype=int64
+       - 'ORIGEMDOC'  dtype=str
+       - 'HISTORICO'  dtype=str
+       - 'LCTCTRAPARTIDA'  dtype=str
+       - 'VLRLANCAMENTO'  dtype=float64
+       - 'TIPOLANCTO'  dtype=str
+       - 'DTALANCTO'  dtype=datetime64[us]
+       - 'CTACORRTRANSF'  dtype=float64
+       - 'NROPROCESSO'  dtype=int64
+       - 'FAVORECIDO'  dtype=float64
+       - 'CHEQUE'  dtype=str
+       - 'SEQLCTCTPARTIDA'  dtype=float64
+       - 'OPCAIXA'  dtype=float64
+       - 'OPCANCELADA'  dtype=float64
+       - 'DTACANCELOU'  dtype=float64
+       - 'USUCANCELOU'  dtype=float64
+       - 'JUSTCANCEL'  dtype=float64
+       - 'DTAALTERACAO'  dtype=datetime64[us]
+       - 'USUALTERACAO'  dtype=str
+       - 'LINKERP'  dtype=float64
+       - 'NROPROCCONCILIACAO'  dtype=int64
+       - 'SEQTALAO'  dtype=float64
+       - 'LINKERPEXT'  dtype=float64
+       - 'NROPROCESSOTRANSF'  dtype=float64
+       - 'DTAEXECUTOUTRANSF'  dtype=float64
+   primeiras linhas:
+ SEQLANCTO  NROEMPRESA  CODOPERACAO  NROEMPRESAMAE  CONTA  SEQCTACORRENTE  NRODOCUMENTO  SERIEDOCUMENTO  NRODOCORIGEM ORIGEMDOC                               HISTORICO LCTCTRAPARTIDA  VLRLANCAMENTO TIPOLANCTO  DTALANCTO  CTACORRTRANSF  NROPROCESSO  FAVORECIDO CHEQUE  SEQLCTCTPARTIDA  OPCAIXA  OPCANCELADA  DTACANCELOU  USUCANCELOU  JUSTCANCEL DTAALTERACAO USUALTERACAO  LINKERP  NROPROCCONCILIACAO  SEQTALAO  LINKERPEXT  NROPROCESSOTRANSF  DTAEXECUTOUTRANSF
+ 181412359           2          129              1    NaN            1061             0             NaN     181412358       CEL               TARIFA MENSALIDADE PACOTE              S         294.50          D 2026-01-02            NaN    181412358         NaN      N              NaN      NaN          NaN          NaN          NaN         NaN   2026-01-03   ADAELTON.S      NaN           181412358       NaN         NaN                NaN                NaN
+ 181412424           3           73              1    NaN             124             0             NaN     181412423       CEL                                     IOF              S           0.25          D 2026-01-02            NaN    181412423         NaN      N              NaN      NaN          NaN          NaN          NaN         NaN   2026-01-03   ADAELTON.S      NaN           181412423       NaN         NaN                NaN                NaN
+ 181412430           3           73              1    NaN             124             0             NaN     181412429       CEL IOF ADICIONAL / IMPOSTO SOBRE OPERAÇOES              S          11.71          D 2026-01-02            NaN    181412429         NaN      N              NaN      NaN          NaN          NaN          NaN         NaN   2026-01-03   ADAELTON.S      NaN           181412429       NaN         NaN                NaN                NaN
+
+   [Venda Bruta] colunas (7):
+       - 'ANO'  dtype=int64
+       - 'MES'  dtype=int64
+       - 'NROEMPRESA'  dtype=int64
+       - 'TICKET'  dtype=int64
+       - 'VENDA'  dtype=float64
+       - 'MARGEM'  dtype=float64
+       - 'VERBA'  dtype=float64
+   primeiras linhas:
+ ANO  MES  NROEMPRESA  TICKET      VENDA    MARGEM        VERBA
+2026    1           7   33758 1718888.31 339781.01 40157.875760
+2026    1          10   35964 2147053.14 404966.02 28617.496625
+2026    1          11   38250 2030685.51 373728.30 23233.925229
+
+   [Compra de Funcionários] colunas (4):
+       - 'NROEMPRESA'  dtype=int64
+       - 'ANO'  dtype=int64
+       - 'MES'  dtype=int64
+       - 'VENDA'  dtype=float64
+   primeiras linhas:
+ NROEMPRESA  ANO  MES    VENDA
+          5 2026    1  9663.54
+          7 2026    1 13046.08
+          9 2026    1 10064.56
+
+   [Material de Expediente da Opera] colunas (4):
+       - 'EMPRESA'  dtype=int64
+       - 'RAZAO_SOCIAL'  dtype=str
+       - 'DATA_LANCAMENTO'  dtype=datetime64[us]
+       - 'VALOR_LIQUIDO'  dtype=float64
+   primeiras linhas:
+ EMPRESA                    RAZAO_SOCIAL DATA_LANCAMENTO  VALOR_LIQUIDO
+     112                      KALUNGA SA      2026-01-03         247.97
+     112 ANA COMERCIO DE BIJUTERIAS LTDA      2026-01-03         648.00
+      25       MN ARTES GRAFICAS LTDA ME      2026-01-03         314.00
+
+   [Despesas C_ Vendas] colunas (5):
+       - 'NROEMPRESA'  dtype=int64
+       - 'CODESPECIE'  dtype=str
+       - 'DTAEMISSAO'  dtype=datetime64[us]
+       - 'VLRADMINISTRACAO'  dtype=float64
+       - 'CLASS'  dtype=str
+   primeiras linhas:
+ NROEMPRESA CODESPECIE DTAEMISSAO  VLRADMINISTRACAO                    CLASS
+         13     CARDEB 2026-01-01             99.67 Desagio Cartao de Debito
+         13     CARDEB 2026-01-01             78.99 Desagio Cartao de Debito
+         13     CARDEB 2026-01-01             49.20 Desagio Cartao de Debito
+
+==========================================================================================
+### CLASSIF  →  01 - Classificação.xlsx   (0.04 MB)
+==========================================================================================
+
+  -- Aba: 'GRUPO'  (dim=A1:A21, max_row≈21, max_col=1)
+
+  -- Aba: 'AGRUPAMENTO'  (dim=A1:A34, max_row≈34, max_col=1)
+
+  -- Aba: 'PLANO'  (dim=A1:C230, max_row≈230, max_col=3)
+
+  -- Aba: 'EMPRESAS'  (dim=A1:C54, max_row≈54, max_col=3)
+
+  -- Aba: 'PERÍODO'  (dim=A1:C731, max_row≈731, max_col=3)
+
+  -- Aba: 'ANO'  (dim=A1:A3, max_row≈3, max_col=1)
+
+  -- Aba: 'MÊS'  (dim=A1:B13, max_row≈13, max_col=2)
+
+  -- Aba: 'LOJA'  (dim=A1:A31, max_row≈31, max_col=1)
+
+   [GRUPO] colunas (1):
+       - 'GRUPO'  dtype=str
+   primeiras linhas:
+                     GRUPO
+               Venda Bruta
+                       CMV
+Margem C/ Acordos Lançados
+
+   [AGRUPAMENTO] colunas (1):
+       - 'AGRUPAMENTO'  dtype=str
+   primeiras linhas:
+            AGRUPAMENTO
+            Venda Bruta
+Mercadoria para Revenda
+             Embalagens
+
+   [PLANO] colunas (3):
+       - 'GRUPO'  dtype=str
+       - 'AGRUPAMENTO'  dtype=str
+       - 'CONTA'  dtype=str
+   primeiras linhas:
+      GRUPO             AGRUPAMENTO                         CONTA
+Venda Bruta             Venda Bruta                   Venda Bruta
+        CMV Mercadoria para Revenda Mercadoria para Revenda - CMV
+        CMV Mercadoria para Revenda               Consumo Interno
+
+   [EMPRESAS] colunas (3):
+       - 'GRUPO'  dtype=str
+       - 'EMPRESAS'  dtype=int64
+       - 'LOJA'  dtype=str
+   primeiras linhas:
+       GRUPO  EMPRESAS LOJA
+SUPERMERCADO         1  L01
+SUPERMERCADO         2  L02
+SUPERMERCADO         3  L03
+
+   [PERÍODO] colunas (3):
+       - 'ANO'  dtype=int64
+       - 'MÊS'  dtype=int64
+       - 'DATA'  dtype=datetime64[us]
+   primeiras linhas:
+ ANO  MÊS       DATA
+2025    1 2025-01-01
+2025    1 2025-01-02
+2025    1 2025-01-03
+
+   [ANO] colunas (1):
+       - 'ANO'  dtype=int64
+   primeiras linhas:
+ ANO
+2025
+2026
+
+   [MÊS] colunas (2):
+       - 'MÊS'  dtype=int64
+       - 'MESES'  dtype=str
+   primeiras linhas:
+ MÊS MESES
+   1   JAN
+   2   FEV
+   3   MAR
+
+   [LOJA] colunas (1):
+       - 'LOJA'  dtype=str
+   primeiras linhas:
+LOJA
+ L01
+ L02
+ L03
+
+==========================================================================================
+### RATEADOS  →  02 - Valores Rateados.xlsx   (16.78 MB)
+==========================================================================================
+
+  -- Aba: 'Planilha1'  (dim=A1:A1, max_row≈1, max_col=1)
+
+  -- Aba: 'VALORES RATEADOS'  (dim=A1:K21505, max_row≈21505, max_col=11)
+
+  -- Aba: 'Class_loja'  (dim=A1:I33, max_row≈33, max_col=9)
+
+  -- Aba: 'REGRAS_RATEIO'  (dim=A1:G115, max_row≈115, max_col=7)
+
+  -- Aba: 'BASE1'  (dim=A1:E1036, max_row≈1036, max_col=5)
+
+  -- Aba: 'BASE2'  (dim=A1:E929, max_row≈929, max_col=5)
+
+  -- Aba: 'BASE3'  (dim=A1:E297, max_row≈297, max_col=5)
+
+  -- Aba: 'BASE4'  (dim=A1:E4091, max_row≈4091, max_col=5)
+
+  -- Aba: 'BASE5'  (dim=A1:G1684, max_row≈1684, max_col=7)
+
+  -- Aba: 'BASE6'  (dim=A1:L892, max_row≈892, max_col=12)
+
+  -- Aba: 'BASE7'  (dim=A1:E41, max_row≈41, max_col=5)
+
+  -- Aba: 'BASE8'  (dim=A1:E289, max_row≈289, max_col=5)
+
+  -- Aba: 'BASE9'  (dim=A1:E226, max_row≈226, max_col=5)
+
+  -- Aba: 'BASE10'  (dim=A1:E227, max_row≈227, max_col=5)
+
+  -- Aba: 'BASE11'  (dim=A1:E326, max_row≈326, max_col=5)
+
+  -- Aba: 'BASE12'  (dim=A1:E90, max_row≈90, max_col=5)
+
+  -- Aba: 'BASE13'  (dim=A1:E102, max_row≈102, max_col=5)
+
+  -- Aba: 'BASE14'  (dim=A1:E235, max_row≈235, max_col=5)
+
+  -- Aba: 'BASE15'  (dim=A1:E109, max_row≈109, max_col=5)
+
+   [Planilha1] colunas (0):
+   primeiras linhas:
+Empty DataFrame
+Columns: []
+Index: []
+
+   [VALORES RATEADOS] colunas (11):
+       - 'ANO'  dtype=int64
+       - 'MÊS'  dtype=int64
+       - 'LOJA'  dtype=str
+       - 'LINHAS'  dtype=str
+       - 'VALORES'  dtype=float64
+       - 'CONVERSOR'  dtype=float64
+       - 'Venda Bruta'  dtype=float64
+       - 'VALORES ORIGINAIS'  dtype=float64
+       - 'Unnamed: 8'  dtype=int64
+       - 'Unnamed: 9'  dtype=str
+       - 'Unnamed: 10'  dtype=int64
+   primeiras linhas:
+ ANO  MÊS LOJA                        LINHAS       VALORES    CONVERSOR  Venda Bruta  VALORES ORIGINAIS  Unnamed: 8 Unnamed: 9  Unnamed: 10
+2026    1  L01                   Venda Bruta  1.681312e+06 1.681312e+06   1681312.42       1.681312e+06           1        NSP            0
+2026    1  L01 Mercadoria para Revenda - CMV -1.389372e+06 1.389372e+06   1681312.42      -1.389372e+06           1        NaN            0
+2026    1  L01               Consumo Interno -7.708930e+03 7.708930e+03   1681312.42      -7.708930e+03           1        NaN            0
+
+   [Class_loja] colunas (9):
+       - 'LOJA'  dtype=str
+       - 'Unnamed: 1'  dtype=int64
+       - 'Unnamed: 2'  dtype=str
+       - 'Unnamed: 3'  dtype=float64
+       - 'Unnamed: 4'  dtype=float64
+       - 'Unnamed: 5'  dtype=float64
+       - 'LOJA.1'  dtype=str
+       - 'Unnamed: 7'  dtype=int64
+       - 'Unnamed: 8'  dtype=str
+   primeiras linhas:
+LOJA  Unnamed: 1 Unnamed: 2  Unnamed: 3  Unnamed: 4  Unnamed: 5 LOJA.1  Unnamed: 7 Unnamed: 8
+ L01           1        NSP         NaN         NaN         NaN    L01           1        NSP
+ L02           2        NSM         NaN         NaN         NaN    L02           2        NSM
+ L03           3        NSP         NaN         NaN         NaN    L03           3        NSP
+
+   [REGRAS_RATEIO] colunas (7):
+       - 'LINHA'  dtype=str
+       - 'REGRA'  dtype=str
+       - 'Unnamed: 2'  dtype=str
+       - 'REGRA.1'  dtype=float64
+       - 'Unnamed: 4'  dtype=float64
+       - 'Unnamed: 5'  dtype=str
+       - 'REGRA.2'  dtype=float64
+   primeiras linhas:
+            LINHA       REGRA           Unnamed: 2    REGRA.1  Unnamed: 4           Unnamed: 5  REGRA.2
+ Acordo Comercial Venda Bruta  13 Salario Operacao -263508.14         NaN  INSS e GPS Operacao     0.90
+Acordo de Compras Venda Bruta 13 Salario Comercial   -4284.12         NaN INSS e GPS Comercial     0.02
+ Acordo Marketing Venda Bruta       13 Salario ADM  -35481.00         NaN       INSS e GPS ADM     0.08
+
+   [BASE1] colunas (5):
+       - 'Rótulos de Linha'  dtype=int64
+       - 'MÊS'  dtype=int64
+       - 'LOJA'  dtype=str
+       - 'Valores'  dtype=str
+       - 'Unnamed: 4'  dtype=float64
+   primeiras linhas:
+ Rótulos de Linha  MÊS LOJA                    Valores   Unnamed: 4
+             2026    1  L01                Venda Bruta 1.681312e+06
+             2026    1  L01 Margem C/ Acordos Lançados 3.195738e+05
+             2026    1  L01          Verba Bonificação 2.763300e+04
+
+   [BASE2] colunas (5):
+       - 'Rótulos de Linha'  dtype=int64
+       - 'MÊS'  dtype=int64
+       - 'LOJA'  dtype=str
+       - 'Class'  dtype=str
+       - 'Compras'  dtype=float64
+   primeiras linhas:
+ Rótulos de Linha  MÊS LOJA          Class  Compras
+             2026    1  L01       Bandejas  -111.29
+             2026    1  L01 Bobina Acougue  -814.57
+             2026    1  L01     Bobina FLV -3380.00
+
+   [BASE3] colunas (5):
+       - 'Rótulos de Linha'  dtype=int64
+       - 'MÊS'  dtype=int64
+       - 'LOJA'  dtype=str
+       - 'CLASS'  dtype=str
+       - 'Soma de VLROPERACAO'  dtype=float64
+   primeiras linhas:
+ Rótulos de Linha  MÊS LOJA                     CLASS  Soma de VLROPERACAO
+             2026    1  L01          Contrato Retorno              5562.19
+             2026    1  L01 Devolução de Fornecedores             19027.86
+             2026    1  L02          Acordo Comercial               206.03
+
+   [BASE4] colunas (5):
+       - 'Rótulos de Linha'  dtype=int64
+       - 'MÊS'  dtype=int64
+       - 'LOJA'  dtype=str
+       - 'DESCRICAO'  dtype=str
+       - 'DESPESA-'  dtype=float64
+   primeiras linhas:
+ Rótulos de Linha  MÊS LOJA            DESCRICAO  DESPESA-
+             2026    1  L01        Agua e Esgoto  -5372.25
+             2026    1  L01 Alimentacao Operaçao  -1904.00
+             2026    1  L01   Aluguel de Imoveis -35700.00
+
+   [BASE5] colunas (5):
+       - 'Rótulos de Linha'  dtype=int64
+       - 'MÊS'  dtype=int64
+       - 'LOJA'  dtype=str
+       - 'CODOPERACAO'  dtype=str
+       - 'OPFin'  dtype=float64
+   primeiras linhas:
+ Rótulos de Linha  MÊS LOJA     CODOPERACAO   OPFin
+             2026    1  L01 Tarifa Bancaria  -68.35
+             2026    1  L01 Tarifa Bancaria -120.29
+             2026    1  L01             IOF   -2.74
+
+   [BASE6] colunas (5):
+       - 'Rótulos de Linha'  dtype=int64
+       - 'MÊS'  dtype=int64
+       - 'LOJA'  dtype=str
+       - 'CLASS'  dtype=str
+       - 'VendaPrazo'  dtype=float64
+   primeiras linhas:
+ Rótulos de Linha  MÊS LOJA                     CLASS  VendaPrazo
+             2026    1  L01 Desagio Cartao de Credito    -4501.08
+             2026    1  L01  Desagio Cartao de Debito    -3989.18
+             2026    1  L01            Desagio Ticket    -7058.40
+
+   [BASE7] colunas (5):
+       - 'Rótulos de Linha'  dtype=int64
+       - 'MÊS'  dtype=int64
+       - 'LOJA'  dtype=str
+       - 'class'  dtype=str
+       - 'trans cons'  dtype=float64
+   primeiras linhas:
+ Rótulos de Linha  MÊS LOJA       class  trans cons
+             2026    1  L07 Sacolas PDV      902.28
+             2026    1  L12  Bobina FLV     1501.50
+             2026    1  L12  Bobina PDV    15198.75
+
+   [BASE8] colunas (5):
+       - 'Rótulos de Linha'  dtype=int64
+       - 'MÊS'  dtype=int64
+       - 'LOJA'  dtype=str
+       - 'DESCRICAO'  dtype=str
+       - 'Pago'  dtype=float64
+   primeiras linhas:
+ Rótulos de Linha  MÊS LOJA                      DESCRICAO      Pago
+             2026    1  L01       Salarios e Ordenados ADM  -1869.52
+             2026    1  L01 Salarios e Ordenados Comercial -14257.63
+             2026    1  L01  Salarios e Ordenados Operaçao -83898.85
+
+   [BASE9] colunas (5):
+       - 'Rótulos de Linha'  dtype=int64
+       - 'MÊS'  dtype=int64
+       - 'LOJA'  dtype=str
+       - 'ATRIBUTO'  dtype=str
+       - 'Soma de VALOR'  dtype=float64
+   primeiras linhas:
+ Rótulos de Linha  MÊS LOJA           ATRIBUTO  Soma de VALOR
+             2026    1  L01   (-) Quebra Caixa        -341.03
+             2026    1  L01 Sobra de Caixa PDV         268.98
+             2026    1  L02   (-) Quebra Caixa        -625.85
+
+   [BASE10] colunas (5):
+       - 'Rótulos de Linha'  dtype=int64
+       - 'MÊS'  dtype=int64
+       - 'LOJA'  dtype=str
+       - 'Valores'  dtype=str
+       - 'Unnamed: 4'  dtype=float64
+   primeiras linhas:
+ Rótulos de Linha  MÊS LOJA                  Valores  Unnamed: 4
+             2026    1  L01            Soma de VENDA     9527.89
+             2026    1  L01 (-) Compras Funcionarios    -9527.89
+             2026    1  L02            Soma de VENDA    24444.48
+
+   [BASE11] colunas (5):
+       - 'Rótulos de Linha'  dtype=int64
+       - 'MÊS'  dtype=int64
+       - 'LOJA'  dtype=str
+       - 'Class'  dtype=str
+       - 'Compr Tra'  dtype=float64
+   primeiras linhas:
+ Rótulos de Linha  MÊS LOJA              Class  Compr Tra
+             2026    1  L01         Bobina FLV    -546.00
+             2026    1  L01         Bobina PDV    -876.75
+             2026    1  L01 Etiquetas e Ribbon   -1178.52
+
+   [BASE12] colunas (5):
+       - 'Rótulos de Linha'  dtype=int64
+       - 'MÊS'  dtype=int64
+       - 'LOJA'  dtype=str
+       - 'CLASS'  dtype=str
+       - 'Soma de VLROPERACAO'  dtype=float64
+   primeiras linhas:
+ Rótulos de Linha  MÊS LOJA                    CLASS  Soma de VLROPERACAO
+             2026    1  L01 Juros e Multas Recebidos                 8.46
+             2026    1  L02 Juros e Multas Recebidos               134.41
+             2026    1  L04 Juros e Multas Recebidos                 9.29
+
+   [BASE13] colunas (5):
+       - 'Rótulos de Linha'  dtype=int64
+       - 'MÊS'  dtype=int64
+       - 'LOJA'  dtype=str
+       - 'CLASS'  dtype=str
+       - 'Emprest'  dtype=float64
+   primeiras linhas:
+ Rótulos de Linha  MÊS LOJA                          CLASS   Emprest
+             2026    1  L01 Juros e Multas Pagos Sobre Emp -11839.28
+             2026    1  L02 Juros e Multas Pagos Sobre Emp  -5337.95
+             2026    1  L03 Juros e Multas Pagos Sobre Emp -12339.41
+
+   [BASE14] colunas (5):
+       - 'Rótulos de Linha'  dtype=int64
+       - 'MÊS'  dtype=int64
+       - 'LOJA'  dtype=str
+       - 'Valores'  dtype=str
+       - 'Unnamed: 4'  dtype=float64
+   primeiras linhas:
+ Rótulos de Linha  MÊS LOJA              Valores  Unnamed: 4
+             2026    1  L01    Descontos Obtidos    24798.58
+             2026    1  L01 Soma de VLROPERACAO2    24798.58
+             2026    1  L02    Descontos Obtidos    36904.38
+
+   [BASE15] colunas (5):
+       - 'Rótulos de Linha'  dtype=int64
+       - 'MÊS'  dtype=int64
+       - 'LOJA'  dtype=str
+       - 'Valores'  dtype=str
+       - 'Unnamed: 4'  dtype=float64
+   primeiras linhas:
+ Rótulos de Linha  MÊS LOJA                            Valores  Unnamed: 4
+             2026    1  L03              Soma de VALOR_LIQUIDO       189.2
+             2026    1  L03 Material de Expediente da Operaçao      -189.2
+             2026    1  L07              Soma de VALOR_LIQUIDO       948.0
+

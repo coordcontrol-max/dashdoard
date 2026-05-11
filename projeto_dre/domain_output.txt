@@ -1,0 +1,614 @@
+
+=== GRUPOS (todos) ===
+['Venda Bruta', 'CMV', 'Margem C/ Acordos Lançados', 'Verba Bonificação', 'Margem S/ Acordos', 'Receitas Comerciais', 'Margem C/ Acordos', 'Quebra Contábil', 'Margem Operacional', 'Despesas Operacionais', 'Despesa Comerciais', 'Despesas Administrativas', 'Despesas C/ Vendas', 'Resultado Financeiro', 'IRPJ/CSLL', 'EBITDA', 'LAIR', 'Lucro Líquido', 'Novas Unidades e Ajustes Gerenciais', 'Lucro Líquido Ajustado']
+
+=== AGRUPAMENTOS (todos) ===
+['Venda Bruta', 'Mercadoria para Revenda', 'Embalagens', 'Margem C/ Acordos Lançados', 'Verba Bonificação', 'Margem S/ Acordos', 'Receitas Comerciais', 'Margem C/ Acordos', 'Quebra Contábil', 'Margem Operacional', 'Despesas c/ Pessoal', 'Serviços Públicos', 'Aluguéis', 'Manutenção do Imóvel', 'Despesas com Informática', 'Serviços Terceirizados', 'Manutenção de Veículos', 'Despesas Jurídicas', 'Manutenção de Equipamentos', 'Material de Expediente', 'Despesas Tributárias', 'Publicidade e Propaganda', 'Despesas Gerais', 'Despesas com Vendas', 'Custos de Distribuição', 'Receitas Financeiras', 'Despesas Financeiras', 'IRPJ/CSLL', 'EBITDA', 'LAIR', 'Lucro Líquido', 'Novas Unidades e Ajustes Gerenciais', 'Lucro Líquido Ajustado']
+
+=== PLANO (GRUPO → AGRUPAMENTO → CONTA) ===
+
+  ◆ Venda Bruta
+      └─ Venda Bruta
+            • Venda Bruta
+
+  ◆ CMV
+      └─ Mercadoria para Revenda
+            • Mercadoria para Revenda - CMV
+            • Consumo Interno
+      └─ Embalagens
+            • Etiquetas e Ribbon
+            • Sacolas PDV
+
+  ◆ Margem C/ Acordos Lançados
+      └─ Margem C/ Acordos Lançados
+            • Margem C/ Acordos Lançados
+
+  ◆ Verba Bonificação
+      └─ Verba Bonificação
+            • Verba Bonificação
+
+  ◆ Margem S/ Acordos
+      └─ Margem S/ Acordos
+            • Margem S/ Acordos
+
+  ◆ Receitas Comerciais
+      └─ Receitas Comerciais
+            • Contrato Retorno
+            • Acordo Comercial
+            • Acordo de Compras
+            • Acordo Marketing
+            • Acordo Logística e Recebimento
+            • Acordo Troca de Produtos Avariados
+            • Acordo Introdução
+            • Acordo Ponta de Gondola
+            • Acordo Preço
+            • Acordo Quebra de Produtos Avariados
+            • Acordo Ação Extra
+            • Acordo Aniversário 2022
+            • Acordo Aniversário 2023
+            • Contrato de Evento
+            • Devolução de Fornecedores
+            • Descontos Obtidos
+
+  ◆ Margem C/ Acordos
+      └─ Margem C/ Acordos
+            • Margem C/ Acordos
+
+  ◆ Quebra Contábil
+      └─ Quebra Contábil
+            • Inventario
+            • Perdas e Quebras
+
+  ◆ Margem Operacional
+      └─ Margem Operacional
+            • Margem Operacional
+
+  ◆ Despesas Operacionais
+      └─ Despesas c/ Pessoal
+            • Salarios e Ordenados Operaçao
+            • Salarios e Ordenados Operação Rateio
+            • 13 Salario Operacao
+            • Adiantamento de Salario
+            • Vales Funcionarios
+            • (-) Quebra Caixa
+            • FGTS Operacao
+            • INSS e GPS Operacao
+            • Ferias Operacao
+            • Pensao Alimenticia Operacao
+            • Rescisao Trabalhista Operacao
+            • FGTS Multa Recisoria Operacao
+            • Premios e Bonus Operaçao
+            • Uniformes e EPIs Operacao
+            • Estagiarios e Menores Aprendiz
+            • (-) Compras Funcionarios
+            • (-) Despesas com Funcionarios
+            • (-) Convenio Farmacia
+            • Alimentacao Operaçao
+            • Transporte Operação
+            • Assistencia Medica e Hospitalar
+            • Mao de Obra Temporaria
+            • Plano de Saude Operacao
+            • Taxa Funeraria
+            • Cesta Básica
+      └─ Serviços Públicos
+            • Energia Eletrica
+            • Energia Gerador
+            • Agua e Esgoto
+      └─ Aluguéis
+            • IPTU e TLP
+            • Aluguel de Imoveis
+      └─ Manutenção do Imóvel
+            • Manutencao da Loja
+            • Extintores e Mat Contra Incendio
+            • Despesas Emergencial Lojas
+            • Seguro Predial
+            • Manutenção Construçao e Reformas
+      └─ Despesas com Informática
+            • Internet
+            • Licenca de Software Operacao
+            • Telefone Celular
+            • Locaçao de Equipamentos de Informatica Operacao
+            • Computadores e Perifericos
+      └─ Serviços Terceirizados
+            • Servicos Contratos Mensais Operacao
+            • Servicos Contratos Mensais PJ Operacao
+            • Servicos Terceirizados Detetizacao
+            • Servicos Terceirizados de Limpeza
+            • Servicos Terceirizados de Seguranca
+      └─ Manutenção de Veículos
+            • Combustivel
+            • IPVA e DPVAT
+            • Multas de Transito
+            • Manutencao Empilhadeira
+            • Manutencao Geradores
+            • Manutencao Caminhao de Transferencia
+            • Manutencao Caminhao de Entrega
+            • Manutencao Veiculo de Som
+            • Manutencao de Veiculos em Geral
+            • Manutencao de Veiculos Gestores
+            • Aquisiçao e Financiamento de Veiculos
+            • Locacao de Equipamentos para Obras
+            • Despesas Diversas com Logistica
+            • Manutencao Motos
+            • Aluguel de Veiculos
+      └─ Despesas Jurídicas
+            • Custas Judiciais Trabalhistas Operacao
+            • Acordos Judicial Operacao
+            • Custas Judiciais  Civis e Criminal
+      └─ Manutenção de Equipamentos
+            • Material e Equipamentos da Operação
+            • Manutencao de Equipamentos da Operação
+      └─ Material de Expediente
+            • Materiais de Limpeza
+            • Toucas, Mascaras e Luvas
+            • Sacolas Outros
+            • Bandejas
+            • Bobina PDV
+            • Bobina FLV
+            • Bobina Acougue
+            • Strech e Outros Materiais
+            • Matéria-prima Padaria
+            • Material de Expediente da Operaçao
+            • Cartaz Faixa e Outdoor
+      └─ Despesas Tributárias
+            • Taxa INMETRO
+
+  ◆ Despesa Comerciais
+      └─ Publicidade e Propaganda
+            • Anuncios em Televisao
+            • Anuncios em Midia Social
+            • Agencias de Propaganda
+            • Influencers e Eventos Patrocinados
+            • Promocoes, Brindes e Sorteios
+            • Material Impresso em Tabloide
+            • Musica Ambiente e Vinhetas
+            • Comunicacao Visual
+            • Anuncios em Jornais
+            • Despesas Eventuais com Marketing
+            • Panfletagem
+            • Taxa ECAD
+      └─ Despesas c/ Pessoal
+            • Salarios e Ordenados Comercial
+            • Premio e Bonus Comercial
+            • 13 Salario Comercial
+            • Pensao Alimenticia Comercial
+            • Plano de Saude Comercial
+            • Rescisao Trabalhista Comercial
+            • Transporte Comercial
+            • INSS e GPS Comercial
+            • Servicos Contratos Mensais PJ Comercial
+            • Ferias Comercial
+            • FGTS Comercial
+            • FGTS Multa Rescisória Comercial
+      └─ Serviços Terceirizados
+            • Servicos Contratos Mensais Comercial
+      └─ Despesas com Informática
+            • Licenca de Software Comercial
+      └─ Despesas Jurídicas
+            • Acordos Judicial Comercial
+            • Custas Judiciais Comercial
+            • Custas Cartoriais Comercial
+
+  ◆ Despesas Administrativas
+      └─ Despesas c/ Pessoal
+            • Salarios e Ordenados ADM
+            • Premio e Bonus ADM
+            • 13 Salario ADM
+            • Alimentação ADM
+            • Servicos Contratos Mensais PJ
+            • Seguro de Vida
+            • FGTS ADM
+            • FGTS Multa Rescisória ADM
+            • Uniformes e EPIs ADM
+            • Ferias ADM
+            • Lavanderia
+            • Contribuicao Sindical
+            • Pensao Alimenticia ADM
+            • INSS e GPS ADM
+            • Plano de Saude ADM
+            • Rescisao Trabalhista ADM
+            • Eventos e Treinamentos
+            • Viagens e Hospedagens de Funcionarios
+            • Cursos
+            • Transporte ADM
+      └─ Serviços Terceirizados
+            • Servicos Contratos Mensais ADM
+            • Projetos de Engenharia e Arquitetura
+            • Servicos Terceirizados de Alarme
+            • Serviço Segurança do Trabalho
+            • Servicos Terceirizados de Manutencao ADM
+            • Serviços de Consultoria Externa
+            • Honorarios Contabeis
+            • Consultoria Contabil
+      └─ Despesas com Informática
+            • Telefone
+            • Suporte Tecnico
+            • Licenca de Software ADM
+            • Multas e Rescisoes
+            • Locaçao de Equipamentos de Informatica ADM
+            • Computadores e Perifericos ADM
+      └─ Material de Expediente
+            • Material de Expediente do ADM
+            • Material e Equipamento do ADM
+      └─ Despesas Jurídicas
+            • Honorarios Advocaticios
+            • Deposito Judicial Processos em Andamento
+            • Custas Cartoriais
+      └─ Despesas Gerais
+            • Correios e Telégrafos
+            • Fluxo Consultoria
+            • Autos de Infracao em Geral
+      └─ Despesas Tributárias
+            • DIFAL
+            • PIS, COFINS e CSLL Guia Unica
+            • INSSRF
+            • Taxa Administrativa
+            • Taxa ASBRA
+            • DCTF
+            • DAS
+            • ISSRF
+            • Taxa SPC
+            • Alvaras e Licencas das Lojas
+
+  ◆ Despesas C/ Vendas
+      └─ Despesas com Vendas
+            • Desagio Cartao de Credito
+            • Desagio Cartao de Debito
+            • Desagio Ticket
+            • Tarifas de Cartao Debito e Credito
+            • Desagio Sobre Carteira Digital
+            • Desagio Recargas
+            • Desagio Sobre Transp Valores
+            • Custos de Dist. De Mercadorias
+
+  ◆ Resultado Financeiro
+      └─ Receitas Financeiras
+            • Juros e Multas Recebidos
+            • Sobra de Caixa PDV
+            • Outras Receitas Financeiras
+            • Rendimentos de Aplicacoes financeiras
+      └─ Despesas Financeiras
+            • IOF
+            • Tarifa Bancaria
+            • Juros e Multas
+            • Juros e Multas Pagos Sobre Emp
+            • IRRF
+            • IR Op Financeiras
+
+  ◆ IRPJ/CSLL
+      └─ IRPJ/CSLL
+            • IRPJ
+            • CSLL
+
+  ◆ EBITDA
+      └─ EBITDA
+            • EBITDA
+
+  ◆ LAIR
+      └─ LAIR
+            • LAIR
+
+  ◆ Lucro Líquido
+      └─ Lucro Líquido
+            • Lucro Líquido
+
+  ◆ Novas Unidades e Ajustes Gerenciais
+      └─ Novas Unidades e Ajustes Gerenciais
+            • Socio 30
+            • Socio 60
+            • Compras de Imoveis
+            • Fretes e Carretos
+            • Maquinas e Equipamentos
+            • Doacoes e Brindes
+            • Parcelamento Estadual
+            • Parcelamento Federal
+            • ICMS
+            • PIS
+            • COFINS
+            • ICMS-ST
+            • Compras para Construcao
+
+  ◆ Lucro Líquido Ajustado
+      └─ Lucro Líquido Ajustado
+            • Lucro Líquido Ajustado
+
+  ◆ Despesas Totais e Ajustes Gerenciais
+      └─ Despesas Totais e Ajustes Gerenciais
+            • Despesas Totais e Ajustes Gerenciais
+
+  ◆ Linhas Vazias
+      └─ Linhas Vazias
+            • Vazio 1
+            • Vazio 2
+            • Vazio 3
+            • Vazio 4
+            • Vazio 5
+
+=== EMPRESAS (NROEMPRESA → LOJA) ===
+       GRUPO  EMPRESAS   LOJA
+SUPERMERCADO         1    L01
+SUPERMERCADO         2    L02
+SUPERMERCADO         3    L03
+SUPERMERCADO         4    L04
+SUPERMERCADO         5    L05
+SUPERMERCADO         6    L06
+SUPERMERCADO         7    L07
+SUPERMERCADO         8    L08
+SUPERMERCADO         9    L09
+SUPERMERCADO        10    L10
+SUPERMERCADO        11    L11
+SUPERMERCADO        12    L12
+SUPERMERCADO        13    L13
+SUPERMERCADO        14    L14
+SUPERMERCADO        15    L15
+SUPERMERCADO        16    L16
+SUPERMERCADO        17    L17
+SUPERMERCADO        18    L18
+SUPERMERCADO        19    L19
+SUPERMERCADO        20    L20
+SUPERMERCADO        21    L21
+SUPERMERCADO        22    L22
+SUPERMERCADO        23    L23
+SUPERMERCADO        25    L25
+SUPERMERCADO        26    L26
+SUPERMERCADO        27    L27
+SUPERMERCADO        28    L28
+SUPERMERCADO        29    L09
+SUPERMERCADO       101    L01
+SUPERMERCADO       102    L02
+SUPERMERCADO       103    L03
+SUPERMERCADO       104    L04
+SUPERMERCADO       106    L06
+SUPERMERCADO       108    L08
+SUPERMERCADO       112    L12
+SUPERMERCADO       115    L15
+SUPERMERCADO       215    L15
+SUPERMERCADO       117    L17
+SUPERMERCADO       217    L17
+SUPERMERCADO       119    L19
+SUPERMERCADO       219    L19
+SUPERMERCADO       122    L22
+SUPERMERCADO       222    L22
+SUPERMERCADO       125    L25
+SUPERMERCADO       225    L25
+SUPERMERCADO       130 OUTROS
+SUPERMERCADO       131    L31
+SUPERMERCADO       997 OUTROS
+SUPERMERCADO       998 OUTROS
+SUPERMERCADO       999 OUTROS
+SUPERMERCADO       900 OUTROS
+SUPERMERCADO       901 OUTROS
+SUPERMERCADO       109 OUTROS
+... total 53 linhas
+
+=== LINHAS distintas em VALORES RATEADOS ===
+linhas totais: 21504
+anos: [2026]
+meses: [1, 2, 3]
+lojas: ['AT REC / TTR', 'L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13', 'L14', 'L15', 'L16', 'L17', 'L18', 'L19', 'L20', 'L21', 'L22', 'L23', 'L25', 'L26', 'L27', 'L28', 'L29', 'L30', 'L31', 'OUTROS']
+
+LINHAS distintas (224):
+   • 'Venda Bruta'                                            total=  153,283,071.36
+   • 'Mercadoria para Revenda - CMV'                          total= -126,160,652.65
+   • 'Consumo Interno'                                        total=     -772,992.66
+   • 'Etiquetas e Ribbon'                                     total=      -87,804.23
+   • 'Sacolas PDV'                                            total=     -240,645.66
+   • 'Margem C/ Acordos Lançados'                             total=   29,340,609.47
+   • 'Verba Bonificação'                                      total=    2,218,190.76
+   • 'Margem S/ Acordos'                                      total=   26,020,976.16
+   • 'Contrato Retorno'                                       total=      491,672.98
+   • 'Acordo Comercial'                                       total=       79,336.90
+   • 'Acordo de Compras'                                      total=          290.00
+   • 'Acordo Marketing'                                       total=      183,888.47
+   • 'Acordo Logística e Recebimento'                         total=          333.50
+   • 'Acordo Troca de Produtos Avariados'                     total=      351,464.05
+   • 'Acordo Introdução'                                      total=       64,752.61
+   • 'Acordo Ponta de Gondola'                                total=       71,625.00
+   • 'Acordo Preço'                                           total=    2,196,716.97
+   • 'Acordo Quebra de Produtos Avariados'                    total=       46,380.13
+   • 'Acordo Ação Extra'                                      total=            0.00
+   • 'Acordo Aniversário 2022'                                total=            0.00
+   • 'Acordo Aniversário 2023'                                total=      611,020.96
+   • 'Devolução de Fornecedores'                              total=    1,391,471.73
+   • 'Descontos Obtidos'                                      total=    2,173,643.37
+   • 'Margem C/ Acordos'                                      total=   33,683,572.83
+   • 'Inventario'                                             total=   -1,653,159.30
+   • 'Perdas e Quebras'                                       total=   -1,011,013.64
+   • 'Margem Operacional'                                     total=   31,019,399.88
+   • 'Salarios e Ordenados Operaçao'                          total=   -7,612,220.15
+   • 'Salarios e Ordenados Operação Rateio'                   total=     -240,861.12
+   • '13 Salario Operacao'                                    total=     -790,666.79
+   • 'Adiantamento de Salario'                                total=       -2,657.29
+   • 'Vales Funcionarios'                                     total=            0.00
+   • '(-) Quebra Caixa'                                       total=      -36,747.43
+   • 'FGTS Operacao'                                          total=   -1,562,419.55
+   • 'INSS e GPS Operacao'                                    total=   -1,726,076.47
+   • 'Ferias Operacao'                                        total=     -395,201.21
+   • 'Pensao Alimenticia Operacao'                            total=       -9,735.47
+   • 'Rescisao Trabalhista Operacao'                          total=     -481,709.81
+   • 'FGTS Multa Recisoria Operacao'                          total=     -136,087.09
+   • 'Premios e Bonus Operaçao'                               total=     -357,722.75
+   • 'Uniformes e EPIs Operacao'                              total=      -75,929.41
+   • 'Estagiarios e Menores Aprendiz'                         total=            0.00
+   • '(-) Compras Funcionarios'                               total=   -1,213,856.12
+   • '(-) Despesas com Funcionarios'                          total=            0.00
+   • '(-) Convenio Farmacia'                                  total=            0.00
+   • 'Alimentacao Operaçao'                                   total=     -313,605.00
+   • 'Transporte Operação'                                    total=     -138,658.04
+   • 'Assistencia Medica e Hospitalar'                        total=      -28,781.80
+   • 'Mao de Obra Temporaria'                                 total=            0.00
+   • 'Plano de Saude Operacao'                                total=      -15,517.03
+   • 'Taxa Funeraria'                                         total=            0.00
+   • 'Cesta Básica'                                           total=     -516,364.05
+   • 'Energia Eletrica'                                       total=   -2,962,088.86
+   • 'Energia Gerador'                                        total=      -18,716.00
+   • 'Agua e Esgoto'                                          total=     -187,094.56
+   • 'IPTU e TLP'                                             total=      -18,884.08
+   • 'Aluguel de Imoveis'                                     total=   -2,231,542.95
+   • 'Manutencao da Loja'                                     total=     -167,253.81
+   • 'Extintores e Mat Contra Incendio'                       total=       -3,030.00
+   • 'Despesas Emergencial Lojas'                             total=            0.00
+   • 'Seguro Predial'                                         total=       -6,420.15
+   • 'Manutenção Construçao e Reformas'                       total=      -40,072.45
+   • 'Internet'                                               total=     -147,407.59
+   • 'Licenca de Software Operacao'                           total=     -345,472.79
+   • 'Telefone Celular'                                       total=            0.00
+   • 'Locaçao de Equipamentos de Informatica Operacao'        total=      -20,040.00
+   • 'Computadores e Perifericos'                             total=     -153,587.39
+   • 'Servicos Contratos Mensais Operacao'                    total=     -347,009.19
+   • 'Servicos Contratos Mensais PJ Operacao'                 total=      -78,200.00
+   • 'Servicos Terceirizados Detetizacao'                     total=      -79,903.00
+   • 'Servicos Terceirizados de Limpeza'                      total=      -38,650.56
+   • 'Servicos Terceirizados de Seguranca'                    total=      -57,357.30
+   • 'Combustivel'                                            total=     -195,886.67
+   • 'IPVA e DPVAT'                                           total=            0.00
+   • 'Multas de Transito'                                     total=            0.00
+   • 'Manutencao Empilhadeira'                                total=       -8,119.80
+   • 'Manutencao Geradores'                                   total=      -71,806.14
+   • 'Manutencao Caminhao de Transferencia'                   total=       -5,295.29
+   • 'Manutencao Caminhao de Entrega'                         total=       -3,471.67
+   • 'Manutencao Veiculo de Som'                              total=            0.00
+   • 'Manutencao de Veiculos em Geral'                        total=       -1,750.00
+   • 'Manutencao de Veiculos Gestores'                        total=       -3,610.00
+   • 'Aquisiçao e Financiamento de Veiculos'                  total=            0.00
+   • 'Locacao de Equipamentos para Obras'                     total=      -10,332.00
+   • 'Despesas Diversas com Logistica'                        total=            0.00
+   • 'Manutencao Motos'                                       total=         -281.63
+   • 'Aluguel de Veiculos'                                    total=     -502,578.85
+   • 'Custas Judiciais Trabalhistas Operacao'                 total=     -173,717.11
+   • 'Acordos Judicial Operacao'                              total=     -170,634.09
+   • 'Custas Judiciais  Civis e Criminal'                     total=      -87,121.70
+   • 'Material e Equipamentos da Operação'                    total=     -470,944.27
+   • 'Manutencao de Equipamentos da Operação'                 total=      -74,012.62
+   • 'Material de Expediente OP'                              total=            0.00
+   • 'Materiais de Limpeza'                                   total=      -64,057.96
+   • 'Toucas, Mascaras e Luvas'                               total=      -49,092.17
+   • 'Sacolas Outros'                                         total=     -143,906.29
+   • 'Bandejas'                                               total=      -21,212.63
+   • 'Bobina PDV'                                             total=      -65,415.00
+   • 'Bobina FLV'                                             total=     -274,248.01
+   • 'Bobina Acougue'                                         total=      -83,885.88
+   • 'Strech e Outros Materiais'                              total=      -68,330.38
+   • 'Matéria-prima Padaria'                                  total=     -106,399.59
+   • 'Material de Expediente da Operaçao'                     total=      -84,765.01
+   • 'Cartaz Faixa e Outdoor'                                 total=     -196,514.00
+   • 'Taxa INMETRO'                                           total=            0.00
+   • 'Anuncios em Televisao'                                  total=     -603,960.24
+   • 'Anuncios em Midia Social'                               total=      -35,737.13
+   • 'Agencias de Propaganda'                                 total=      -58,623.78
+   • 'Influencers e Eventos Patrocinados'                     total=      -29,000.00
+   • 'Promocoes, Brindes e Sorteios'                          total=            0.00
+   • 'Material Impresso em Tabloide'                          total=     -163,685.00
+   • 'Musica Ambiente e Vinhetas'                             total=       -8,296.00
+   • 'Comunicacao Visual'                                     total=      -41,701.00
+   • 'Anuncios em Jornais'                                    total=         -600.00
+   • 'Despesas Eventuais com Marketing'                       total=       -6,931.00
+   • 'Panfletagem'                                            total=      -97,144.99
+   • 'Taxa ECAD'                                              total=      -11,073.05
+   • 'Salarios e Ordenados Comercial'                         total=      -90,427.26
+   • 'Premio e Bonus Comercial'                               total=     -130,664.87
+   • '13 Salario Comercial'                                   total=      -12,852.36
+   • 'Pensao Alimenticia Comercial'                           total=       -4,436.82
+   • 'Plano de Saude Comercial'                               total=       -6,890.95
+   • 'Rescisao Trabalhista Comercial'                         total=      -24,024.44
+   • 'Transporte Comercial'                                   total=       -1,817.47
+   • 'INSS e GPS Comercial'                                   total=      -34,521.53
+   • 'Servicos Contratos Mensais PJ Comercial'                total=     -164,560.00
+   • 'Ferias Comercial'                                       total=       -6,053.92
+   • 'FGTS Comercial'                                         total=      -31,248.39
+   • 'FGTS Multa Rescisória Comercial'                        total=            0.00
+   • 'Servicos Contratos Mensais Comercial'                   total=      -20,251.00
+   • 'Despesas com Informática COM'                           total=            0.00
+   • 'Licenca de Software Comercial'                          total=      -43,493.13
+   • 'Acordos Judicial Comercial'                             total=       -2,114.40
+   • 'Custas Cartoriais Comercial'                            total=      -15,731.90
+   • 'Custas Judiciais Comercial'                             total=         -908.99
+   • 'Salarios e Ordenados ADM'                               total=     -958,150.07
+   • 'Premio e Bonus ADM'                                     total=     -318,090.06
+   • '13 Salario ADM'                                         total=     -106,443.00
+   • 'Alimentação ADM'                                        total=     -119,095.35
+   • 'Servicos Contratos Mensais PJ'                          total=     -100,500.00
+   • 'Seguro de Vida'                                         total=            0.00
+   • 'FGTS ADM'                                               total=     -124,993.56
+   • 'FGTS Multa Rescisória ADM'                              total=            0.00
+   • 'Uniformes e EPIs ADM'                                   total=            0.00
+   • 'Ferias ADM'                                             total=      -39,633.07
+   • 'Lavanderia'                                             total=       -1,353.75
+   • 'Contribuicao Sindical'                                  total=     -105,600.00
+   • 'Pensao Alimenticia ADM'                                 total=       -1,171.88
+   • 'INSS e GPS ADM'                                         total=     -138,086.12
+   • 'Plano de Saude ADM'                                     total=     -117,471.11
+   • 'Rescisao Trabalhista ADM'                               total=      -91,626.55
+   • 'Eventos e Treinamentos'                                 total=       -7,591.50
+   • 'Viagens e Hospedagens de Funcionarios'                  total=            0.00
+   • 'Cursos'                                                 total=            0.00
+   • 'Servicos Contratos Mensais ADM'                         total=      -41,340.23
+   • 'Projetos de Engenharia e Arquitetura'                   total=       -5,877.81
+   • 'Servicos Terceirizados de Alarme'                       total=            0.00
+   • 'Serviço Segurança do Trabalho'                          total=            0.00
+   • 'Servicos Terceirizados de Manutencao ADM'               total=         -520.00
+   • 'Transporte ADM'                                         total=       -7,428.93
+   • 'Serviços de Consultoria Externa'                        total=      -76,888.70
+   • 'Honorarios Contabeis'                                   total=     -428,605.02
+   • 'Consultoria Contabil'                                   total=     -216,455.00
+   • 'Telefone'                                               total=      -11,290.80
+   • 'Suporte Tecnico'                                        total=      -11,379.09
+   • 'Licenca de Software ADM'                                total=      -79,531.10
+   • 'Multas e Rescisoes'                                     total=            0.00
+   • 'Locaçao de Equipamentos de Informatica ADM'             total=      -32,248.43
+   • 'Computadores e Perifericos ADM'                         total=       -5,161.94
+   • 'Material de Expediente do ADM'                          total=      -31,492.56
+   • 'Material e Equipamento do ADM'                          total=      -10,983.74
+   • 'Honorarios Advocaticios'                                total=     -158,921.19
+   • 'Deposito Judicial Processos em Andamento'               total=      -63,622.92
+   • 'Custas Cartoriais'                                      total=      -15,731.90
+   • 'Correios e Telégrafos'                                  total=            0.00
+   • 'Fluxo Consultoria'                                      total=     -170,526.07
+   • 'DIFAL'                                                  total=       -1,332.00
+   • 'PIS, COFINS e CSLL Guia Unica'                          total=      -23,160.05
+   • 'INSSRF'                                                 total=            0.00
+   • 'Taxa Administrativa'                                    total=     -126,720.51
+   • 'Taxa ASBRA'                                             total=      -12,700.00
+   • 'DCTF'                                                   total=            0.00
+   • 'DAS'                                                    total=            0.00
+   • 'ISSRF'                                                  total=       -2,005.55
+   • 'Taxa SPC'                                               total=      -12,778.45
+   • 'Alvaras e Licencas das Lojas'                           total=      -22,689.45
+   • 'Desagio Cartao de Credito'                              total=     -369,075.32
+   • 'Desagio Cartao de Debito'                               total=     -341,723.84
+   • 'Desagio Ticket'                                         total=     -825,611.84
+   • 'Tarifas de Cartao Debito e Credito'                     total=      -54,762.25
+   • 'Desagio Sobre Carteira Digital'                         total=           -2.85
+   • 'Desagio Recargas'                                       total=      -77,327.00
+   • 'Desagio Sobre Transp Valores'                           total=     -262,441.03
+   • 'Custos de Dist. De Mercadorias'                         total=            0.00
+   • 'Juros e Multas Recebidos'                               total=       17,009.47
+   • 'Sobra de Caixa PDV'                                     total=       19,683.96
+   • 'Outras Receitas Financeiras'                            total=            0.00
+   • 'Rendimentos de Aplicacoes financeiras'                  total=       41,772.83
+   • 'Autos de Infracao em Geral'                             total=       -3,009.11
+   • 'IOF'                                                    total=       -2,777.67
+   • 'Tarifa Bancaria'                                        total=      -84,788.55
+   • 'Juros e Multas'                                         total=           -3.56
+   • 'Juros e Multas Pagos Sobre Emp'                         total=     -734,368.88
+   • 'IRRF'                                                   total=      -20,606.95
+   • 'IR Op Financeiras'                                      total=       -9,730.93
+   • 'IRPJ'                                                   total=     -191,746.28
+   • 'CSLL'                                                   total=      -69,028.66
+   • 'EBITDA'                                                 total=   -1,852,427.35
+   • 'LAIR'                                                   total=   -2,629,246.74
+   • 'Lucro Líquido'                                          total=   -2,890,021.68
+   • 'Socio 30'                                               total=     -436,755.00
+   • 'Socio 60'                                               total=     -494,090.81
+   • 'Compras de Imoveis'                                     total=            0.00
+   • 'Fretes e Carretos'                                      total=            0.00
+   • 'Maquinas e Equipamentos'                                total=            0.00
+   • 'Doacoes e Brindes'                                      total=      -17,100.00
+   • 'Parcelamento Estadual'                                  total=   -3,699,560.14
+   • 'Parcelamento Federal'                                   total=     -153,303.17
+   • 'ICMS'                                                   total=   -1,447,676.51
+   • 'PIS'                                                    total=      -92,106.57
+   • 'COFINS'                                                 total=     -433,892.38
+   • 'ICMS-ST'                                                total=      -66,001.01
+   • 'Compras para Construcao'                                total=   -2,021,568.79
+   • 'Lucro Líquido Ajustado'                                 total=  -11,752,076.06

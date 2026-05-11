@@ -1,0 +1,43 @@
+===== 2026-05-02 19:31:29 ETL iniciado =====
+----- [1/2] etl.py -----
+   Lendo Excel de: /mnt/controller/-- PROJETOS BUSINESS INTELLIGENCE/00 - Dados
+[1/5] Lendo Classificação (PLANO/EMPRESAS/MÊS)...
+[2/5] Lendo VALORES RATEADOS...
+   ⚠ 2 LINHAS sem mapeamento no PLANO (ex.: ['Material de Expediente OP', 'Despesas com Informática COM'])
+   linhas=28,672  anos=[np.int64(2026)]  meses=[np.int64(1), np.int64(2), np.int64(3), np.int64(4)]  lojas=32
+[3/5] Agregando por dimensões...
+[4/5] Montando dados.json...
+[5/5] OK → /root/projeto_dre/dados.json  (4.77 MB, 28,416 linhas no fato detalhado)
+
+Validação 2026 (todas as lojas):
+  Receita Total       = R$   203.64M  (esperado ≈ 153,28M)
+  CMV                 = R$  -169.43M  (esperado ≈ -127,26M)
+  Lucro Líquido       = R$    -3.00M  (esperado ≈ -2,89M)
+----- [2/2] upload_to_firestore.py -----
+[1/4] Inicializando Firebase Admin SDK (projeto-686e2)...
+[2/4] Sincronizando 3 usuário(s) no Firebase Auth...
+   ✓ weswish@gmail.com  (já existia, uid=6GfNg03Q…)
+   ✓ coord.control@supervs.com.br  (já existia, uid=rbUMZxfV…)
+   ✓ tiagovalentimcsilva@gmail.com  (já existia, uid=LspIvFDa…)
+[3/4] Gravando meta/whitelist no Firestore...
+        ✓ whitelist: ['weswish@gmail.com', 'coord.control@supervs.com.br', 'tiagovalentimcsilva@gmail.com']
+        Sincronizando coleção users/ (perfis + permissões)...
+   ↻ users/weswish@gmail.com  (atualizado nome+role; status/lojas preservados)
+   ↻ users/coord.control@supervs.com.br  (atualizado nome+role; status/lojas preservados)
+   ↻ users/tiagovalentimcsilva@gmail.com  (atualizado nome+role; status/lojas preservados)
+[4/4] Subindo meta/dimensoes + meses/ ...
+   Lendo dados.json (4.77 MB)...
+   Gravando 4 documentos em meses/ ...
+   ⚠ 2026-01 tem 1131 KB (próximo do limite de 1 MiB).
+   ✓ meses/2026-01  (640 porGrupo, 1024 porAgrupamento, 7104 porLinha, 1131 KB)
+   ⚠ 2026-02 tem 1131 KB (próximo do limite de 1 MiB).
+   ✓ meses/2026-02  (640 porGrupo, 1024 porAgrupamento, 7104 porLinha, 1131 KB)
+   ⚠ 2026-03 tem 1130 KB (próximo do limite de 1 MiB).
+   ✓ meses/2026-03  (640 porGrupo, 1024 porAgrupamento, 7104 porLinha, 1130 KB)
+   ⚠ 2026-04 tem 1129 KB (próximo do limite de 1 MiB).
+   ✓ meses/2026-04  (640 porGrupo, 1024 porAgrupamento, 7104 porLinha, 1129 KB)
+
+✅  Concluído.
+    Firestore:    https://console.firebase.google.com/project/projeto-686e2/firestore/data
+    Auth users:   https://console.firebase.google.com/project/projeto-686e2/authentication/users
+===== 2026-05-02 19:32:54 ETL concluído com sucesso =====

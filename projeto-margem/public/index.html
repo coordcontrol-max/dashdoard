@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Margem · Tomada de Decisão</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <h1>Margem · Tomada de Decisão</h1>
+    <div class="sub">Atualização de Margem · Planilha1 · <span id="rowCount">0</span> linhas exibidas</div>
+  </div>
+  <div class="actions">
+    <select id="cenario" title="Cenário"></select>
+    <button id="btnSalvarCenario" title="Salvar cenário atual">Salvar cenário</button>
+    <button id="btnNovoCenario" title="Novo cenário">+ Novo</button>
+    <button id="btnExcluirCenario" class="danger" title="Excluir cenário">Excluir</button>
+    <span class="sep"></span>
+    <button id="btnExport" title="Exportar CSV">Exportar CSV</button>
+    <button id="btnReset" class="danger" title="Recarregar valores originais">Reset</button>
+    <span class="sep"></span>
+    <a href="/dre" style="color:#b8d4e6;text-decoration:none;font-size:12px;padding:6px 12px;border:1px solid #2c3346;border-radius:6px;background:#1f2533;">DRE PowerBI</a>
+    <span id="userInfo" class="user-info"></span>
+    <a id="linkAdmin" href="/admin" style="display:none;color:#b8d4e6;text-decoration:none;font-size:12px;padding:6px 12px;border:1px solid #2c3346;border-radius:6px;">Admin</a>
+    <button id="btnLogout">Sair</button>
+  </div>
+</header>
+
+<section class="kpis">
+  <div class="kpi">
+    <span class="kpi-label">Méd venda total</span>
+    <span class="kpi-value" id="kpiMed">—</span>
+  </div>
+  <div class="kpi">
+    <span class="kpi-label">Lucr. Vivendas (atual)</span>
+    <span class="kpi-value" id="kpiLucroAtual">—</span>
+  </div>
+  <div class="kpi">
+    <span class="kpi-label">Lucr. Proposta</span>
+    <span class="kpi-value" id="kpiLucroProposta">—</span>
+  </div>
+  <div class="kpi big">
+    <span class="kpi-label">Δ Lucro (Proposta − Vivendas)</span>
+    <span class="kpi-value" id="kpiDelta">—</span>
+    <span class="kpi-sub" id="kpiDeltaPct">—</span>
+  </div>
+  <div class="kpi">
+    <span class="kpi-label">Lucr. Scanntech</span>
+    <span class="kpi-value" id="kpiLucroScann">—</span>
+  </div>
+  <div class="kpi">
+    <span class="kpi-label">Lucr. Concorrente</span>
+    <span class="kpi-value" id="kpiLucroConc">—</span>
+  </div>
+</section>
+
+<section class="filters">
+  <input id="search" type="search" placeholder="Buscar categoria…">
+  <select id="filtroSecao"><option value="">Todas as seções</option></select>
+  <select id="filtroNivel">
+    <option value="">Todos os níveis</option>
+    <option value="1">Só departamentos (N1)</option>
+    <option value="2">Até subdepto (N1-N2)</option>
+    <option value="3">Até categoria (N1-N3)</option>
+    <option value="4">Só itens (N4)</option>
+  </select>
+  <label class="chk"><input type="checkbox" id="onlyChanged"> só editados</label>
+  <span class="hint">Edite valores nos <b>itens (N4)</b> · subtotais recalculam automático · margens em % (12 ou 12,5) · valores em R$</span>
+</section>
+
+<main>
+  <div class="tableWrap">
+    <table id="tbl">
+      <thead>
+        <tr>
+          <th class="col-secao">Seção</th>
+          <th class="col-cat">Categoria</th>
+          <th class="num" title="Margem cadastrada Vivendas (col C)">Vivendas %</th>
+          <th class="num" title="Margem Scanntech (col D)">Scanntech %</th>
+          <th class="num" title="Margem do concorrente (col E)">Concor. %</th>
+          <th class="num" title="Margem praticada total c/ promo (col F)">Pratic. %</th>
+          <th class="num" title="Margem praticada sem promo (col G)">s/Promo %</th>
+          <th class="num prop" title="Proposta de nova margem (col H)">Proposta %</th>
+          <th class="num" title="Diferença (Proposta − Vivendas) / Proposta · col I">Δ Margem</th>
+          <th class="num money" title="Méd venda mensal · = venda trimestre / 3 · col K">Méd Venda</th>
+          <th class="num calc-h" title="Lucr. Scanntech · = Scanntech × Méd Venda · col L">Lucr. Scann</th>
+          <th class="num calc-h" title="Lucr. Concorrente · = Concor. × Méd Venda · col M">Lucr. Concor.</th>
+          <th class="num calc-h" title="Lucr. Vivendas · = Vivendas × Méd Venda · col N">Lucr. Vivendas</th>
+          <th class="num calc-h prop" title="Lucr. Proposta · = Proposta × Méd Venda · col O">Lucr. Proposta</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>

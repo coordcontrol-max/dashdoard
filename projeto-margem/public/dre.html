@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DRE PowerBI · Margem</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  html, body { height: 100%; }
+  body { display: flex; flex-direction: column; }
+  .pb-wrap { flex: 1; min-height: 0; background: #0f1115; }
+  .pb-wrap iframe {
+    width: 100%; height: 100%;
+    border: 0; display: block;
+    background: #0f1115;
+  }
+  .nav-links { display: flex; gap: 8px; align-items: center; }
+  .nav-links a {
+    color: #b8d4e6; text-decoration: none; font-size: 12px;
+    padding: 6px 12px; border: 1px solid #2c3346; border-radius: 6px;
+    background: #1f2533;
+  }
+  .nav-links a:hover { background: #283047; }
+  .nav-links a.active { background: #142336; border-color: #2c4868; color: #e6e8eb; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <h1>DRE · PowerBI</h1>
+    <div class="sub">Relatório operacional consolidado</div>
+  </div>
+  <div class="actions">
+    <div class="nav-links">
+      <a href="/">Margem</a>
+      <a href="/dre" class="active">DRE PowerBI</a>
+    </div>
+    <span class="sep"></span>
+    <span id="userInfo" class="user-info"></span>
+    <a id="linkAdmin" href="/admin" style="display:none;color:#b8d4e6;text-decoration:none;font-size:12px;padding:6px 12px;border:1px solid #2c3346;border-radius:6px;">Admin</a>
+    <button id="btnLogout">Sair</button>
+  </div>
+</header>
+
+<main class="pb-wrap">
+  <iframe id="drePbFrame"
+          title="DRE PowerBI"
+          src="https://app.powerbi.com/reportEmbed?reportId=65e1ecc1-2da3-49ff-95d4-da29ed21c4e3&autoAuth=true&ctid=77e97564-703e-4dda-9606-23389e1501a6"
+          allowfullscreen
+          referrerpolicy="strict-origin-when-cross-origin"></iframe>
+</main>
+
+<script>
+  (async () => {
+    try {
+      const r = await fetch('/api/me', { credentials: 'same-origin' });
+      if (!r.ok) { location.href = '/login.html'; return; }
+      const me = await r.json();
+      document.getElementById('userInfo').textContent = me.username || '';
+      if (me.is_admin) document.getElementById('linkAdmin').style.display = '';
+    } catch { location.href = '/login.html'; }
+  })();
+
+  document.getElementById('btnLogout').addEventListener('click', async () => {
+    await fetch('/api/logout', { method: 'POST', credentials: 'same-origin' });
+    location.href = '/login.html';
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Margem · Login</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  body { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+  .login-box {
+    background: #161a23; border: 1px solid #232938; border-radius: 12px;
+    padding: 32px; width: 100%; max-width: 380px; box-shadow: 0 10px 40px rgba(0,0,0,.4);
+  }
+  .login-box h1 { margin: 0 0 4px; font-size: 22px; }
+  .login-box .sub { color: #8b95a7; font-size: 13px; margin-bottom: 24px; }
+  .login-box label { display: block; color: #c5cad4; font-size: 12px; margin: 14px 0 6px; text-transform: uppercase; letter-spacing: .4px; }
+  .login-box input {
+    width: 100%; background: #0f131c; color: #e6e8eb; border: 1px solid #2c3346;
+    padding: 10px 12px; border-radius: 6px; font-size: 14px;
+  }
+  .login-box input:focus { border-color: #3b6dab; outline: none; }
+  .login-box button {
+    width: 100%; margin-top: 20px; background: #3b6dab; color: white; border: none;
+    padding: 12px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer;
+  }
+  .login-box button:hover { background: #4a7dbb; }
+  .login-box button:disabled { background: #2a3a52; cursor: not-allowed; }
+  .err { color: #f87171; font-size: 13px; margin-top: 12px; min-height: 18px; }
+</style>
+</head>
+<body>
+  <div class="login-box">
+    <h1>Margem</h1>
+    <div class="sub">Tomada de decisão · login</div>
+    <form id="loginForm">
+      <label for="username">Usuário</label>
+      <input id="username" name="username" type="text" autocomplete="username" required autofocus>
+      <label for="password">Senha</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+      <button type="submit" id="btnSubmit">Entrar</button>
+      <div class="err" id="err"></div>
+    </form>
+  </div>
+  <script src="login.js"></script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "name": "projeto-margem",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Site de tomada de decisão de margem com login, cenários compartilhados e painel admin",
+  "main": "server.js",
+  "engines": {
+    "node": ">=22.5"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "init-db": "node scripts/init-db.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
+    "express": "^4.21.1",
+    "jsonwebtoken": "^9.0.2"
+  }
+}

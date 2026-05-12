@@ -1239,7 +1239,7 @@ function cpfValido(s) {
 // ===== API: usuários (admin) =====
 app.get('/api/users', adminRequired, async (req, res) => {
   const rows = await query(`
-    SELECT id, username, nome, email, telefone, cpf, cargo, ativo, is_admin, senha_definida, token_primeiro_acesso, token_expira_em, created_at
+    SELECT id, username, nome, email, telefone, cpf, cargo, nivel, ativo, is_admin, senha_definida, token_primeiro_acesso, token_expira_em, created_at
     FROM users ORDER BY ativo DESC, COALESCE(nome, username)
   `);
   res.json(rows);

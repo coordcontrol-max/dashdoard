@@ -1,0 +1,49 @@
+/* Estilos próprios da página /troca — herda muita coisa de ruptura.css */
+
+.btn-atualizar {
+  background: var(--accent, #1f6b35);
+  color: #fff;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn-atualizar:hover { filter: brightness(1.1); }
+.btn-atualizar:disabled { opacity: 0.6; cursor: wait; }
+
+/* Barra de status */
+.tr-status {
+  padding: 10px 16px;
+  background: var(--bg-elev-1);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+  font-size: 12px;
+}
+.tr-status-icon { font-size: 14px; line-height: 1; }
+.tr-status.idle      .tr-status-icon { color: #1a8f4f; }
+.tr-status.pendente  .tr-status-icon { color: #d4a017; animation: pulse 1.5s infinite; }
+.tr-status.processando .tr-status-icon { color: #2c75c5; animation: pulse 1.5s infinite; }
+.tr-status.erro      .tr-status-icon { color: #c0392b; }
+@keyframes pulse {
+  0%,100% { opacity: 1; }
+  50%     { opacity: 0.3; }
+}
+.tr-status-msg { color: var(--text); }
+.tr-status-msg b { color: var(--accent); }
+
+/* Tabela analítica adapta colunas pra 7 (vs 6 do ruptura) */
+.ru-tabela #tblItens td.num { font-variant-numeric: tabular-nums; }
+.ru-tabela #tblItens td.valor-pos { color: #1a8f4f; font-weight: 600; }
+
+/* Grid de 3 colunas pros rankings (Comprador, Loja, Fornecedor) */
+.tr-rankings-3 { grid-template-columns: 1fr 1fr 1fr !important; }
+@media (max-width: 1100px) { .tr-rankings-3 { grid-template-columns: 1fr 1fr !important; } }
+@media (max-width: 700px)  { .tr-rankings-3 { grid-template-columns: 1fr !important; } }
+
+/* Modal de drill: cards empilhados (um embaixo do outro) e largura maior */
+#modalDrill .drill-resumos { grid-template-columns: 1fr !important; gap: 8px; }
+#modalDrill .drill-resumo-body { max-height: 220px; }
+
+/* CSS de modal moveu pra style.css (global) — agora todas as páginas usam */

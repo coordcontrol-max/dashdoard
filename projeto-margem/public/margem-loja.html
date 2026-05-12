@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Supervendas · Margem por Loja</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#1f6b35">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<script src="/pwa.js"></script>
+<script src="theme.js"></script>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="ruptura.css">
+<link rel="stylesheet" href="kpis.css">
+<link rel="stylesheet" href="margem-loja.css">
+<link rel="stylesheet" href="mobile.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <h1>Margem por Loja</h1>
+    <div class="sub">Acompanhamento diário · <span id="periodoTxt">—</span></div>
+  </div>
+  <div class="actions">
+    <span id="userInfo" class="user-info"></span>
+    <a id="linkAdmin" href="/admin" style="display:none;color:var(--text-link);text-decoration:none;font-size:12px;padding:6px 12px;border:1px solid var(--border-2);border-radius:6px;">Admin</a>
+    <button id="btnAtualizar" class="btn-atualizar" title="Roda a query no Oracle (atualização automática às 06:30)">🔄 Atualizar</button>
+    <a href="/margem-loja/imprimir" target="_blank" title="Análise comparativa em PDF (paisagem)"
+       style="color:var(--text);text-decoration:none;font-size:12px;padding:6px 12px;border:1px solid var(--border-2);border-radius:6px;background:var(--bg-input);">📄 PDF</a>
+    <button class="btn-fullscreen" title="Tela cheia"></button>
+    <button class="btn-theme" title="Trocar tema">☀️</button>
+    <button id="btnLogout">Sair</button>
+  </div>
+</header>
+<script src="fullscreen.js"></script>
+
+<div class="layout">
+<aside class="sidebar"></aside>
+<div class="main-content">
+
+  <section class="tr-status" id="trStatus">
+    <span class="tr-status-left">
+      <span class="tr-status-icon">●</span>
+      <span class="tr-status-msg" id="trStatusMsg">Carregando…</span>
+    </span>
+    <span class="tr-status-right" id="trPeriodoBox" style="display:none;">
+      <span class="tr-status-icon" style="color:#aab2bd;">📅</span>
+      <span style="color:var(--text-muted);">Período:</span>
+      <strong id="trPeriodoTxt">—</strong>
+    </span>
+  </section>
+
+  <!-- KPIs do topo -->
+  <section class="ml-kpis">
+    <div class="ml-kpi"><div class="lbl">Venda Total</div><div class="val" id="kpiVenda">—</div></div>
+    <div class="ml-kpi"><div class="lbl">Margem Total</div><div class="val" id="kpiMgTotal">—</div></div>
+    <div class="ml-kpi"><div class="lbl">Margem PDV</div><div class="val" id="kpiMgPdv">—</div></div>
+    <div class="ml-kpi"><div class="lbl">Verba</div><div class="val" id="kpiVerba">—</div></div>
+    <div class="ml-kpi"><div class="lbl">Doctos</div><div class="val" id="kpiDoctos">—</div></div>
+  </section>
+
+  <!-- Filtros -->
+  <section class="ml-filtros">
+    <select id="filtroComprador">
+      <option value="">Todos os compradores</option>
+    </select>
+    <select id="filtroGerente">
+      <option value="">Todos os gerentes</option>
+      <option value="André">🥩 André</option>
+      <option value="Walas">🛒 Walas</option>
+    </select>
+    <span class="ml-spacer"></span>
+    <span class="ml-hint">Últimos N dias na análise:</span>
+    <select id="ultimosN">
+      <option value="5">5</option>
+      <option value="7">7</option>
+      <option value="10">10</option>
+      <option value="15">15</option>
+      <option value="30" selected>todos</option>
+    </select>
+  </section>
+
+  <!-- Tabela 1: Acumulado por loja com Ranks -->
+  <section class="ml-bloco">
+    <div class="ml-bloco-head">
+      <strong>📊 Acumulado por Loja</strong>
+      <span class="hint">venda total · margem ponderada · rank do pior (1) ao melhor</span>
+    </div>
+    <div class="ru-tabela-wrap">
+      <table id="tblAcum">
+        <thead>
+          <tr>
+            <th>Loja</th>
+            <th class="num">Venda</th>
+            <th class="num">Mg Total %</th>
+            <th class="num">Rank Mg Tot</th>
+            <th class="num">Mg PDV %</th>
+            <th class="num">Rank Mg PDV</th>
+            <th class="num">Verba</th>
+            <th class="num">Doctos</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyAcum"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Tabela 2: Matriz Loja × Dia (igual à planilha) -->
+  <section class="ml-bloco">
+    <div class="ml-bloco-head">
+      <strong>📅 Matriz Loja × Dia</strong>
+      <span class="hint">Venda · Mg Total % · Mg PDV % por dia</span>
+    </div>
+    <div class="ru-tabela-wrap ml-matrix-wrap">
+      <table id="tblMatrix" class="ml-matrix"></table>
+    </div>
+  </section>
+
+  <!-- Tabela 3: Variação dos últimos N dias -->
+  <section class="ml-bloco">
+    <div class="ml-bloco-head">
+      <strong>📈 Análise Comparativa — Últimos dias</strong>
+      <span class="hint">tendência (último vs média dos anteriores)</span>
+    </div>
+    <div class="ru-tabela-wrap">
+      <table id="tblComp">
+        <thead id="theadComp"></thead>
+        <tbody id="tbodyComp"></tbody>
+      </table>
+    </div>
+  </section>
+
+</div>
+</div>
+
+<!-- Modal: drill-down por loja → compradores -->
+<div class="modal-backdrop" id="modalDrill">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <h3 id="drillTitle">Detalhe da loja</h3>
+      <button class="modal-close" id="drillClose">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="ru-info-bar" id="drillInfo"></div>
+      <div class="ru-tabela-wrap" style="max-height:60vh;margin-top:12px;">
+        <table id="tblDrill">
+          <thead>
+            <tr>
+              <th>Comprador</th>
+              <th class="num">Venda</th>
+              <th class="num">Part %</th>
+              <th class="num">Mg Total %</th>
+              <th class="num">Mg PDV %</th>
+              <th class="num">Verba</th>
+              <th class="num">Doctos</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyDrill"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-mini primary" id="drillFechar">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<script src="sidebar.js"></script>
+<script src="margem-loja.js?v=2"></script>
+</body>
+</html>

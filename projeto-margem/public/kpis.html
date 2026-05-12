@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Supervendas · KPIs Comerciais</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#1f6b35">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<script src="/pwa.js"></script>
+<script src="theme.js"></script>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="ruptura.css">
+<link rel="stylesheet" href="troca.css">
+<link rel="stylesheet" href="kpis.css">
+<link rel="stylesheet" href="painel.css">
+<link rel="stylesheet" href="mobile.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <h1>KPIs Comerciais</h1>
+    <div class="sub">Acompanhamento mensal · <span id="periodoTxt">—</span></div>
+  </div>
+  <div class="actions">
+    <span id="userInfo" class="user-info"></span>
+    <a id="linkAdmin" href="/admin" style="display:none;color:var(--text-link);text-decoration:none;font-size:12px;padding:6px 12px;border:1px solid var(--border-2);border-radius:6px;">Admin</a>
+    <button id="btnAtualizar" class="btn-atualizar" title="Roda as queries no banco">🔄 Atualizar</button>
+    <button class="btn-fullscreen" title="Tela cheia"></button>
+    <button class="btn-theme" title="Trocar tema">☀️</button>
+    <button id="btnLogout">Sair</button>
+  </div>
+</header>
+<script src="fullscreen.js"></script>
+
+<div class="layout">
+<aside class="sidebar"></aside>
+<div class="main-content">
+
+  <section class="tr-status" id="trStatus">
+    <span class="tr-status-left">
+      <span class="tr-status-icon">●</span>
+      <span class="tr-status-msg" id="trStatusMsg">Carregando…</span>
+    </span>
+    <span class="tr-status-right" id="trPeriodoBox" style="display:none;">
+      <span class="tr-status-icon" style="color:#aab2bd;">📅</span>
+      <span style="color:var(--text-muted);">Período:</span>
+      <strong id="trPeriodoTxt">—</strong>
+    </span>
+  </section>
+
+  <!-- Tabs: Painel (resumido) / Detalhado -->
+  <section class="ru-filtros" style="border-bottom:1px solid var(--border);">
+    <div class="ru-tabs">
+      <button class="ru-tab active" data-view="painel">📊 Painel</button>
+      <button class="ru-tab" data-view="detalhe">📋 Detalhado</button>
+    </div>
+  </section>
+
+  <!-- ========================= VIEW PAINEL ========================= -->
+  <div id="viewPainel">
+
+    <!-- Filtros (futuro - mes/ano) -->
+    <div class="pn-filtros">
+      <span class="pn-pill active" id="pillMes">—</span>
+    </div>
+
+    <!-- KPIs minimalistas no topo -->
+    <section class="pn-kpis-row">
+      <div class="pn-kpi-mini" id="miniFat"><div class="lbl">Faturamento</div><div class="val">—</div></div>
+      <div class="pn-kpi-mini" id="miniMar"><div class="lbl">Margem</div><div class="val">—</div></div>
+      <div class="pn-kpi-mini" id="miniRup"><div class="lbl">Ruptura</div><div class="val">—</div></div>
+      <div class="pn-kpi-mini" id="miniDDE"><div class="lbl">DDE</div><div class="val">—</div></div>
+      <div class="pn-kpi-mini" id="miniQue"><div class="lbl">Quebra</div><div class="val">—</div></div>
+      <div class="pn-kpi-mini" id="miniTro"><div class="lbl">Troca</div><div class="val">—</div></div>
+    </section>
+
+    <!-- Baixo Desempenho: Venda e Margem -->
+    <section class="pn-piores-row">
+      <div class="pn-piores-card">
+        <div class="pn-piores-head">
+          <span class="ico">📉</span>
+          <strong>Baixo Desempenho na Venda</strong>
+          <span class="hint">menor atingimento</span>
+        </div>
+        <div class="pn-piores" id="pioresVenda"></div>
+      </div>
+      <div class="pn-piores-card">
+        <div class="pn-piores-head">
+          <span class="ico">📉</span>
+          <strong>Baixo Desempenho na Margem</strong>
+          <span class="hint">menor atingimento</span>
+        </div>
+        <div class="pn-piores" id="pioresMargem"></div>
+      </div>
+    </section>
+
+    <!-- Linha principal: Donut grande (esq) + Tabela compradores (dir) -->
+    <section class="pn-main-row">
+      <div class="pn-card-dark">
+        <h3>Vendas</h3>
+        <div class="sub">Alcance de Metas</div>
+        <div class="pn-donut-big">
+          <svg id="donutAtingimento" viewBox="-60 -60 120 120"></svg>
+          <div class="pn-donut-big-center">
+            <div class="pn-donut-big-pct" id="donutPct">—</div>
+            <div class="pn-donut-big-lbl">Atingimento</div>
+          </div>
+        </div>
+        <div class="pn-real-meta">
+          <div class="pn-real-meta-row real">
+            <span class="lbl">Realizado</span>
+            <span class="val" id="realVal">—</span>
+          </div>
+          <div class="pn-real-meta-row">
+            <span class="lbl">Meta</span>
+            <span class="val" id="metaVal">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pn-card-dark" style="padding:0;">
+        <div style="padding:14px 16px 8px;">
+          <h3>Compradores</h3>
+          <div class="sub">Performance individual</div>
+        </div>
+        <div class="pn-tabela-wrap">
+          <table id="tblPainelComp">
+            <thead>
+              <tr>
+                <th>Comprador</th>
+                <th>Venda</th>
+                <th>Meta</th>
+                <th>Ating</th>
+                <th>Margem</th>
+                <th>Margem %</th>
+                <th>DDE</th>
+                <th>Rank</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyPainelComp"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Linha inferior: gráfico evolutivo + donut Andre/Walas -->
+    <section class="pn-bottom-row">
+      <div class="pn-graf-card">
+        <h3>📈 Evolutivo de Vendas (Diário)</h3>
+        <svg id="graficoVendasDia" viewBox="0 0 800 220" preserveAspectRatio="none"></svg>
+      </div>
+      <div class="pn-graf-card">
+        <h3>🍩 Distribuição por Gerente</h3>
+        <div class="pn-donut-wrap" style="position:relative;display:flex;align-items:center;justify-content:center;height:160px;">
+          <svg id="donutVenda" viewBox="-60 -60 120 120" style="width:160px;height:160px;"></svg>
+          <div class="pn-donut-center" style="position:absolute;text-align:center;">
+            <div class="lbl" style="font-size:10px;color:#aab2bd;text-transform:uppercase;letter-spacing:1px;">Total</div>
+            <div class="val" id="donutTotal" style="font-size:14px;font-weight:800;margin-top:2px;">—</div>
+          </div>
+        </div>
+        <div class="pn-donut-leg" id="donutLeg" style="display:flex;flex-direction:column;gap:6px;margin-top:10px;font-size:12px;"></div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ========================= VIEW DETALHE ========================= -->
+  <div id="viewDetalhe" style="display:none;">
+
+  <!-- Bloco 1: Faturamento + Lucratividade por Comprador (com gerentes) -->
+  <section class="kp-bloco">
+    <div class="kp-bloco-head">
+      <strong>📊 KPI's Comercial — Faturamento e Margem</strong>
+      <div class="rank-toggle">
+        <span class="lbl">Rank por:</span>
+        <button class="rk-btn active" data-rank="ating">Atingimento %</button>
+        <button class="rk-btn" data-rank="diff">Diff R$</button>
+      </div>
+    </div>
+    <div class="ru-tabela-wrap">
+      <table id="tblB1">
+        <thead>
+          <tr>
+            <th>Comprador</th>
+            <th class="num">Venda</th>
+            <th class="num">Meta Venda</th>
+            <th class="num">Diff (R$)</th>
+            <th class="num">Ating</th>
+            <th class="num">Rank</th>
+            <th class="num">Part %</th>
+            <th class="num">Margem (R$)</th>
+            <th class="num" title="Margem ÷ Venda">Margem %</th>
+            <th class="num">Meta Margem</th>
+            <th class="num" title="Meta Margem ÷ Meta Venda">Meta %</th>
+            <th class="num">Diff (R$)</th>
+            <th class="num">Ating</th>
+            <th class="num">Rank</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyB1"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Bloco 2: Estoque e Perdas -->
+  <section class="kp-bloco">
+    <div class="kp-bloco-head"><strong>📦 Estoque e Perdas</strong></div>
+    <div class="ru-tabela-wrap">
+      <table id="tblB2">
+        <thead>
+          <tr>
+            <th>Comprador</th>
+            <th class="num">Valor Estq (R$)</th>
+            <th class="num">DDE</th>
+            <th class="num">Meta</th>
+            <th class="num">Ating</th>
+            <th class="num">Rank</th>
+            <th class="num">Ruptura</th>
+            <th class="num">Meta</th>
+            <th class="num">Ating</th>
+            <th class="num">Rank</th>
+            <th class="num">Quebra (R$)</th>
+            <th class="num">Meta</th>
+            <th class="num">Ating</th>
+            <th class="num">Rank</th>
+            <th class="num">Troca (R$)</th>
+            <th class="num">Meta</th>
+            <th class="num">Ating</th>
+            <th class="num">Rank</th>
+            <th class="num">Foto Tab.</th>
+            <th class="num">Meta</th>
+            <th class="num">Ating</th>
+            <th class="num">Ating Total</th>
+            <th class="num">Premiação</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyB2"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Bloco 3: Resumo por gerente (críticos) -->
+  <section class="kp-bloco kp-resumo">
+    <div class="kp-resumo-grid">
+      <div class="kp-card">
+        <div class="kp-card-head">🥩 Perecível — André</div>
+        <div class="kp-card-body" id="resAndre"></div>
+      </div>
+      <div class="kp-card">
+        <div class="kp-card-head">🛒 Mercearia — Walas</div>
+        <div class="kp-card-body" id="resWalas"></div>
+      </div>
+    </div>
+  </section>
+
+  </div><!-- /viewDetalhe -->
+
+</div>
+</div>
+
+<!-- Modal de drill-down: vendas+margem dia a dia -->
+<div class="modal-backdrop" id="modalDiario">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <h3 id="modalDiarioTitulo">Comprador</h3>
+      <button class="modal-close" id="modalDiarioClose">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="ru-info-bar" id="modalDiarioInfo"></div>
+      <div class="ru-tabela-wrap" style="max-height:60vh;margin-top:12px;">
+        <table id="tblDiario">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th class="num">Meta Venda</th>
+              <th class="num">Venda</th>
+              <th class="num">Diff Venda</th>
+              <th class="num">% Atin.</th>
+              <th class="num">Meta Margem</th>
+              <th class="num">Margem</th>
+              <th class="num">Diff Margem</th>
+              <th class="num">% Atin.</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyDiario"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-mini primary" id="modalDiarioFechar">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<script src="sidebar.js"></script>
+<script src="kpis.js?v=24"></script>
+</body>
+</html>

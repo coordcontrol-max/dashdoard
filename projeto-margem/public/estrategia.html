@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Supervendas · Nível Estratégia</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#1f6b35">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<script src="/pwa.js"></script>
+<script src="theme.js"></script>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="estrategia.css">
+<link rel="stylesheet" href="mobile.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <h1>Nível Estratégia</h1>
+    <div class="sub">Comparativo MTD · Atual / Mês Anterior / Ano Anterior · <span id="periodoTxt">—</span></div>
+  </div>
+  <div class="actions">
+    <span id="userInfo" class="user-info"></span>
+    <a id="linkAdmin" href="/admin" style="display:none;color:var(--text-link);text-decoration:none;font-size:12px;padding:6px 12px;border:1px solid var(--border-2);border-radius:6px;">Admin</a>
+    <button id="btnAtualizar" class="btn-atualizar" title="Roda as queries no Oracle (atualização automática 06:30)">🔄 Atualizar</button>
+    <button class="btn-fullscreen" title="Tela cheia"></button>
+    <button class="btn-theme" title="Trocar tema">☀️</button>
+    <button id="btnLogout">Sair</button>
+  </div>
+</header>
+<script src="fullscreen.js"></script>
+
+<div class="layout">
+<aside class="sidebar"></aside>
+<div class="main-content es-main">
+
+  <!-- Status -->
+  <section class="tr-status" id="trStatus">
+    <span class="tr-status-left">
+      <span class="tr-status-icon">●</span>
+      <span class="tr-status-msg" id="trStatusMsg">Carregando…</span>
+    </span>
+  </section>
+
+  <!-- Resumo de totais -->
+  <section class="es-totais">
+    <div class="es-tot-box">
+      <div class="tot-lbl">Venda MTD</div>
+      <div class="tot-big" id="totVenda">—</div>
+      <div class="tot-sub">Meta: <b id="totMeta">—</b> · Ating: <b id="totAting">—</b></div>
+    </div>
+    <div class="es-tot-box">
+      <div class="tot-lbl">vs Mês Anterior</div>
+      <div class="tot-big" id="totVsMes">—</div>
+      <div class="tot-sub">Mês ant: <b id="totMesAnt">—</b></div>
+    </div>
+    <div class="es-tot-box">
+      <div class="tot-lbl">vs Ano Anterior</div>
+      <div class="tot-big" id="totVsAno">—</div>
+      <div class="tot-sub">Ano ant: <b id="totAnoAnt">—</b></div>
+    </div>
+    <div class="es-tot-box">
+      <div class="tot-lbl">Lucratividade</div>
+      <div class="tot-big" id="totLucr">—</div>
+      <div class="tot-sub">Margem: <b id="totMg">—</b></div>
+    </div>
+  </section>
+
+  <!-- Toggle Comprador / Loja -->
+  <section class="es-toolbar">
+    <div class="es-toggle">
+      <button class="es-toggle-btn active" data-view="comprador">📋 Por Comprador</button>
+      <button class="es-toggle-btn" data-view="loja">🏬 Por Loja</button>
+    </div>
+    <div class="es-search">
+      <input type="text" id="filtroBusca" placeholder="Buscar…">
+    </div>
+  </section>
+
+  <!-- Tabela comparativa -->
+  <section class="es-tabela-wrap">
+    <table class="es-tab" id="tabComparativo">
+      <thead>
+        <tr>
+          <th class="col-nome">Nome</th>
+          <th class="num">Venda MTD</th>
+          <th class="num">Part%</th>
+          <th class="num">Mês Ant</th>
+          <th class="num">Δ$ Mês</th>
+          <th class="num">Δ% Mês</th>
+          <th class="num">Ano Ant</th>
+          <th class="num">Δ% Ano</th>
+          <th class="num">Lucr MTD</th>
+          <th class="num">Margem% MTD</th>
+        </tr>
+      </thead>
+      <tbody id="tbodyComp"></tbody>
+    </table>
+  </section>
+
+</div>
+</div>
+
+<script src="sidebar.js"></script>
+<script src="estrategia.js?v=3"></script>
+</body>
+</html>

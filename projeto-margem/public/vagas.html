@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Supervendas · Vagas em Aberto</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#1f6b35">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<script src="/pwa.js"></script>
+<script src="theme.js"></script>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="ruptura.css">
+<link rel="stylesheet" href="troca.css">
+<link rel="stylesheet" href="vagas.css">
+<link rel="stylesheet" href="mobile.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <h1>Vagas em Aberto</h1>
+    <div class="sub">Acompanhamento R&amp;S · <span id="ultimaAtual">—</span></div>
+  </div>
+  <div class="actions">
+    <span id="userInfo" class="user-info"></span>
+    <a id="linkAdmin" href="/admin" style="display:none;color:var(--text-link);text-decoration:none;font-size:12px;padding:6px 12px;border:1px solid var(--border-2);border-radius:6px;">Admin</a>
+    <button id="btnAtualizar" class="btn-atualizar" title="Puxa do Google Sheets agora">🔄 Atualizar</button>
+    <button class="btn-fullscreen" title="Tela cheia"></button>
+    <button class="btn-theme" title="Trocar tema">☀️</button>
+    <button id="btnLogout">Sair</button>
+  </div>
+</header>
+<script src="fullscreen.js"></script>
+
+<div class="layout">
+<aside class="sidebar"></aside>
+<div class="main-content">
+
+  <!-- Status -->
+  <section class="tr-status" id="trStatus">
+    <span class="tr-status-icon">●</span>
+    <span class="tr-status-msg" id="trStatusMsg">Carregando…</span>
+  </section>
+
+  <!-- KPIs -->
+  <section class="ru-kpis">
+    <div class="ru-kpi big" id="kpiTotal">
+      <span class="lbl">Vagas Abertas Total</span>
+      <span class="val">—</span>
+    </div>
+    <div class="ru-kpi" id="kpiAtendendo">
+      <span class="lbl">Atendendo a Empresa</span>
+      <span class="val">—</span>
+      <span class="sub">% prontos pra admissão</span>
+    </div>
+    <div class="ru-kpi" id="kpiForaPrazo">
+      <span class="lbl">Fora do Prazo</span>
+      <span class="val">—</span>
+      <span class="sub">meta: até 10%</span>
+    </div>
+    <div class="ru-kpi" id="kpiSelecao">
+      <span class="lbl">Em Seleção</span>
+      <span class="val">—</span>
+    </div>
+    <div class="ru-kpi" id="kpiPronto">
+      <span class="lbl">Processo de Admissão</span>
+      <span class="val">—</span>
+    </div>
+  </section>
+
+  <!-- Status detalhado em barra -->
+  <section class="vg-status-bar">
+    <div class="vg-status-bar-head">
+      <strong>Status das vagas em aberto</strong>
+      <span class="hint">distribuição</span>
+    </div>
+    <div class="vg-status-grid" id="statusGrid"></div>
+  </section>
+
+  <!-- Tabela de Assistentes -->
+  <section class="ru-tabela">
+    <div class="ru-tabela-head">
+      <strong>🛒 Assistentes de R&amp;S</strong>
+      <span class="hint">performance individual</span>
+    </div>
+    <div class="ru-tabela-wrap">
+      <table id="tblAssist">
+        <thead>
+          <tr>
+            <th>Assistente</th>
+            <th>Região</th>
+            <th>Lojas</th>
+            <th class="num">Vagas Abertas</th>
+            <th class="num">Fora Prazo</th>
+            <th class="num">% Fora Prazo</th>
+            <th class="num">Pronto Adm</th>
+            <th class="num">Meta 80%</th>
+            <th class="num">QLP</th>
+            <th class="num">% QLP</th>
+            <th class="num">Rank</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyAssist"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Tabela de Analistas -->
+  <section class="ru-tabela">
+    <div class="ru-tabela-head">
+      <strong>👥 Analistas</strong>
+    </div>
+    <div class="ru-tabela-wrap">
+      <table id="tblAnalist">
+        <thead>
+          <tr>
+            <th>Analista</th>
+            <th class="num">Vagas Abertas</th>
+            <th class="num">Pronto Admissão</th>
+            <th class="num">% Fora Prazo</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyAnalist"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Heatmap por Loja -->
+  <section class="ru-tabela">
+    <div class="ru-tabela-head">
+      <strong>🏪 Vagas por Loja</strong>
+      <span class="hint">clique numa loja pra ver as vagas em aberto</span>
+    </div>
+    <div class="vg-heatmap" id="heatmap"></div>
+  </section>
+
+  <!-- Admissão Semanal -->
+  <section class="ru-tabela">
+    <div class="ru-tabela-head">
+      <strong>📅 Admissão Semanal no Mês</strong>
+      <span class="hint">meta vs realizado</span>
+    </div>
+    <div class="ru-tabela-wrap">
+      <table id="tblSemanal">
+        <thead id="theadSemanal"></thead>
+        <tbody id="tbodySemanal"></tbody>
+      </table>
+    </div>
+  </section>
+
+</div>
+</div>
+
+<!-- Modal de drill por loja -->
+<div class="modal-backdrop" id="modalLoja">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <h3 id="modalLojaTitulo">Loja</h3>
+      <button class="modal-close" id="modalLojaClose">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="ru-info-bar" id="modalLojaInfo"></div>
+
+      <!-- Resumo agrupado por status -->
+      <div class="vg-resumo-status" id="modalLojaResumo"></div>
+
+      <!-- Tabela detalhada -->
+      <div class="ru-tabela-wrap" style="max-height:50vh;margin-top:14px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Cargo / Função</th>
+              <th>Status</th>
+              <th>Em substituição de</th>
+              <th>Motivo</th>
+              <th>Abertura</th>
+              <th>Prazo</th>
+              <th>Class.</th>
+              <th>Assistente</th>
+            </tr>
+          </thead>
+          <tbody id="modalLojaTbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-mini primary" id="modalLojaFechar">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<script src="sidebar.js"></script>
+<script src="vagas.js"></script>
+</body>
+</html>

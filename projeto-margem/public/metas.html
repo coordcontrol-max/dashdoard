@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Supervendas · Metas Manuais</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#1f6b35">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<script src="/pwa.js"></script>
+<script src="theme.js"></script>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="ruptura.css">
+<link rel="stylesheet" href="kpis.css">
+<link rel="stylesheet" href="metas.css">
+<link rel="stylesheet" href="mobile.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <h1>Metas Manuais</h1>
+    <div class="sub">Override das metas que vêm da planilha · admin</div>
+  </div>
+  <div class="actions">
+    <span id="userInfo" class="user-info"></span>
+    <a id="linkAdmin" href="/admin" style="display:none;color:var(--text-link);text-decoration:none;font-size:12px;padding:6px 12px;border:1px solid var(--border-2);border-radius:6px;">Admin</a>
+    <button class="btn-fullscreen" title="Tela cheia"></button>
+    <button class="btn-theme" title="Trocar tema">☀️</button>
+    <button id="btnLogout">Sair</button>
+  </div>
+</header>
+<script src="fullscreen.js"></script>
+
+<div class="layout">
+<aside class="sidebar"></aside>
+<div class="main-content">
+
+  <!-- Seletor de mês + estado -->
+  <section class="mt-mes-bar">
+    <div class="mt-mes-grupo">
+      <label>📅 Mês de referência</label>
+      <select id="selMes"></select>
+      <span class="mt-mes-badge" id="badgeMes">—</span>
+    </div>
+    <div class="mt-mes-acoes">
+      <span class="mt-mes-hint">Copiar de outro mês:</span>
+      <select id="selCopiarDe"><option value="">— escolher —</option></select>
+      <button class="btn-mini" id="btnCopiar" title="Copia os valores do mês escolhido pra este">📋 Copiar</button>
+      <button class="btn-mini" id="btnPlanilha" title="Pré-preenche todos os campos vazios com os valores atuais da planilha">📥 Importar planilha</button>
+      <button class="btn-mini btn-mini-danger" id="btnApagarMes" title="Remove as metas salvas deste mês">🗑️ Apagar mês</button>
+    </div>
+  </section>
+
+  <section class="mt-info">
+    <div class="mt-info-bloco">
+      <strong>ℹ️ Como funciona</strong>
+      <p>
+        Cada mês tem suas próprias metas. As metas salvas aqui são aplicadas <b>por cima</b> das metas que vêm da planilha
+        toda vez que os KPIs são atualizados (usando o período dos KPIs pra escolher o mês).
+        Se um campo ficar vazio, cai pra metas do mês anterior salvo (ou da planilha, se não tiver).
+      </p>
+      <ul>
+        <li><b>Gerentes / Total:</b> DDE e Ruptura (metas globais).</li>
+        <li><b>Compradores:</b> DDE, Ruptura, Quebra (R$), Troca (R$) e Foto Tabloide (R$).</li>
+        <li><b>Ruptura:</b> decimal entre 0 e 1 (ex.: <code>0.135</code> = 13,5%).</li>
+        <li>Use <b>Importar planilha</b> pra pré-preencher campos vazios com os valores atuais e <b>Salvar</b> pra fixar.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ========== Bloco 1: Metas globais (Gerente / Total) ========== -->
+  <section class="mt-bloco">
+    <div class="mt-bloco-head">
+      <strong>📊 Metas globais — Gerentes e Total</strong>
+      <span class="hint">DDE em dias · Ruptura em decimal (0-1)</span>
+    </div>
+    <div class="mt-globais-grid">
+      <div class="mt-card">
+        <h4>🥩 André (Perecível)</h4>
+        <label>Meta Venda (R$) <input type="number" step="1" id="andreVenda" placeholder="auto: soma compradores"></label>
+        <label>Meta Margem (R$) <input type="number" step="1" id="andreMargem" placeholder="auto: soma compradores"></label>
+        <label>Meta DDE <input type="number" step="0.1" id="andreDde" placeholder="ex.: 10"></label>
+        <label>Meta Ruptura <input type="number" step="0.0001" id="andreRup" placeholder="ex.: 0.135"></label>
+        <small class="mt-card-hint">Venda e Margem em branco = soma automática dos compradores.</small>
+      </div>
+      <div class="mt-card">
+        <h4>🛒 Walas (Mercearia)</h4>
+        <label>Meta Venda (R$) <input type="number" step="1" id="walasVenda" placeholder="auto: soma compradores"></label>
+        <label>Meta Margem (R$) <input type="number" step="1" id="walasMargem" placeholder="auto: soma compradores"></label>
+        <label>Meta DDE <input type="number" step="0.1" id="walasDde" placeholder="ex.: 35"></label>
+        <label>Meta Ruptura <input type="number" step="0.0001" id="walasRup" placeholder="ex.: 0.1443"></label>
+        <small class="mt-card-hint">Venda e Margem em branco = soma automática dos compradores.</small>
+      </div>
+      <div class="mt-card mt-card-total">
+        <h4>Σ Total Loja</h4>
+        <label>Meta Venda (R$) <input type="number" step="1" id="totalVenda" placeholder="ex.: 5500000"></label>
+        <label>Meta Margem (R$) <input type="number" step="1" id="totalMargem" placeholder="ex.: 1100000"></label>
+        <label>Meta DDE <input type="number" step="0.1" id="totalDde" placeholder="ex.: 32"></label>
+        <label>Meta Ruptura <input type="number" step="0.0001" id="totalRup" placeholder="ex.: 0.12"></label>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== Bloco 2: Metas por comprador ========== -->
+  <section class="mt-bloco">
+    <div class="mt-bloco-head">
+      <strong>👤 Metas por Comprador</strong>
+      <span class="hint">Edite direto na tabela ou suba um CSV</span>
+    </div>
+
+    <div class="mt-csv-row">
+      <button class="btn-mini" id="btnTemplate">📥 Baixar template CSV</button>
+      <label class="btn-mini btn-mini-primary" style="cursor:pointer;">
+        📤 Subir CSV
+        <input type="file" id="inputCsv" accept=".csv,text/csv" style="display:none;">
+      </label>
+      <span class="mt-csv-hint">CSV (Excel BR): separador <code>;</code> · decimal com vírgula · colunas: <code>nome;meta_venda;meta_margem;meta_dde;meta_ruptura;meta_quebra;meta_troca;meta_foto</code></span>
+    </div>
+
+    <div class="ru-tabela-wrap">
+      <table id="tblMetas">
+        <thead>
+          <tr>
+            <th>Comprador</th>
+            <th class="num">Venda (R$)</th>
+            <th class="num">Margem (R$)</th>
+            <th class="num">DDE</th>
+            <th class="num">Ruptura</th>
+            <th class="num">Quebra (R$)</th>
+            <th class="num">Troca (R$)</th>
+            <th class="num">Foto (R$)</th>
+            <th class="num">Atual (planilha)</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyMetas"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ========== Bloco 3: Percentuais diários ========== -->
+  <section class="mt-bloco">
+    <div class="mt-bloco-head">
+      <strong>📅 Percentuais Diários (distribuição da meta mensal)</strong>
+      <span class="hint">% por dia do mês · meta_diária = meta_mensal × % / 100</span>
+    </div>
+    <div class="mt-pct-info">
+      <p>
+        Define como a meta mensal é distribuída entre os dias do mês. Sem isso, o sistema usa a curva da planilha
+        (escalada pra bater com a meta mensal) ou divide igual entre os dias se não tiver curva.
+      </p>
+      <ul>
+        <li>CSV separado em <b>3 colunas</b>: <code>nome;dia;pct_venda;pct_margem</code> (ou em formato largo, ver template).</li>
+        <li>Os <b>%</b> são por dia do mês (1-31). A soma por comprador deve ficar próxima de 100%.</li>
+        <li>Se um dia faltar, o sistema considera 0% pra esse dia.</li>
+      </ul>
+      <div class="mt-pct-status" id="pctStatus">—</div>
+    </div>
+    <div class="mt-csv-row">
+      <button class="btn-mini" id="btnTemplatePct">📥 Baixar template % (vem da planilha)</button>
+      <label class="btn-mini btn-mini-primary" style="cursor:pointer;">
+        📤 Subir CSV de %
+        <input type="file" id="inputCsvPct" accept=".csv,text/csv" style="display:none;">
+      </label>
+      <button class="btn-mini btn-mini-danger" id="btnLimparPct">🗑️ Apagar % deste mês</button>
+    </div>
+  </section>
+
+  <!-- Barra de ação fixa no fim -->
+  <section class="mt-acoes">
+    <span id="msgSalvar" class="mt-msg"></span>
+    <button class="btn-mini" id="btnLimparTodas">🗑️ Limpar tudo</button>
+    <button class="btn-mini btn-mini-primary" id="btnSalvar">💾 Salvar e aplicar</button>
+  </section>
+
+</div>
+</div>
+
+<script src="sidebar.js"></script>
+<script src="metas.js?v=5"></script>
+</body>
+</html>

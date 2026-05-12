@@ -1,0 +1,209 @@
+/* ===== Filtros / tabs ===== */
+.ru-filtros {
+  display: flex; align-items: center; gap: 14px;
+  padding: 10px 16px; background: var(--bg-elev-1); border-bottom: 1px solid var(--border);
+}
+.ru-tabs { display: flex; gap: 2px; }
+.ru-tab {
+  background: transparent; color: var(--text-muted); border: 1px solid transparent;
+  padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px;
+  font-weight: 500;
+}
+.ru-tab:hover { color: var(--text); background: var(--bg-elev-3); }
+.ru-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.ru-search { margin-left: auto; }
+.ru-search input {
+  background: var(--bg-input); color: var(--text); border: 1px solid var(--border-2);
+  padding: 7px 12px; border-radius: 6px; font-size: 13px; min-width: 280px;
+}
+.ru-search input:focus { border-color: var(--accent); outline: none; }
+
+/* ===== KPIs ===== */
+.ru-kpis {
+  display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr 1fr; gap: 10px;
+  padding: 12px 16px; background: var(--bg-elev-1); border-bottom: 1px solid var(--border);
+}
+.ru-kpi {
+  background: var(--bg-elev-3); border: 1px solid var(--border); border-radius: 8px;
+  padding: 12px 14px; display: flex; flex-direction: column; gap: 3px;
+}
+.ru-kpi.big { background: linear-gradient(135deg, var(--bg-kpi-grad-a), var(--bg-kpi-grad-b)); border-color: var(--border-blue); }
+.ru-kpi .lbl { color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }
+.ru-kpi .val { color: var(--text); font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 2px; }
+.ru-kpi.big .val { font-size: 26px; }
+.ru-kpi .sub { color: var(--text-muted); font-size: 11px; }
+.ru-kpi.alerta .val { color: var(--neg); }
+.ru-kpi.ok .val { color: var(--pos); }
+
+/* ===== Gráfico ===== */
+.ru-grafico { background: var(--bg-elev-1); border-bottom: 1px solid var(--border); padding: 10px 16px; }
+.ru-grafico-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 6px; color: var(--text-2); font-size: 13px; }
+.ru-grafico-head strong { text-transform: uppercase; letter-spacing: .5px; }
+.ru-grafico-head .hint { color: var(--text-dim); font-size: 11px; }
+#graficoRuptura { width: 100%; height: 240px; display: block; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; }
+
+/* ===== Resumo executivo ===== */
+.ru-resumo {
+  padding: 12px 16px; background: var(--bg-elev-1); border-bottom: 1px solid var(--border);
+}
+.ru-resumo-head {
+  display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px;
+}
+.ru-resumo-head strong { font-size: 14px; }
+.ru-resumo-head .hint { color: var(--text-muted); font-size: 11px; }
+.ru-resumo-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+}
+@media (max-width: 1100px) { .ru-resumo-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 600px)  { .ru-resumo-grid { grid-template-columns: 1fr; } }
+.ru-resumo-card {
+  background: var(--bg-elev-3); border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+}
+.ru-resumo-card-head {
+  padding: 8px 12px; background: var(--bg-elev-2); border-bottom: 1px solid var(--border);
+  font-size: 12px; font-weight: 700;
+}
+.ru-resumo-card-body { padding: 4px 0; }
+.ru-resumo-row {
+  display: grid; grid-template-columns: 24px 1fr auto; gap: 6px;
+  padding: 5px 12px; align-items: center; font-size: 12px;
+  cursor: pointer;
+}
+.ru-resumo-row:hover { background: var(--bg-elev-2); }
+.ru-resumo-row.disabled { cursor: default; }
+.ru-resumo-row.disabled:hover { background: transparent; }
+.ru-resumo-row:not(:last-child) { border-bottom: 1px solid var(--border); }
+.ru-resumo-row .pos { color: var(--text-muted); font-weight: 600; font-size: 11px; }
+.ru-resumo-row .nome {
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-size: 12px;
+}
+.ru-resumo-row .val {
+  font-weight: 700; font-variant-numeric: tabular-nums; min-width: 60px; text-align: right;
+}
+.ru-resumo-row .val.alerta { color: var(--neg, #c0392b); }
+.ru-resumo-row .val.warn   { color: #d4a017; }
+.ru-resumo-row .val.ok     { color: var(--pos, #1a8f4f); }
+
+/* ===== Rankings ===== */
+.ru-rankings {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  padding: 12px 16px; background: var(--bg-elev-1); border-bottom: 1px solid var(--border);
+}
+
+/* Resumos dentro do drill modal (lojas + fornecedores do comprador).
+   Empilhados (1 coluna) pra ter mais largura — igual ao modal da Troca. */
+.drill-resumos {
+  display: grid; grid-template-columns: 1fr; gap: 8px;
+  margin-bottom: 12px;
+}
+.drill-resumo-card {
+  background: var(--bg-elev-3); border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+}
+.drill-resumo-head {
+  padding: 8px 12px; background: var(--bg-elev-2); border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.drill-resumo-body { padding: 4px 0; max-height: 220px; overflow-y: auto; }
+.drill-resumo-row {
+  display: grid; grid-template-columns: 32px 1fr auto auto; gap: 8px;
+  padding: 4px 12px; align-items: center; font-size: 12px;
+}
+.drill-resumo-row:not(:last-child) { border-bottom: 1px solid var(--border); }
+.drill-resumo-row .pos { color: var(--text-muted); font-weight: 600; font-size: 11px; }
+.drill-resumo-row .nome { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.drill-resumo-row .skus { color: var(--text-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+.drill-resumo-row .pct { font-weight: 700; min-width: 56px; text-align: right; font-variant-numeric: tabular-nums; }
+.drill-resumos.hidden { display: none; }
+@media (max-width: 800px) {
+  .drill-resumos { grid-template-columns: 1fr; }
+}
+.ru-rank-card {
+  background: var(--bg-elev-3); border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+  display: flex; flex-direction: column;
+}
+.ru-rank-head {
+  padding: 10px 14px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: baseline; justify-content: space-between;
+}
+.ru-rank-head strong { color: var(--text); font-size: 13px; }
+.ru-rank-head .hint { color: var(--text-dim); font-size: 10px; }
+.ru-rank-body { max-height: 380px; overflow-y: auto; }
+.ru-rank-row {
+  display: grid; grid-template-columns: 28px 1fr auto auto; gap: 10px; align-items: center;
+  padding: 8px 14px; cursor: pointer; border-bottom: 1px solid var(--border-row);
+  transition: background .12s;
+}
+.ru-rank-row:hover { background: var(--bg-row-hover); }
+.ru-rank-row .pos { color: var(--text-muted); font-weight: 600; font-size: 12px; }
+.ru-rank-row .pos.top1 { color: var(--neg); }
+.ru-rank-row .pos.top2 { color: #f5a522; }
+.ru-rank-row .pos.top3 { color: var(--warn); }
+.ru-rank-row .nome { font-size: 12px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ru-rank-row .skus { color: var(--text-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+.ru-rank-row .pct { color: var(--neg); font-weight: 700; font-size: 13px; font-variant-numeric: tabular-nums; min-width: 56px; text-align: right; }
+.ru-rank-row .pct.warn { color: var(--warn); }
+.ru-rank-row .pct.ok { color: var(--pos); }
+.ru-rank-row.disabled { cursor: default; }
+
+/* ===== Tabela ===== */
+.ru-tabela { padding: 0; }
+.ru-tabela-head {
+  display: flex; justify-content: space-between; align-items: center; padding: 10px 16px;
+  background: var(--bg-filter); border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 8px;
+}
+.ru-tabela-head strong { color: var(--text-2); font-size: 13px; text-transform: uppercase; letter-spacing: .4px; }
+.ru-filtros-tab { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.ru-filtros-tab select {
+  background: var(--bg-input); color: var(--text); border: 1px solid var(--border-2);
+  padding: 6px 10px; border-radius: 6px; font-size: 12px; min-width: 180px; max-width: 260px;
+}
+.ru-info-bar {
+  padding: 8px 16px; background: var(--bg-filter); border-bottom: 1px solid var(--border);
+  color: var(--text-muted); font-size: 12px;
+}
+.ru-info-bar b { color: var(--text); }
+.ru-tabela-wrap { overflow: auto; max-height: 60vh; }
+#tblItens, #tblDrill { width: 100%; border-collapse: collapse; }
+#tblItens thead th, #tblDrill thead th {
+  position: sticky; top: 0; z-index: 5; background: var(--bg-thead); color: var(--text-2);
+  font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .4px;
+  text-align: left; padding: 8px; border-bottom: 1px solid var(--border-2); white-space: nowrap;
+}
+#tblItens thead th.num, #tblDrill thead th.num { text-align: right; }
+#tblItens thead th.center, #tblDrill thead th.center { text-align: center; }
+#tblItens tbody td, #tblDrill tbody td {
+  padding: 6px 8px; border-bottom: 1px solid var(--border-row);
+  font-size: 12px; font-variant-numeric: tabular-nums;
+}
+#tblItens tbody td.num, #tblDrill tbody td.num { text-align: right; }
+#tblItens tbody td.center, #tblDrill tbody td.center { text-align: center; }
+#tblItens tbody tr:hover td, #tblDrill tbody tr:hover td { background: var(--bg-row-hover); }
+.produto-link { color: var(--text); cursor: pointer; }
+.produto-link:hover { color: var(--accent); text-decoration: underline; }
+.badge-2080 {
+  display: inline-block; background: color-mix(in srgb, var(--warn) 25%, transparent);
+  color: var(--warn-strong); border: 1px solid color-mix(in srgb, var(--warn) 50%, transparent);
+  padding: 1px 6px; border-radius: 999px; font-size: 10px; font-weight: 600;
+}
+
+.ru-pagina {
+  display: flex; align-items: center; gap: 12px; justify-content: center;
+  padding: 10px; border-top: 1px solid var(--border); background: var(--bg-filter);
+}
+
+.btn-mini {
+  background: var(--bg-input); color: var(--text); border: 1px solid var(--border-2);
+  padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;
+}
+.btn-mini:hover { background: var(--bg-button-h); }
+.btn-mini.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn-mini.primary:hover { filter: brightness(1.1); }
+
+/* ===== Modal de drill ===== */
+.modal-lg { max-width: 1100px !important; }
+
+@media (max-width: 1100px) {
+  .ru-rankings { grid-template-columns: 1fr; }
+  .ru-kpis { grid-template-columns: repeat(2, 1fr); }
+}

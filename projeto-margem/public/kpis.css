@@ -1,0 +1,145 @@
+/* Página /kpis */
+
+/* Status bar com periodo */
+.tr-status {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.tr-status-left, .tr-status-right {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px;
+}
+.tr-status-right strong { color: var(--accent); }
+
+@media (max-width: 600px) {
+  .tr-status-right { font-size: 11px; }
+}
+
+/* Fonte Aptos (padrão do Microsoft 365) com fallbacks */
+body, .topbar, .sidebar, .main-content, .kp-bloco, .modal {
+  font-family: Aptos, "Aptos Display", "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif !important;
+}
+.kp-bloco table, .kp-bloco-head, .kp-card, .kp-indic-row {
+  font-family: Aptos, "Aptos Display", "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif !important;
+}
+
+.kp-bloco {
+  margin: 12px;
+  background: var(--bg-elev-3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.kp-bloco-head {
+  padding: 10px 14px;
+  background: var(--bg-elev-2);
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.rank-toggle { display: flex; gap: 4px; align-items: center; }
+.rank-toggle .lbl {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  font-weight: 600;
+  margin-right: 4px;
+}
+.rk-btn {
+  padding: 5px 10px;
+  background: var(--bg-elev-3);
+  border: 1px solid var(--border-2);
+  border-radius: 5px;
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.rk-btn:hover { background: var(--bg-elev-4); }
+.rk-btn.active {
+  background: #1f6b35;
+  color: #fff;
+  border-color: #1f6b35;
+}
+
+#tblB1 td, #tblB2 td { font-size: 12px; padding: 6px 8px; }
+#tblB1 th, #tblB2 th {
+  font-size: 11px; padding: 8px;
+  background: var(--bg-elev-2);
+  position: sticky; top: 0; z-index: 2;
+}
+
+#tblB1 tr.gerente td, #tblB2 tr.gerente td {
+  background: rgba(31, 107, 53, .12);
+  font-weight: 700;
+  border-top: 1px solid rgba(31, 107, 53, .4);
+  border-bottom: 1px solid rgba(31, 107, 53, .4);
+}
+#tblB1 tr.total td, #tblB2 tr.total td {
+  background: rgba(245, 211, 12, .12);
+  font-weight: 700;
+  border-top: 2px solid rgba(245, 211, 12, .5);
+}
+
+.ating-ok    { color: #1a8f4f; font-weight: 700; }
+.ating-warn  { color: #d4a017; font-weight: 700; }
+.ating-bad   { color: #c0392b; font-weight: 700; }
+
+/* Nome do comprador clicável — visual normal, só muda o cursor */
+.comp-link {
+  cursor: pointer;
+  color: inherit;
+}
+.comp-link:hover { color: var(--accent); }
+
+/* Rank: piores 3 destacados em vermelho */
+.rank-bad {
+  color: #fff !important;
+  background: rgba(192, 57, 43, .85);
+  font-weight: 800;
+  border-radius: 4px;
+}
+
+/* Bloco 3: cards lado a lado */
+.kp-resumo-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  padding: 12px;
+}
+.kp-card {
+  background: var(--bg-elev-3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.kp-card-head {
+  padding: 10px 14px;
+  background: var(--bg-elev-2);
+  font-weight: 700;
+  border-bottom: 1px solid var(--border);
+}
+.kp-card-body { padding: 4px 0; }
+.kp-indic-row {
+  display: grid;
+  grid-template-columns: 110px 1fr auto auto auto;
+  gap: 8px;
+  padding: 8px 14px;
+  align-items: center;
+  font-size: 12px;
+}
+.kp-indic-row:not(:last-child) { border-bottom: 1px solid var(--border); }
+.kp-indic-row .lbl { color: var(--text-muted); font-weight: 600; }
+.kp-indic-row .real { font-variant-numeric: tabular-nums; font-weight: 700; }
+.kp-indic-row .meta { font-variant-numeric: tabular-nums; color: var(--text-muted); font-size: 11px; }
+.kp-indic-row .ating { font-variant-numeric: tabular-nums; min-width: 60px; text-align: right; }
+.kp-indic-row .status { min-width: 90px; text-align: right; font-weight: 700; font-size: 11px; }
+
+@media (max-width: 900px) {
+  .kp-resumo-grid { grid-template-columns: 1fr; }
+}

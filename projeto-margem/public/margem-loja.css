@@ -1,0 +1,206 @@
+/* Página /margem-loja */
+
+body, .topbar, .sidebar, .main-content, .ml-bloco, .modal {
+  font-family: Aptos, "Aptos Display", "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif !important;
+}
+
+/* KPIs do topo */
+.ml-kpis {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1px;
+  background: var(--border);
+  margin: 12px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.ml-kpi {
+  background: var(--bg-elev-3);
+  padding: 14px 18px;
+  text-align: center;
+}
+.ml-kpi .lbl {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+.ml-kpi .val {
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Filtros */
+.ml-filtros {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 14px;
+  margin: 0 12px 12px;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 12px;
+}
+.ml-filtros select {
+  padding: 6px 10px;
+  background: var(--bg-elev-3);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font-size: 12px;
+}
+.ml-spacer { flex: 1; }
+.ml-hint { color: var(--text-muted); }
+
+/* Blocos */
+.ml-bloco {
+  margin: 12px;
+  background: var(--bg-elev-3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.ml-bloco-head {
+  padding: 10px 14px;
+  background: var(--bg-elev-2);
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.ml-bloco-head .hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Tabelas */
+#tblAcum, #tblComp, #tblMatrix {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+#tblAcum th, #tblComp th, #tblMatrix th {
+  font-size: 11px;
+  padding: 8px;
+  background: var(--bg-elev-2);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  text-align: right;
+}
+#tblAcum th:first-child, #tblComp th:first-child, #tblMatrix th:first-child {
+  text-align: left;
+}
+#tblAcum td, #tblComp td, #tblMatrix td {
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  font-variant-numeric: tabular-nums;
+}
+#tblAcum td:first-child, #tblComp td:first-child, #tblMatrix td:first-child {
+  font-weight: 600;
+  text-align: left;
+}
+#tblAcum tbody tr.total td, #tblComp tbody tr.total td, #tblMatrix tbody tr.total td {
+  background: rgba(245, 211, 12, .12);
+  font-weight: 700;
+  border-top: 2px solid rgba(245, 211, 12, .5);
+}
+#tblAcum tbody tr:hover td, #tblComp tbody tr:hover td, #tblMatrix tbody tr:hover td {
+  background: rgba(255,255,255,.03);
+}
+
+/* Loja clicável */
+.loja-link {
+  cursor: pointer;
+  color: inherit;
+}
+.loja-link:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+/* Ranks */
+.rank-bad {
+  color: #fff !important;
+  background: rgba(192, 57, 43, .85);
+  font-weight: 800;
+  border-radius: 4px;
+  padding: 2px 6px;
+  display: inline-block;
+  min-width: 28px;
+  text-align: center;
+}
+.rank-good {
+  color: #fff !important;
+  background: rgba(34, 139, 34, .75);
+  font-weight: 800;
+  border-radius: 4px;
+  padding: 2px 6px;
+  display: inline-block;
+  min-width: 28px;
+  text-align: center;
+}
+
+/* Cores de margem */
+.mg-ok    { color: #1a8f4f; font-weight: 700; }
+.mg-warn  { color: #d4a017; font-weight: 700; }
+.mg-bad   { color: #c0392b; font-weight: 700; }
+
+/* Variação positiva/negativa */
+.var-up   { color: #1a8f4f; font-weight: 700; }
+.var-down { color: #c0392b; font-weight: 700; }
+
+/* Tendência */
+.tend-up   { color: #1a8f4f; }
+.tend-down { color: #c0392b; }
+.tend-flat { color: #888; }
+
+/* Matriz: scroll horizontal pra muitas datas */
+.ml-matrix-wrap {
+  overflow-x: auto;
+  max-height: 600px;
+}
+#tblMatrix th, #tblMatrix td {
+  padding: 4px 6px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+#tblMatrix .col-date-group {
+  border-left: 1px solid rgba(255,255,255,.08);
+}
+#tblMatrix .col-date-header {
+  background: var(--bg-elev-2);
+  text-align: center;
+  font-weight: 700;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+#tblMatrix .col-loja {
+  position: sticky;
+  left: 0;
+  background: var(--bg-elev-3);
+  z-index: 1;
+}
+#tblMatrix thead .col-loja {
+  z-index: 3;
+  background: var(--bg-elev-2);
+}
+
+/* Mobile */
+@media (max-width: 900px) {
+  .ml-kpis { grid-template-columns: repeat(3, 1fr); }
+  .ml-kpi .val { font-size: 16px; }
+}
+@media (max-width: 600px) {
+  .ml-kpis { grid-template-columns: repeat(2, 1fr); }
+  .ml-filtros { font-size: 11px; }
+}

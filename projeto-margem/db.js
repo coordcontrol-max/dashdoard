@@ -1,33 +1,166 @@
-// Wrapper fino sobre node:sqlite (built-in do Node 22.5+).
-import { DatabaseSync } from 'node:sqlite';
-import { mkdirSync } from 'node:fs';
-import path from 'node:path';
+// Wrapper sobre node-postgres (pg). Toda a app usa Postgres (local + prod).
+import pg from 'pg';
 
-const DB_PATH = process.env.DB_PATH || './db.sqlite';
-mkdirSync(path.dirname(DB_PATH), { recursive: true });
+const DATABASE_URL = process.env.DATABASE_URL;
+if (!DATABASE_URL) {
+  console.error('ERRO: variável de ambiente DATABASE_URL não definida.');
+  console.error('Defina ela com a connection string do Postgres (Render → seu banco → Internal/External Database URL).');
+  process.exit(1);
+}
 
-export const db = new DatabaseSync(DB_PATH);
-db.exec('PRAGMA journal_mode = WAL;');
-db.exec('PRAGMA foreign_keys = ON;');
+// Render usa SSL self-signed; Postgres nativo precisa de rejectUnauthorized=false
+const ssl = DATABASE_URL.includes('localhost') || DATABASE_URL.includes('127.0.0.1')
+  ? false
+  : { rejectUnauthorized: false };
 
-export function migrate() {
-  db.exec(`
+export const pool = new pg.Pool({
+  connectionString: DATABASE_URL,
+  ssl,
+  max: 5,
+});
+
+// Helpers async — sintaxe parecida com SQLite mas com await
+export async function query(sql, params = []) {
+  const r = await pool.query(sql, params);
+  return r.rows;
+}
+
+export async function queryOne(sql, params = []) {
+  const r = await pool.query(sql, params);
+  return r.rows[0] || null;
+}
+
+export async function run(sql, params = []) {
+  // Para INSERT/UPDATE/DELETE — retorna rowCount e (se RETURNING) primeira linha
+  const r = await pool.query(sql, params);
+  return { rowCount: r.rowCount, row: r.rows[0] || null };
+}
+
+export async function migrate() {
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      id SERIAL PRIMARY KEY,
       username TEXT UNIQUE NOT NULL,
-      password_hash TEXT NOT NULL,
-      is_admin INTEGER NOT NULL DEFAULT 0,
-      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+      password_hash TEXT,
+      is_admin BOOLEAN NOT NULL DEFAULT FALSE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
 
     CREATE TABLE IF NOT EXISTS scenarios (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      id SERIAL PRIMARY KEY,
       name TEXT UNIQUE NOT NULL,
-      overrides_json TEXT NOT NULL DEFAULT '{}',
+      overrides_json JSONB NOT NULL DEFAULT '{}'::jsonb,
       created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
       updated_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
+
+    CREATE TABLE IF NOT EXISTS app_data (
+      key TEXT PRIMARY KEY,
+      data JSONB NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_by INTEGER REFERENCES users(id) ON DELETE SET NULL
+    );
+  `);
+
+  // Migrações idempotentes — adicionam colunas extras sem quebrar dados existentes.
+  await pool.query(`
+    ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS nome TEXT;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS email TEXT;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS telefone TEXT;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS cpf TEXT;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS cargo TEXT;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS ativo BOOLEAN NOT NULL DEFAULT TRUE;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS senha_definida BOOLEAN NOT NULL DEFAULT TRUE;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS token_primeiro_acesso TEXT;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS token_expira_em TIMESTAMPTZ;
+  `);
+
+  // Index único por email (permite NULL pra users antigos sem email).
+  await pool.query(`
+    CREATE UNIQUE INDEX IF NOT EXISTS users_email_unique ON users (LOWER(email)) WHERE email IS NOT NULL;
+  `);
+
+  // Snapshot diário da ruptura por comprador (alimenta a "Evolução Diária").
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS ruptura_historico (
+      data DATE NOT NULL,
+      escopo TEXT NOT NULL,
+      comprador TEXT NOT NULL,
+      skus NUMERIC,
+      zerados NUMERIC,
+      pct DOUBLE PRECISION,
+      PRIMARY KEY (data, escopo, comprador)
+    );
+    CREATE INDEX IF NOT EXISTS ruptura_historico_data_idx ON ruptura_historico (data DESC);
+  `);
+
+  // Solicitações de atualização do relatório de Troca (extract roda no PC do user).
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS troca_atualizacao (
+      id SERIAL PRIMARY KEY,
+      solicitado_por INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      solicitado_em  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      iniciado_em    TIMESTAMPTZ,
+      processado_em  TIMESTAMPTZ,
+      status         TEXT NOT NULL DEFAULT 'pendente',
+      mensagem       TEXT
+    );
+    CREATE INDEX IF NOT EXISTS troca_atualizacao_status_idx ON troca_atualizacao (status, solicitado_em);
+  `);
+
+  // Mesma estrutura pra KPIs Comerciais
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS kpis_atualizacao (
+      id SERIAL PRIMARY KEY,
+      solicitado_por INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      solicitado_em  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      iniciado_em    TIMESTAMPTZ,
+      processado_em  TIMESTAMPTZ,
+      status         TEXT NOT NULL DEFAULT 'pendente',
+      mensagem       TEXT
+    );
+    CREATE INDEX IF NOT EXISTS kpis_atualizacao_status_idx ON kpis_atualizacao (status, solicitado_em);
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS margem_loja_atualizacao (
+      id SERIAL PRIMARY KEY,
+      solicitado_por INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      solicitado_em  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      iniciado_em    TIMESTAMPTZ,
+      processado_em  TIMESTAMPTZ,
+      status         TEXT NOT NULL DEFAULT 'pendente',
+      mensagem       TEXT
+    );
+    CREATE INDEX IF NOT EXISTS margem_loja_atualizacao_status_idx ON margem_loja_atualizacao (status, solicitado_em);
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS operacao_atualizacao (
+      id SERIAL PRIMARY KEY,
+      solicitado_por INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      solicitado_em  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      iniciado_em    TIMESTAMPTZ,
+      processado_em  TIMESTAMPTZ,
+      status         TEXT NOT NULL DEFAULT 'pendente',
+      mensagem       TEXT
+    );
+    CREATE INDEX IF NOT EXISTS operacao_atualizacao_status_idx ON operacao_atualizacao (status, solicitado_em);
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS estrategia_atualizacao (
+      id SERIAL PRIMARY KEY,
+      solicitado_por INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      solicitado_em  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      iniciado_em    TIMESTAMPTZ,
+      processado_em  TIMESTAMPTZ,
+      status         TEXT NOT NULL DEFAULT 'pendente',
+      mensagem       TEXT
+    );
+    CREATE INDEX IF NOT EXISTS estrategia_atualizacao_status_idx ON estrategia_atualizacao (status, solicitado_em);
   `);
 }

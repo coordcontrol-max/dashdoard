@@ -1,0 +1,578 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Supervendas · Operação</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#1f6b35">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<script src="/pwa.js"></script>
+<script src="theme.js"></script>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="ruptura.css">
+<link rel="stylesheet" href="kpis.css">
+<link rel="stylesheet" href="operacao.css">
+<link rel="stylesheet" href="mobile.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <h1>Operação</h1>
+    <div class="sub">Pontos da Meta · <span id="periodoTxt">—</span></div>
+  </div>
+  <div class="actions">
+    <span id="userInfo" class="user-info"></span>
+    <a id="linkAdmin" href="/admin" style="display:none;color:var(--text-link);text-decoration:none;font-size:12px;padding:6px 12px;border:1px solid var(--border-2);border-radius:6px;">Admin</a>
+    <button id="btnAtualizar" class="btn-atualizar" title="Roda a query no Oracle (atualização automática 06:30)">🔄 Atualizar</button>
+    <button class="btn-fullscreen" title="Tela cheia"></button>
+    <button class="btn-theme" title="Trocar tema">☀️</button>
+    <button id="btnLogout">Sair</button>
+  </div>
+</header>
+<script src="fullscreen.js"></script>
+
+<div class="layout">
+<aside class="sidebar"></aside>
+<div class="main-content">
+
+  <section class="tr-status" id="trStatus">
+    <span class="tr-status-left">
+      <span class="tr-status-icon">●</span>
+      <span class="tr-status-msg" id="trStatusMsg">Carregando…</span>
+    </span>
+  </section>
+
+  <!-- Abas das metas -->
+  <section class="op-tabs">
+    <button class="op-tab active" data-tab="1">1 · Venda Loja</button>
+    <button class="op-tab" data-tab="2">2 · Lucro líquido %</button>
+    <button class="op-tab" data-tab="3">3 · Bovino</button>
+    <button class="op-tab" data-tab="4">4 · FLV</button>
+    <button class="op-tab" data-tab="5">5 · Padaria</button>
+    <button class="op-tab" data-tab="6">6 · Quebra FLV</button>
+    <button class="op-tab" data-tab="7">7 · Quebra Identificada</button>
+    <button class="op-tab" data-tab="8">8 · Inv. Rotativo</button>
+    <button class="op-tab" data-tab="9">9 · Estq s/ Venda 10d</button>
+    <button class="op-tab" data-tab="10">10 · Cancel. Cupom</button>
+    <button class="op-tab" data-tab="11">11 · Checklist Op.</button>
+    <button class="op-tab" data-tab="12">12 · Turnover</button>
+    <button class="op-tab" data-tab="13">13 · Ruptura zerados</button>
+    <button class="op-tab op-tab-extra" data-tab="14">📝 Acompanhamentos</button>
+  </section>
+
+  <!-- ABA 1 · Venda Loja -->
+  <div class="op-tab-content" data-tab-content="1">
+    <!-- KPIs do topo -->
+    <section class="op-kpis">
+      <div class="op-kpi"><div class="lbl">Meta Venda</div><div class="val" id="kpiMeta">—</div></div>
+      <div class="op-kpi"><div class="lbl">Venda</div><div class="val" id="kpiVenda">—</div></div>
+      <div class="op-kpi"><div class="lbl">Diff</div><div class="val" id="kpiDiff">—</div></div>
+      <div class="op-kpi"><div class="lbl">Atingimento</div><div class="val" id="kpiAting">—</div></div>
+      <div class="op-kpi"><div class="lbl">Margem Total %</div><div class="val" id="kpiMgTotal">—</div></div>
+      <div class="op-kpi"><div class="lbl">Margem PDV %</div><div class="val" id="kpiMgPdv">—</div></div>
+    </section>
+    <section class="op-filtros">
+      <select id="filtroSupervisor">
+        <option value="">Todos os supervisores</option>
+      </select>
+      <span class="op-spacer"></span>
+      <span class="op-hint">Clique no <b>Loja</b> pra ver detalhes diários</span>
+    </section>
+    <section class="op-bloco">
+      <div class="op-bloco-head">
+        <strong>📊 Venda &amp; Margem por Loja</strong>
+        <span class="hint">acumulado do mês · agrupado por supervisor</span>
+      </div>
+      <div class="ru-tabela-wrap">
+        <table id="tblVendaMargem">
+          <thead>
+            <tr>
+              <th>Loja</th>
+              <th class="num">Meta Venda</th>
+              <th class="num">Venda</th>
+              <th class="num">Diff</th>
+              <th class="num">% Atingimento</th>
+              <th class="num">Rank</th>
+              <th class="num">Lucratividade R$</th>
+              <th class="num">Margem Total %</th>
+              <th class="num">Clientes</th>
+              <th class="num">Diff Clientes</th>
+              <th class="num">Rank Clientes</th>
+              <th class="num">Ticket Médio</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyVM"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- ABA 2 · Lucro líquido % -->
+  <div class="op-tab-content" data-tab-content="2" hidden>
+    <section class="op-bloco">
+      <div class="op-bloco-head">
+        <strong>💰 Lucro líquido por Loja</strong>
+        <span class="hint">margem % do faturamento · ranking pela margem</span>
+      </div>
+      <div class="ru-tabela-wrap">
+        <table id="tblLucro">
+          <thead>
+            <tr>
+              <th>Loja</th>
+              <th class="num">Venda</th>
+              <th class="num">Lucratividade R$</th>
+              <th class="num">Margem Total %</th>
+              <th class="num">Margem PDV %</th>
+              <th class="num">Rank Margem</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyLucro"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- ABA 3 · Compra e Venda Bovino (= seção AÇOUGUE) -->
+  <div class="op-tab-content" data-tab-content="3" hidden>
+    <section class="op-bloco">
+      <div class="op-bloco-head">
+        <strong>🐂 Compra e Venda Bovino</strong>
+        <span class="hint">seção PERECÍVEIS \ AÇOUGUE · CxV = (Venda − Compra) / Venda</span>
+      </div>
+      <div class="ru-tabela-wrap">
+        <table id="tblBovino">
+          <thead>
+            <tr>
+              <th>Loja</th>
+              <th class="num">Venda</th>
+              <th class="num">Compra</th>
+              <th class="num">CxV R$</th>
+              <th class="num">CxV %</th>
+              <th class="num">Rank</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyBovino"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- ABA 4 · Compra e Venda FLV -->
+  <div class="op-tab-content" data-tab-content="4" hidden>
+    <section class="op-bloco">
+      <div class="op-bloco-head">
+        <strong>🥬 Compra e Venda FLV</strong>
+        <span class="hint">seção PERECÍVEIS \ FLV · CxV = (Venda − Compra) / Venda</span>
+      </div>
+      <div class="ru-tabela-wrap">
+        <table id="tblFLV">
+          <thead>
+            <tr>
+              <th>Loja</th>
+              <th class="num">Venda</th>
+              <th class="num">Compra</th>
+              <th class="num">CxV R$</th>
+              <th class="num">CxV %</th>
+              <th class="num">Rank</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyFLV"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- ABA 5 · Compra e Venda Padaria -->
+  <div class="op-tab-content" data-tab-content="5" hidden>
+    <section class="op-bloco">
+      <div class="op-bloco-head">
+        <strong>🍞 Compra e Venda Padaria</strong>
+        <span class="hint">seção PERECÍVEIS \ PADARIA · CxV = (Venda − Compra) / Venda · (consumo interno será adicionado depois)</span>
+      </div>
+      <div class="ru-tabela-wrap">
+        <table id="tblPadaria">
+          <thead>
+            <tr>
+              <th>Loja</th>
+              <th class="num">Venda</th>
+              <th class="num">Compra</th>
+              <th class="num">CxV R$</th>
+              <th class="num">CxV %</th>
+              <th class="num">Rank</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyPadaria"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- ABA 6 · Quebra FLV -->
+  <div class="op-tab-content" data-tab-content="6" hidden>
+    <section class="op-bloco">
+      <div class="op-bloco-head">
+        <strong>🥬 Quebra FLV com Folhagens (Identificada + Rotativo)</strong>
+        <span class="hint">quebra identificada + ajuste de inventário rotativo</span>
+      </div>
+      <div class="ru-tabela-wrap">
+        <table id="tblQuebraFLV">
+          <thead>
+            <tr>
+              <th>Loja</th>
+              <th class="num">Venda FLV</th>
+              <th class="num">Quebra Ident.</th>
+              <th class="num">Inv. Rotativo</th>
+              <th class="num">Quebra Total</th>
+              <th class="num">Quebra %</th>
+              <th class="num">Rank</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyQuebraFLV"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- ABA 7 · Geração de Quebra Identificada -->
+  <div class="op-tab-content" data-tab-content="7" hidden>
+    <section class="op-bloco">
+      <div class="op-bloco-head">
+        <strong>⚠️ Geração de Quebra Identificada</strong>
+        <span class="hint">acumulado do mês · clique no valor pra ver compradores e produtos</span>
+      </div>
+      <div class="ru-tabela-wrap">
+        <table id="tblQuebra">
+          <thead>
+            <tr>
+              <th>Loja</th>
+              <th class="num">Valor Quebra</th>
+              <th class="num">Qtd</th>
+              <th class="num">Rank</th>
+              <th class="num">% Venda <small>(meta 0,60%)</small></th>
+            </tr>
+          </thead>
+          <tbody id="tbodyQuebra"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- ABA 8 · Inventário Rotativo Geral -->
+  <div class="op-tab-content" data-tab-content="8" hidden>
+    <div class="op-placeholder-big">
+      <h3>📋 Inventário Rotativo Geral</h3>
+      <p>Aguardando planilha no servidor de rede.</p>
+      <p class="hint">Me passe o caminho da planilha quando estiver pronto.</p>
+    </div>
+  </div>
+
+  <!-- ABA 9 · Produtos Estoque s/ Vendas 10 Dias -->
+  <div class="op-tab-content" data-tab-content="9" hidden>
+    <section class="op-bloco">
+      <div class="op-bloco-head">
+        <strong>📦 Estoque por Loja</strong>
+        <span class="hint">valor de estoque a custo bruto · dias de estoque (DDE) · clique no valor pra ver compradores</span>
+      </div>
+      <div class="ru-tabela-wrap">
+        <table id="tblEstoque">
+          <thead>
+            <tr>
+              <th>Loja</th>
+              <th class="num">Valor Estoque</th>
+              <th class="num">DDE</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyEstoque"></tbody>
+        </table>
+      </div>
+    </section>
+    <section class="op-bloco" style="margin-top:14px;">
+      <div class="op-bloco-head">
+        <strong>🐢 Produtos com Estoque s/ Vendas</strong>
+        <span class="hint">unidades paradas (da aba SEM VENDAS) · clique na loja pra ver detalhe</span>
+      </div>
+      <div class="ru-tabela-wrap">
+        <table id="tblSemVendas">
+          <thead>
+            <tr>
+              <th>Loja</th>
+              <th class="num">Venda</th>
+              <th class="num">SKUs</th>
+              <th class="num">Qtd Unid.</th>
+              <th class="num">Valor R$</th>
+              <th class="num">% Venda</th>
+              <th class="num">Rank</th>
+            </tr>
+          </thead>
+          <tbody id="tbodySemVendas"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- ABA 10 · Cancelamento de Cupom -->
+  <div class="op-tab-content" data-tab-content="10" hidden>
+    <section class="op-bloco">
+      <div class="op-bloco-head">
+        <strong>🧾 Cancelamento de Cupom</strong>
+        <span class="hint">cancelamentos brutos · clique na loja pra ver operador/data/PDV</span>
+      </div>
+      <div class="ru-tabela-wrap">
+        <table id="tblCancel">
+          <thead>
+            <tr>
+              <th>Loja</th>
+              <th class="num">Venda</th>
+              <th class="num">Cancel R$</th>
+              <th class="num">Qtd Op.</th>
+              <th class="num">Cancel %</th>
+              <th class="num">Rank</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyCancel"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- ABA 11 · Checklist Operação -->
+  <div class="op-tab-content" data-tab-content="11" hidden>
+    <div class="op-placeholder-big">
+      <h3>✅ Checklist Operação (Prevenção)</h3>
+      <p>Aguardando planilha no servidor de rede.</p>
+    </div>
+  </div>
+
+  <!-- ABA 12 · Turnover -->
+  <div class="op-tab-content" data-tab-content="12" hidden>
+    <div class="op-placeholder-big">
+      <h3>👥 Turnover</h3>
+      <p>Aguardando planilha no servidor de rede (ou ligação com a página RH/DP).</p>
+    </div>
+  </div>
+
+  <!-- ABA 13 · Ruptura Geral -->
+  <div class="op-tab-content" data-tab-content="13" hidden>
+    <div class="op-placeholder-big">
+      <h3>🛒 Ruptura Geral (itens zerados)</h3>
+      <p>Vou puxar do mesmo dado da página Ruptura. Atalho: <a href="/ruptura" style="color:var(--text-link);">abrir página Ruptura completa →</a></p>
+    </div>
+  </div>
+
+  <!-- ABA 14 · Acompanhamentos (edição manual) -->
+  <div class="op-tab-content" data-tab-content="14" hidden>
+    <div class="op-placeholder-big">
+      <h3>📝 Acompanhamentos</h3>
+      <p>Comparativo mensal manual: Banco de horas, Geração de trocas, Acompanhamento nº clientes, Ticket médio, Venda POS.</p>
+      <p class="hint">Próxima etapa: criar tabela no Postgres + form de edição (admin only). Avise quando começarmos.</p>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- Modal: drill-down estoque por comprador (loja) -->
+<div class="modal-backdrop" id="modalEstoque">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <h3 id="modalEstoqueTitulo">Estoque — Loja</h3>
+      <button class="modal-close" id="modalEstoqueClose">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="ru-info-bar" id="modalEstoqueInfo"></div>
+      <div class="ru-tabela-wrap" style="max-height:60vh;margin-top:12px;">
+        <table id="tblEstoqueComp">
+          <thead>
+            <tr>
+              <th>Comprador</th>
+              <th class="num">Valor Estoque</th>
+              <th class="num">% do Total</th>
+              <th class="num">DDE</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyEstoqueComp"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-mini primary" id="modalEstoqueFechar">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: drill-down quebra por loja (compradores + produtos) -->
+<div class="modal-backdrop" id="modalQuebra">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <h3 id="modalQuebraTitulo">Quebra — Loja</h3>
+      <button class="modal-close" id="modalQuebraClose">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="ru-info-bar" id="modalQuebraInfo"></div>
+      <div class="op-quebra-tabs" id="modalQuebraTabs" style="margin:8px 0;display:flex;gap:6px;flex-wrap:wrap;"></div>
+      <div class="ru-tabela-wrap" style="max-height:55vh;margin-top:8px;">
+        <table id="tblQuebraComp">
+          <thead>
+            <tr>
+              <th>Comprador</th>
+              <th>Produto</th>
+              <th class="num">Qtd</th>
+              <th class="num">Valor</th>
+              <th class="num">% do Total</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyQuebraComp"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-mini primary" id="modalQuebraFechar">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: drill-down Estoque sem Vendas por loja (produtos) -->
+<div class="modal-backdrop" id="modalSemVendas">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <h3 id="modalSemVendasTitulo">Estoque s/ Vendas — Loja</h3>
+      <button class="modal-close" id="modalSemVendasClose">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="ru-info-bar" id="modalSemVendasInfo"></div>
+      <div class="ru-tabela-wrap" style="max-height:65vh;margin-top:12px;">
+        <table id="tblSemVendasDet">
+          <thead>
+            <tr>
+              <th>Produto</th>
+              <th>Comprador</th>
+              <th class="num">Qtd</th>
+              <th class="num">Valor</th>
+              <th class="num">Dias s/ Venda</th>
+              <th class="num">Última Venda</th>
+            </tr>
+          </thead>
+          <tbody id="tbodySemVendasDet"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-mini primary" id="modalSemVendasFechar">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: drill-down Cancelamento por loja (operador, data, pdv) -->
+<div class="modal-backdrop" id="modalCancel">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <h3 id="modalCancelTitulo">Cancelamento — Loja</h3>
+      <button class="modal-close" id="modalCancelClose">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="ru-info-bar" id="modalCancelInfo"></div>
+      <div class="ru-tabela-wrap" style="max-height:60vh;margin-top:12px;">
+        <table id="tblCancelDet">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Operador</th>
+              <th class="num">Cód Op.</th>
+              <th class="num">PDV</th>
+              <th class="num">Valor</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyCancelDet"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-mini primary" id="modalCancelFechar">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: drill-down Quebra FLV por loja (Identificada + Rotativo) -->
+<div class="modal-backdrop" id="modalQuebraFLV">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <h3 id="modalQuebraFLVTitulo">Quebra FLV — Loja</h3>
+      <button class="modal-close" id="modalQuebraFLVClose">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="ru-info-bar" id="modalQuebraFLVInfo"></div>
+      <h4 style="margin:14px 0 6px;">🔻 Quebra Identificada</h4>
+      <div class="ru-tabela-wrap" style="max-height:35vh;">
+        <table id="tblQuebraFLVIdent">
+          <thead>
+            <tr>
+              <th>Produto</th>
+              <th class="num">Qtd</th>
+              <th class="num">Valor</th>
+              <th class="num">% do Total</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyQuebraFLVIdent"></tbody>
+        </table>
+      </div>
+      <h4 style="margin:14px 0 6px;">📋 Inventário Rotativo <span style="font-weight:400;color:var(--text-muted);font-size:11px;">(negativo = perda)</span></h4>
+      <div class="ru-tabela-wrap" style="max-height:35vh;">
+        <table id="tblQuebraFLVInv">
+          <thead>
+            <tr>
+              <th>Produto</th>
+              <th class="num">Qtd</th>
+              <th class="num">Valor</th>
+              <th class="num">% do Total</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyQuebraFLVInv"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-mini primary" id="modalQuebraFLVFechar">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: drill-down dia a dia por loja -->
+<div class="modal-backdrop" id="modalDiario">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <h3 id="modalDiarioTitulo">Loja</h3>
+      <button class="modal-close" id="modalDiarioClose">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="ru-info-bar" id="modalDiarioInfo"></div>
+      <div class="ru-tabela-wrap" style="max-height:60vh;margin-top:12px;">
+        <table id="tblDiario">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th class="num">Meta Venda</th>
+              <th class="num">Venda</th>
+              <th class="num">Diff</th>
+              <th class="num">% Atingimento</th>
+              <th class="num">Lucratividade</th>
+              <th class="num">Mg Total %</th>
+              <th class="num">Mg PDV %</th>
+              <th class="num">Verba</th>
+              <th class="num">Doctos</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyDiario"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-mini primary" id="modalDiarioFechar">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<script src="sidebar.js"></script>
+<script src="operacao.js?v=20"></script>
+</body>
+</html>

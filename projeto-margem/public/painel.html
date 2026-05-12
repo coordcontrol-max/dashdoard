@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Supervendas · Painel Comercial</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#1f6b35">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<script src="/pwa.js"></script>
+<script src="theme.js"></script>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="ruptura.css">
+<link rel="stylesheet" href="kpis.css">
+<link rel="stylesheet" href="painel.css">
+<link rel="stylesheet" href="mobile.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <h1>Painel Comercial</h1>
+    <div class="sub">Visão executiva · <span id="periodoTxt">—</span></div>
+  </div>
+  <div class="actions">
+    <span id="userInfo" class="user-info"></span>
+    <a href="/kpis" style="color:var(--text);text-decoration:none;font-size:12px;padding:6px 12px;border:1px solid var(--border-2);border-radius:6px;background:var(--bg-input);">Ver detalhes →</a>
+    <button class="btn-fullscreen" title="Tela cheia"></button>
+    <button class="btn-theme" title="Trocar tema">☀️</button>
+    <button id="btnLogout">Sair</button>
+  </div>
+</header>
+<script src="fullscreen.js"></script>
+
+<div class="layout">
+<aside class="sidebar"></aside>
+<div class="main-content">
+
+  <!-- Hero: ating total grande no topo -->
+  <section class="pn-hero">
+    <div class="pn-hero-card">
+      <div class="pn-hero-lbl">ATINGIMENTO TOTAL</div>
+      <div class="pn-hero-val" id="heroAting">—</div>
+      <div class="pn-hero-sub" id="heroSub">—</div>
+    </div>
+  </section>
+
+  <!-- KPIs principais -->
+  <section class="pn-kpis">
+    <div class="pn-kpi" id="kpiFat">
+      <div class="pn-kpi-head">💰 Faturamento</div>
+      <div class="pn-kpi-val">—</div>
+      <div class="pn-kpi-sub">—</div>
+      <div class="pn-bar"><div class="pn-bar-fill"></div></div>
+    </div>
+    <div class="pn-kpi" id="kpiMar">
+      <div class="pn-kpi-head">📊 Margem</div>
+      <div class="pn-kpi-val">—</div>
+      <div class="pn-kpi-sub">—</div>
+      <div class="pn-bar"><div class="pn-bar-fill"></div></div>
+    </div>
+    <div class="pn-kpi" id="kpiRup">
+      <div class="pn-kpi-head">🚨 Ruptura</div>
+      <div class="pn-kpi-val">—</div>
+      <div class="pn-kpi-sub">—</div>
+      <div class="pn-bar"><div class="pn-bar-fill"></div></div>
+    </div>
+    <div class="pn-kpi" id="kpiDDE">
+      <div class="pn-kpi-head">📦 DDE</div>
+      <div class="pn-kpi-val">—</div>
+      <div class="pn-kpi-sub">—</div>
+      <div class="pn-bar"><div class="pn-bar-fill"></div></div>
+    </div>
+    <div class="pn-kpi" id="kpiQue">
+      <div class="pn-kpi-head">⚠️ Quebra</div>
+      <div class="pn-kpi-val">—</div>
+      <div class="pn-kpi-sub">—</div>
+      <div class="pn-bar"><div class="pn-bar-fill"></div></div>
+    </div>
+    <div class="pn-kpi" id="kpiTro">
+      <div class="pn-kpi-head">🔄 Troca</div>
+      <div class="pn-kpi-val">—</div>
+      <div class="pn-kpi-sub">—</div>
+      <div class="pn-bar"><div class="pn-bar-fill"></div></div>
+    </div>
+  </section>
+
+  <!-- Comparativo gerentes -->
+  <section class="pn-bloco">
+    <div class="pn-bloco-head"><strong>👥 Comparativo Gerentes</strong></div>
+    <div class="pn-gerentes" id="gerentesGrid"></div>
+  </section>
+
+  <!-- Top compradores -->
+  <section class="pn-bloco">
+    <div class="pn-row">
+      <div class="pn-col">
+        <div class="pn-bloco-head"><strong>🏆 Melhores compradores</strong> <span class="hint">por atingimento total</span></div>
+        <div class="pn-list" id="listMelhores"></div>
+      </div>
+      <div class="pn-col">
+        <div class="pn-bloco-head"><strong>⚠️ Atenção</strong> <span class="hint">piores 3</span></div>
+        <div class="pn-list" id="listPiores"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Premiação -->
+  <section class="pn-bloco" id="secPremiacao">
+    <div class="pn-bloco-head"><strong>💸 Premiação</strong> <span class="hint">compradores que bateram margem</span></div>
+    <div class="pn-list" id="listPremiacao"></div>
+  </section>
+
+</div>
+</div>
+
+<script src="sidebar.js"></script>
+<script src="painel.js"></script>
+</body>
+</html>

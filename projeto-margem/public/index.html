@@ -3,8 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Margem · Tomada de Decisão</title>
+<title>Supervendas · Margem</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#1f6b35">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<script src="/pwa.js"></script>
+<script src="theme.js"></script>
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="mobile.css">
 </head>
 <body>
 <header class="topbar">
@@ -21,12 +27,18 @@
     <button id="btnExport" title="Exportar CSV">Exportar CSV</button>
     <button id="btnReset" class="danger" title="Recarregar valores originais">Reset</button>
     <span class="sep"></span>
-    <a href="/dre" style="color:#b8d4e6;text-decoration:none;font-size:12px;padding:6px 12px;border:1px solid #2c3346;border-radius:6px;background:#1f2533;">DRE PowerBI</a>
     <span id="userInfo" class="user-info"></span>
-    <a id="linkAdmin" href="/admin" style="display:none;color:#b8d4e6;text-decoration:none;font-size:12px;padding:6px 12px;border:1px solid #2c3346;border-radius:6px;">Admin</a>
+    <a id="linkAdmin" href="/admin" style="display:none;color:var(--text-link);text-decoration:none;font-size:12px;padding:6px 12px;border:1px solid var(--border-2);border-radius:6px;">Admin</a>
+    <button class="btn-fullscreen" title="Tela cheia"></button>
+    <button class="btn-theme" title="Trocar tema">☀️</button>
     <button id="btnLogout">Sair</button>
   </div>
 </header>
+<script src="fullscreen.js"></script>
+
+<div class="layout">
+<aside class="sidebar"></aside>
+<div class="main-content">
 
 <section class="kpis">
   <div class="kpi">
@@ -96,6 +108,10 @@
   </div>
 </main>
 
+</div><!-- /.main-content -->
+</div><!-- /.layout -->
+
+<script src="sidebar.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

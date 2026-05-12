@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Supervendas · Venda Diária</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#1f6b35">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<script src="/pwa.js"></script>
+<script src="theme.js"></script>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="venda-diaria.css">
+<link rel="stylesheet" href="mobile.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <h1>Venda Diária</h1>
+    <div class="sub">Acompanhamento Meta vs Realizado · <span id="mesRef">—</span></div>
+  </div>
+  <div class="actions">
+    <span id="userInfo" class="user-info"></span>
+    <a id="linkAdmin" href="/admin" style="display:none;color:var(--text-link);text-decoration:none;font-size:12px;padding:6px 12px;border:1px solid var(--border-2);border-radius:6px;">Admin</a>
+    <a href="/venda-diaria/imprimir" target="_blank" title="PDF detalhado (estilo planilha)"
+       style="color:var(--text);text-decoration:none;font-size:12px;padding:6px 12px;border:1px solid var(--border-2);border-radius:6px;background:var(--bg-input);">📄 PDF</a>
+    <a href="/venda-diaria/imprimir-resumo" target="_blank" title="PDF resumo da tela completa em 1 página paisagem"
+       style="color:var(--text);text-decoration:none;font-size:12px;padding:6px 12px;border:1px solid var(--border-2);border-radius:6px;background:var(--bg-input);">📄 Resumo</a>
+    <button class="btn-fullscreen" title="Tela cheia"></button>
+    <button class="btn-theme" title="Trocar tema">☀️</button>
+    <button id="btnLogout">Sair</button>
+  </div>
+</header>
+<script src="fullscreen.js"></script>
+
+<div class="layout">
+<aside class="sidebar"></aside>
+
+<div class="main-content">
+  <!-- KPIs gerais (5 cards principais) -->
+  <section class="kpis vd-kpis-main">
+    <div class="kpi-card" id="cardVenda" data-color="primary">
+      <div class="kpi-card-title">Faturamento</div>
+      <div class="kpi-card-grid">
+        <div><span class="lbl">Meta mês</span><span class="val" data-k="meta_mes">—</span></div>
+        <div><span class="lbl">Meta até hoje</span><span class="val" data-k="meta_ate_hoje">—</span></div>
+        <div><span class="lbl">Realizado</span><span class="val big" data-k="realizado">—</span></div>
+        <div><span class="lbl">Diff</span><span class="val" data-k="diff">—</span></div>
+        <div><span class="lbl">Ating Total</span><span class="val ating" data-k="ating">—</span></div>
+        <div><span class="lbl">Ating Acum</span><span class="val ating" data-k="ating_acum">—</span></div>
+      </div>
+    </div>
+    <div class="kpi-card" id="cardMargemGeral">
+      <div class="kpi-card-title">Margem Total %</div>
+      <div class="kpi-card-grid">
+        <div><span class="lbl">Meta mês</span><span class="val" data-k="meta_mes">—</span></div>
+        <div><span class="lbl">Meta até hoje</span><span class="val" data-k="meta_ate_hoje">—</span></div>
+        <div><span class="lbl">Realizado</span><span class="val big" data-k="realizado">—</span></div>
+        <div><span class="lbl">Diff</span><span class="val" data-k="diff">—</span></div>
+        <div><span class="lbl">Ating Total</span><span class="val ating" data-k="ating">—</span></div>
+        <div><span class="lbl">Ating Acum</span><span class="val ating" data-k="ating_acum">—</span></div>
+        <div class="full"><span class="lbl">% sobre venda</span><span class="val" id="pctMargemGeral">—</span></div>
+      </div>
+    </div>
+    <div class="kpi-card" id="cardMargemPDV">
+      <div class="kpi-card-title">Margem PDV %</div>
+      <div class="kpi-card-grid">
+        <div><span class="lbl">Meta mês</span><span class="val" data-k="meta_mes">—</span></div>
+        <div><span class="lbl">Meta até hoje</span><span class="val" data-k="meta_ate_hoje">—</span></div>
+        <div><span class="lbl">Realizado</span><span class="val big" data-k="realizado">—</span></div>
+        <div><span class="lbl">Diff</span><span class="val" data-k="diff">—</span></div>
+        <div><span class="lbl">Ating Total</span><span class="val ating" data-k="ating">—</span></div>
+        <div><span class="lbl">Ating Acum</span><span class="val ating" data-k="ating_acum">—</span></div>
+        <div class="full"><span class="lbl">% sobre venda</span><span class="val" id="pctMargemPDV">—</span></div>
+      </div>
+    </div>
+    <div class="kpi-card" id="cardPromo">
+      <div class="kpi-card-title">Promoção</div>
+      <div class="kpi-card-grid">
+        <div><span class="lbl">Venda c/ promo</span><span class="val" id="vendaComPromo">—</span></div>
+        <div><span class="lbl">Part %</span><span class="val" id="partComPromo">—</span></div>
+        <div><span class="lbl">Venda s/ promo</span><span class="val" id="vendaSemPromo">—</span></div>
+        <div><span class="lbl">Part %</span><span class="val" id="partSemPromo">—</span></div>
+        <div><span class="lbl">Margem c/ promo</span><span class="val" id="margemComPromo">—</span></div>
+        <div><span class="lbl">Mg %</span><span class="val" id="margemComPromoPct">—</span></div>
+        <div><span class="lbl">Margem s/ promo</span><span class="val" id="margemSemPromo">—</span></div>
+        <div><span class="lbl">Mg %</span><span class="val" id="margemSemPromoPct">—</span></div>
+      </div>
+    </div>
+    <div class="kpi-card" id="cardQuebra">
+      <div class="kpi-card-title">Quebra</div>
+      <div class="kpi-card-grid">
+        <div><span class="lbl">Meta mês</span><span class="val" data-k="meta_mes">—</span></div>
+        <div><span class="lbl">Realizado</span><span class="val big" data-k="realizado">—</span></div>
+        <div><span class="lbl">Diff</span><span class="val" data-k="diff">—</span></div>
+        <div><span class="lbl">Ating Total</span><span class="val ating" data-k="ating">—</span></div>
+        <div><span class="lbl">Ating Acum</span><span class="val ating" data-k="ating_acum">—</span></div>
+      </div>
+    </div>
+    <div class="kpi-card" id="cardCompra">
+      <div class="kpi-card-title">Compra</div>
+      <div class="kpi-card-grid">
+        <div><span class="lbl">Meta mês</span><span class="val" data-k="meta_mes">—</span></div>
+        <div><span class="lbl">Realizado</span><span class="val big" data-k="realizado">—</span></div>
+        <div><span class="lbl">Diff</span><span class="val" data-k="diff">—</span></div>
+        <div><span class="lbl">Ating Total</span><span class="val ating" data-k="ating">—</span></div>
+        <div><span class="lbl">Ating Acum</span><span class="val ating" data-k="ating_acum">—</span></div>
+        <div class="full" title="(Venda − Compra) ÷ Venda"><span class="lbl">CxV</span><span class="val" id="pctCompraVenda">—</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KPIs setores -->
+  <section class="vd-setores-head">
+    <strong>Setores</strong>
+    <span class="hint">total acumulado do mês</span>
+  </section>
+  <section class="vd-setores">
+    <!-- preenchido por JS -->
+  </section>
+
+  <!-- Gráfico -->
+  <section class="vd-grafico">
+    <div class="vd-grafico-head">
+      <strong>Curva diária — Meta vs Realizado (acumulado)</strong>
+    </div>
+    <svg id="grafico" viewBox="0 0 1200 280" preserveAspectRatio="none"></svg>
+  </section>
+
+  <!-- Resumo -->
+  <section class="vd-resumo" id="vdResumo"></section>
+
+  <!-- Tabela com abas -->
+  <section class="vd-tabela">
+    <div class="vd-tabela-head">
+      <div class="vd-tabs">
+        <button class="vd-tab active" data-tab="faturamento">Faturamento</button>
+        <button class="vd-tab" data-tab="margem">Margem</button>
+        <button class="vd-tab" data-tab="quebras">Quebras + Compra</button>
+        <button class="vd-tab" data-tab="acougue">Açougue</button>
+        <button class="vd-tab" data-tab="flv-liquida">FLV + Liquida</button>
+      </div>
+      <button id="btnExport">Exportar CSV</button>
+    </div>
+    <div class="tableWrap">
+      <table id="tblVendas">
+        <thead id="theadVendas"></thead>
+        <tbody id="tbodyVendas"></tbody>
+      </table>
+    </div>
+  </section>
+</div><!-- /.main-content -->
+</div><!-- /.layout -->
+
+<script src="sidebar.js"></script>
+<script src="venda-diaria.js"></script>
+</body>
+</html>

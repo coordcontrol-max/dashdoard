@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Supervendas · Primeiro acesso</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#1f6b35">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<script src="/pwa.js"></script>
+<script src="theme.js"></script>
+<link rel="stylesheet" href="style.css">
+<style>
+  body { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+  .pa-card {
+    width: 100%; max-width: 440px;
+    background: var(--bg-elev-3);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 36px;
+    box-shadow: var(--shadow-card);
+    text-align: center;
+  }
+  .pa-mark {
+    width: 64px; height: 64px;
+    background: var(--accent);
+    border: 3px solid var(--accent-2);
+    border-radius: 14px;
+    margin: 0 auto 18px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent-2); font-weight: 800; font-size: 26px;
+    font-style: italic; letter-spacing: -1px;
+    box-shadow: 0 3px 12px rgba(31, 107, 53, .3);
+  }
+  .pa-card h1 { color: var(--text); font-size: 22px; margin: 0 0 6px; font-weight: 700; }
+  .pa-card .sub { color: var(--text-muted); font-size: 13px; margin-bottom: 6px; }
+  .pa-card .user-info { color: var(--accent); font-size: 14px; font-weight: 600; margin-bottom: 26px; }
+  .pa-card label {
+    display: block; color: var(--text); font-size: 12px;
+    margin: 12px 0 5px; font-weight: 600; text-align: left;
+    text-transform: uppercase; letter-spacing: .3px;
+  }
+  .pa-card input {
+    width: 100%; background: var(--bg-input); color: var(--text);
+    border: 1px solid var(--border-2); padding: 11px 14px;
+    border-radius: 8px; font-size: 14px;
+  }
+  .pa-card input:focus { border-color: var(--accent); outline: none; }
+  .pa-card button.submit {
+    width: 100%; margin-top: 20px;
+    background: linear-gradient(180deg, var(--accent) 0%, var(--accent-strong) 100%);
+    color: white; border: none;
+    padding: 13px; border-radius: 8px;
+    font-size: 14px; font-weight: 700; cursor: pointer;
+    box-shadow: 0 3px 10px rgba(31, 107, 53, .3);
+  }
+  .pa-card button.submit:hover { filter: brightness(1.1); }
+  .pa-card button.submit:disabled { opacity: .5; cursor: not-allowed; }
+  .err { color: var(--neg); font-size: 13px; margin-top: 14px; min-height: 18px; }
+  .ok-msg { color: var(--pos); font-size: 14px; margin-top: 14px; line-height: 1.5; }
+  .strength { font-size: 11px; color: var(--text-muted); margin-top: 6px; text-align: left; }
+
+  .theme-corner { position: fixed; top: 16px; right: 16px; }
+</style>
+<link rel="stylesheet" href="mobile.css">
+</head>
+<body>
+<button class="btn-theme theme-corner" title="Trocar tema">☀️</button>
+
+<div class="pa-card">
+  <div class="pa-mark">SV</div>
+  <h1>Primeiro acesso</h1>
+  <div class="sub">Crie sua senha pra entrar no sistema</div>
+  <div class="user-info" id="userInfo">…</div>
+
+  <div id="formArea">
+    <form id="formPwd">
+      <label>Nova senha</label>
+      <input id="pwd" type="password" required minlength="6" autocomplete="new-password">
+      <div class="strength">Mínimo 6 caracteres. Recomendado: 10+ com letras e números.</div>
+
+      <label>Confirmar senha</label>
+      <input id="pwd2" type="password" required minlength="6" autocomplete="new-password">
+
+      <button type="submit" class="submit" id="btnSalvar">Definir senha e entrar</button>
+      <div class="err" id="err"></div>
+    </form>
+  </div>
+
+  <div id="errorArea" style="display:none;">
+    <div class="err" id="errorMsg"></div>
+    <a href="/login.html" style="color:var(--accent); text-decoration:none; font-size:13px; margin-top: 16px; display: inline-block;">Voltar pro login</a>
+  </div>
+
+  <div id="successArea" style="display:none;">
+    <div class="ok-msg">✓ Senha definida com sucesso!<br>Redirecionando pro login…</div>
+  </div>
+</div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const params = new URLSearchParams(location.search);
+const TOKEN = params.get('token');
+
+async function init() {
+  if (!TOKEN) {
+    return mostrarErro('Link inválido — token ausente.');
+  }
+  try {
+    const r = await fetch(`/api/primeiro-acesso/${encodeURIComponent(TOKEN)}`);
+    const data = await r.json();
+    if (!r.ok) return mostrarErro(data.error || 'Link inválido');
+    $('#userInfo').textContent = `${data.nome || ''} · ${data.email || ''}`;
+  } catch (err) { mostrarErro('Falha ao validar o link: ' + err.message); }
+}
+
+function mostrarErro(msg) {
+  $('#formArea').style.display = 'none';
+  $('#errorArea').style.display = 'block';
+  $('#errorMsg').textContent = msg;
+  $('#userInfo').style.display = 'none';
+}
+
+$('#formPwd').addEventListener('submit', async e => {
+  e.preventDefault();
+  $('#err').textContent = '';
+  const p1 = $('#pwd').value;
+  const p2 = $('#pwd2').value;
+  if (p1.length < 6) { $('#err').textContent = 'Senha precisa ter ao menos 6 caracteres.'; return; }
+  if (p1 !== p2) { $('#err').textContent = 'As senhas não conferem.'; return; }
+  $('#btnSalvar').disabled = true;
+  $('#btnSalvar').textContent = 'Salvando…';
+  try {
+    const r = await fetch(`/api/primeiro-acesso/${encodeURIComponent(TOKEN)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: p1 }),
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || 'erro');
+    $('#formArea').style.display = 'none';
+    $('#successArea').style.display = 'block';
+    setTimeout(() => { location.href = '/login.html'; }, 2000);
+  } catch (err) {
+    $('#err').textContent = err.message;
+    $('#btnSalvar').disabled = false;
+    $('#btnSalvar').textContent = 'Definir senha e entrar';
+  }
+});
+
+init();
+</script>
+</body>
+</html>

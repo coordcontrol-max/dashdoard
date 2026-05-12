@@ -1,8 +1,15 @@
 node_modules/
-db.sqlite
-db.sqlite-journal
-db.sqlite-wal
-db.sqlite-shm
 .env
 .env.local
 *.log
+
+# SQLite legado (não usamos mais, mas se existir no FS local não sobe pro git)
+db.sqlite
+db.sqlite-*
+
+# Dados extraídos das planilhas — esses agora vão direto pro Postgres via upload.
+# Mantenho gitignored pra evitar subir info comercial sensível pro GitHub.
+data/data.json
+data/vendas.json
+data/*.xlsx
+data/ruptura.json

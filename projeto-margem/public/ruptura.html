@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Supervendas · Ruptura</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#1f6b35">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<script src="/pwa.js"></script>
+<script src="theme.js"></script>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="ruptura.css">
+<link rel="stylesheet" href="mobile.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <h1>Ruptura</h1>
+    <div class="sub">Acompanhamento de SKUs zerados · <span id="geradoEm">—</span></div>
+  </div>
+  <div class="actions">
+    <span id="userInfo" class="user-info"></span>
+    <a id="linkAdmin" href="/admin" style="display:none;color:var(--text-link);text-decoration:none;font-size:12px;padding:6px 12px;border:1px solid var(--border-2);border-radius:6px;">Admin</a>
+    <a href="/ruptura/imprimir" target="_blank" title="Gerar PDF de Ruptura"
+       style="color:var(--text);text-decoration:none;font-size:12px;padding:6px 12px;border:1px solid var(--border-2);border-radius:6px;background:var(--bg-input);">📄 PDF</a>
+    <button class="btn-fullscreen" title="Tela cheia"></button>
+    <button class="btn-theme" title="Trocar tema">☀️</button>
+    <button id="btnLogout">Sair</button>
+  </div>
+</header>
+<script src="fullscreen.js"></script>
+
+<div class="layout">
+<aside class="sidebar"></aside>
+
+<div class="main-content">
+  <!-- Filtros / escopo -->
+  <section class="ru-filtros">
+    <div class="ru-tabs">
+      <button class="ru-tab active" data-escopo="geral">Geral</button>
+      <button class="ru-tab" data-escopo="20x80">20×80 (alto giro)</button>
+    </div>
+    <div class="ru-search">
+      <input id="busca" type="search" placeholder="Buscar produto, comprador, loja…">
+    </div>
+  </section>
+
+  <!-- KPIs -->
+  <section class="ru-kpis">
+    <div class="ru-kpi big" id="kpiPctRuptura">
+      <span class="lbl">% Ruptura</span>
+      <span class="val">—</span>
+      <span class="sub">vs meta 12%</span>
+    </div>
+    <div class="ru-kpi" id="kpiSkus">
+      <span class="lbl">Total SKUs</span>
+      <span class="val">—</span>
+    </div>
+    <div class="ru-kpi" id="kpiZerados">
+      <span class="lbl">SKUs Zerados</span>
+      <span class="val">—</span>
+    </div>
+    <div class="ru-kpi" id="kpiVariacao">
+      <span class="lbl">Variação último dia</span>
+      <span class="val">—</span>
+      <span class="sub">vs dia anterior</span>
+    </div>
+    <div class="ru-kpi" id="kpiFornEm100">
+      <span class="lbl">Fornecedores 100% ruptura</span>
+      <span class="val">—</span>
+    </div>
+  </section>
+
+  <!-- Resumo executivo (onde está o problema) -->
+  <section class="ru-resumo">
+    <div class="ru-resumo-head">
+      <strong>📊 Resumo executivo · onde está o problema</strong>
+      <span class="hint">top 5 em cada dimensão</span>
+    </div>
+    <div class="ru-resumo-grid">
+      <div class="ru-resumo-card">
+        <div class="ru-resumo-card-head">🛒 Piores compradores</div>
+        <div class="ru-resumo-card-body" id="resumoCompradores"></div>
+      </div>
+      <div class="ru-resumo-card">
+        <div class="ru-resumo-card-head">🏪 Piores lojas</div>
+        <div class="ru-resumo-card-body" id="resumoLojas"></div>
+      </div>
+      <div class="ru-resumo-card">
+        <div class="ru-resumo-card-head">🚚 Piores fornecedores</div>
+        <div class="ru-resumo-card-body" id="resumoFornecedores"></div>
+      </div>
+      <div class="ru-resumo-card">
+        <div class="ru-resumo-card-head">📦 Produtos que mais doem</div>
+        <div class="ru-resumo-card-body" id="resumoProdutos"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Gráfico evolução -->
+  <section class="ru-grafico">
+    <div class="ru-grafico-head">
+      <strong>Evolução diária — % de ruptura</strong>
+      <span id="graficoHeadInfo" class="hint">linha tracejada vermelha = meta 12% · clique num comprador na legenda pra focar</span>
+    </div>
+    <svg id="graficoRuptura" viewBox="0 0 1200 300" preserveAspectRatio="none"></svg>
+  </section>
+
+  <!-- 2 rankings lado a lado -->
+  <section class="ru-rankings">
+    <div class="ru-rank-card">
+      <div class="ru-rank-head">
+        <strong>🛒 Compradores</strong>
+        <span class="hint">clique pra ver detalhes</span>
+      </div>
+      <div class="ru-rank-body" id="rankCompradores"></div>
+    </div>
+    <div class="ru-rank-card">
+      <div class="ru-rank-head">
+        <strong>🏪 Lojas</strong>
+        <span class="hint">clique pra ver detalhes</span>
+      </div>
+      <div class="ru-rank-body" id="rankLojas"></div>
+    </div>
+  </section>
+
+  <!-- Tabela analítica de itens -->
+  <section class="ru-tabela">
+    <div class="ru-tabela-head">
+      <strong>Produtos zerados</strong>
+      <div class="ru-filtros-tab">
+        <select id="filtroComprador"><option value="">Todos os compradores</option></select>
+        <select id="filtroLoja"><option value="">Todas as lojas</option></select>
+        <select id="filtroFornecedor"><option value="">Todos os fornecedores</option></select>
+        <button id="limparFiltros" class="btn-mini">Limpar filtros</button>
+        <button id="exportarCsv" class="btn-mini">Exportar CSV</button>
+      </div>
+    </div>
+    <div class="ru-info-bar" id="infoBar"></div>
+    <div class="ru-tabela-wrap">
+      <table id="tblItens">
+        <thead>
+          <tr>
+            <th>Produto</th>
+            <th>Código</th>
+            <th>Loja</th>
+            <th>Comprador</th>
+            <th class="num">Méd Venda</th>
+            <th class="center">20×80</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyItens"></tbody>
+      </table>
+    </div>
+    <div class="ru-pagina">
+      <button id="btnPrev" class="btn-mini">← Anterior</button>
+      <span id="pgInfo">Página 1</span>
+      <button id="btnNext" class="btn-mini">Próxima →</button>
+    </div>
+  </section>
+</div>
+</div>
+
+<!-- Modal de drill-down -->
+<div class="modal-backdrop" id="modalDrill">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <h3 id="drillTitle">Detalhe</h3>
+      <button class="modal-close" id="drillClose">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="ru-info-bar" id="drillInfo"></div>
+
+      <!-- Resumos por loja e fornecedor (visível só no drill por comprador) -->
+      <div class="drill-resumos" id="drillResumos">
+        <div class="drill-resumo-card">
+          <div class="drill-resumo-head">
+            <strong>🏪 Lojas com mais ruptura</strong>
+          </div>
+          <div class="drill-resumo-body" id="drillResumoLojas"></div>
+        </div>
+        <div class="drill-resumo-card">
+          <div class="drill-resumo-head">
+            <strong>🚚 Fornecedores com mais ruptura</strong>
+          </div>
+          <div class="drill-resumo-body" id="drillResumoFornecedores"></div>
+        </div>
+      </div>
+
+      <div class="ru-tabela-wrap" style="max-height:55vh;">
+        <table id="tblDrill">
+          <thead>
+            <tr>
+              <th>Produto</th>
+              <th>Código</th>
+              <th id="drillCol1">—</th>
+              <th id="drillCol2">—</th>
+              <th class="num">Méd Venda</th>
+              <th class="center">20×80</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyDrill"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-mini" id="drillExport">Exportar CSV</button>
+      <button class="btn-mini primary" id="drillFechar">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<script src="sidebar.js"></script>
+<script src="ruptura.js"></script>
+</body>
+</html>

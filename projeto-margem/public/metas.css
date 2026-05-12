@@ -1,0 +1,310 @@
+/* Página /metas — admin */
+
+body, .topbar, .sidebar, .main-content, .mt-bloco, .mt-card {
+  font-family: Aptos, "Aptos Display", "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif !important;
+}
+
+/* ===== Barra do seletor de mês ===== */
+.mt-mes-bar {
+  margin: 12px 12px 0;
+  padding: 12px 14px;
+  background: var(--bg-elev-3);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+.mt-mes-grupo {
+  display: flex; align-items: center; gap: 10px;
+}
+.mt-mes-grupo label {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  font-weight: 600;
+}
+.mt-mes-grupo select {
+  padding: 7px 12px;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.mt-mes-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(245, 165, 34, .15);
+  color: #f5a522;
+  border: 1px solid rgba(245, 165, 34, .35);
+}
+.mt-mes-badge.salvo {
+  background: rgba(34, 197, 94, .15);
+  color: #22c55e;
+  border-color: rgba(34, 197, 94, .35);
+}
+.mt-mes-acoes {
+  display: flex; align-items: center;
+  gap: 8px; flex-wrap: wrap;
+}
+.mt-mes-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.mt-mes-acoes select {
+  padding: 6px 10px;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font-size: 12px;
+}
+.btn-mini-danger {
+  background: rgba(239, 68, 68, .12);
+  border-color: rgba(239, 68, 68, .35);
+  color: #ef4444;
+}
+.btn-mini-danger:hover {
+  background: rgba(239, 68, 68, .2);
+}
+
+.mt-info {
+  margin: 0 12px;
+  padding: 12px 14px;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent, #1f6b35);
+  font-size: 13px;
+}
+.mt-info p { margin: 6px 0; }
+.mt-info ul { margin: 4px 0 0 20px; padding: 0; }
+.mt-info li { margin: 2px 0; font-size: 12px; }
+.mt-info code {
+  background: rgba(0,0,0,.2);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+}
+
+.mt-bloco {
+  margin: 12px;
+  background: var(--bg-elev-3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.mt-bloco-head {
+  padding: 10px 14px;
+  background: var(--bg-elev-2);
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 12px; flex-wrap: wrap;
+}
+.mt-bloco-head .hint {
+  font-size: 11px; color: var(--text-muted); font-style: italic;
+}
+
+/* ===== Cards de metas globais ===== */
+.mt-globais-grid {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;
+  padding: 14px;
+}
+.mt-card {
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px 14px;
+}
+.mt-card-total {
+  border-top: 3px solid #f5a522;
+}
+.mt-card h4 {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.mt-card label {
+  display: flex; flex-direction: column;
+  font-size: 11px; color: var(--text-muted);
+  margin-bottom: 8px;
+  text-transform: uppercase; letter-spacing: .5px;
+}
+.mt-card input[type="number"] {
+  margin-top: 4px;
+  padding: 7px 10px;
+  background: var(--bg-elev-3);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.mt-card input[type="number"]:focus {
+  outline: none;
+  border-color: var(--accent, #1f6b35);
+}
+.mt-card-hint {
+  display: block;
+  margin-top: 4px;
+  font-size: 10px;
+  color: var(--text-muted);
+  font-style: italic;
+  line-height: 1.4;
+}
+
+@media (max-width: 900px) {
+  .mt-globais-grid { grid-template-columns: 1fr; }
+}
+
+/* ===== Linha CSV ===== */
+.mt-csv-row {
+  display: flex; align-items: center;
+  gap: 10px; flex-wrap: wrap;
+  padding: 12px 14px;
+  background: rgba(255,255,255,.02);
+  border-bottom: 1px solid var(--border);
+}
+.mt-csv-hint {
+  font-size: 11px; color: var(--text-muted);
+}
+.mt-csv-hint code {
+  background: rgba(0,0,0,.2);
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+/* ===== Percentuais diários ===== */
+.mt-pct-info {
+  padding: 12px 14px;
+  background: rgba(255,255,255,.02);
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.mt-pct-info p { margin: 0 0 6px; color: var(--text-muted); }
+.mt-pct-info ul { margin: 4px 0 8px 18px; padding: 0; }
+.mt-pct-info li { margin: 2px 0; }
+.mt-pct-info code {
+  background: rgba(0,0,0,.2);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+}
+.mt-pct-status {
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: var(--bg-elev-2);
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.mt-pct-status.ok    { color: #22c55e; }
+.mt-pct-status.warn  { color: #f5a522; }
+
+/* ===== Tabela ===== */
+#tblMetas { width: 100%; border-collapse: collapse; font-size: 12px; }
+#tblMetas th {
+  font-size: 11px; padding: 8px;
+  background: var(--bg-elev-2);
+  position: sticky; top: 0; z-index: 2;
+  text-align: right;
+}
+#tblMetas th:first-child { text-align: left; }
+#tblMetas td {
+  padding: 4px 6px;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+}
+#tblMetas td:first-child {
+  font-weight: 600;
+  text-align: left;
+}
+#tblMetas tbody tr.gerente td {
+  background: rgba(31, 107, 53, .12);
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--text-muted);
+}
+#tblMetas input[type="number"] {
+  width: 100%;
+  padding: 5px 7px;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--text);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+#tblMetas input[type="number"]:focus {
+  outline: none;
+  border-color: var(--accent, #1f6b35);
+  background: var(--bg-elev-3);
+}
+#tblMetas input.modificado {
+  background: rgba(245, 165, 34, .15);
+  border-color: #f5a522;
+}
+.mt-atual {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===== Barra de ações ===== */
+.mt-acoes {
+  position: sticky; bottom: 0;
+  margin: 12px;
+  padding: 12px 14px;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex; justify-content: flex-end; align-items: center;
+  gap: 10px; flex-wrap: wrap;
+  box-shadow: 0 -2px 10px rgba(0,0,0,.3);
+}
+.mt-msg {
+  flex: 1;
+  font-size: 13px;
+}
+.mt-msg.ok { color: #22c55e; }
+.mt-msg.erro { color: #ef4444; }
+.btn-mini {
+  padding: 8px 14px;
+  background: var(--bg-elev-3);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 12px;
+}
+.btn-mini:hover { background: var(--bg-elev-2); }
+.btn-mini-primary {
+  background: var(--accent, #1f6b35);
+  border-color: var(--accent, #1f6b35);
+  color: #fff;
+  font-weight: 600;
+}
+.btn-mini-primary:hover { background: #2a8347; }
+
+@media (max-width: 600px) {
+  .mt-csv-row, .mt-acoes { padding: 10px; }
+  .mt-csv-hint { display: none; }
+  #tblMetas { font-size: 11px; }
+  #tblMetas td, #tblMetas th { padding: 4px 3px; }
+}

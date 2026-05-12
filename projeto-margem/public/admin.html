@@ -176,6 +176,40 @@
   .placeholder-card .ph-title { color: var(--text); font-size: 14px; font-weight: 600; margin-bottom: 6px; }
   .placeholder-card .ph-desc { font-size: 12px; line-height: 1.5; max-width: 480px; margin: 0 auto; }
 
+  /* Badges dos níveis de acesso */
+  .nivel-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .2px;
+    border: 1px solid transparent;
+    white-space: nowrap;
+  }
+  .nivel-badge.administrador { background: color-mix(in srgb, var(--pos) 14%, transparent); color: var(--pos); border-color: color-mix(in srgb, var(--pos) 45%, transparent); }
+  .nivel-badge.ger-comercial  { background: color-mix(in srgb, #3b82f6 14%, transparent); color: #60a5fa;       border-color: color-mix(in srgb, #3b82f6 45%, transparent); }
+  .nivel-badge.gerente        { background: color-mix(in srgb, #f59e0b 14%, transparent); color: #fbbf24;       border-color: color-mix(in srgb, #f59e0b 45%, transparent); }
+  .nivel-badge.supervisor     { background: color-mix(in srgb, #a855f7 14%, transparent); color: #c084fc;       border-color: color-mix(in srgb, #a855f7 45%, transparent); }
+  .nivel-badge.comprador      { background: color-mix(in srgb, #14b8a6 14%, transparent); color: #2dd4bf;       border-color: color-mix(in srgb, #14b8a6 45%, transparent); }
+
+  /* Tabela de permissões */
+  .perm-row-first td { border-top: 2px solid var(--border); }
+  .perm-row td.nivel-cell { vertical-align: top; padding-top: 14px; }
+  .perm-status {
+    font-size: 12px; color: var(--text-muted);
+    margin-right: 10px; align-self: center;
+  }
+  .perm-status.dirty { color: var(--warn); font-weight: 600; }
+  .perm-status.saved { color: var(--pos); font-weight: 600; }
+  .perm-check {
+    width: 18px; height: 18px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+  .perm-check:disabled { cursor: not-allowed; opacity: .65; }
+  .center-cell { text-align: center; }
+
   /* Modal de "Link gerado" */
   .link-box {
     background: var(--bg-input); border: 1px solid var(--border-2);
@@ -252,12 +286,13 @@
           <div class="sub">Controle quais relatórios cada nível pode acessar</div>
         </div>
         <div class="toolbar">
+          <span class="perm-status" id="permStatus"></span>
           <button class="btn primary" id="btnSalvarPermissoes" disabled>Salvar alterações</button>
         </div>
       </div>
       <p class="config-pane-hint">
-        Marque quais relatórios cada nível pode acessar. Administrador e Diretoria têm acesso total
-        por padrão (não editável). As permissões aplicam-se a todos os usuários do nível correspondente.
+        Marque quais relatórios cada nível pode acessar. <b>Administrador</b> tem acesso total por
+        padrão (não editável). As permissões aplicam-se a todos os usuários do nível correspondente.
       </p>
       <div class="users-card">
         <table class="users-table">
@@ -269,9 +304,7 @@
               <th class="center">Acesso</th>
             </tr>
           </thead>
-          <tbody id="permissionsTbody">
-            <tr><td colspan="4" style="text-align:center;padding:24px;color:var(--text-muted);">Em construção — backend de permissões ainda não disponível neste app.</td></tr>
-          </tbody>
+          <tbody id="permissionsTbody"></tbody>
         </table>
       </div>
     </div>

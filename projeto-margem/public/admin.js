@@ -178,12 +178,138 @@ $('#btnLogout').addEventListener('click', async () => {
   location.href = '/login.html';
 });
 
+// ===== Níveis de acesso (permissões por nível × relatório) =====
+const NIVEIS = [
+  { id: 'administrador', label: 'Administrador', cls: 'administrador', tudo: true },
+  { id: 'ger-comercial', label: 'Ger Comercial', cls: 'ger-comercial' },
+  { id: 'gerente',       label: 'Gerente',       cls: 'gerente' },
+  { id: 'supervisor',    label: 'Supervisor',    cls: 'supervisor' },
+  { id: 'comprador',     label: 'Comprador',     cls: 'comprador' },
+];
+// Relatórios na mesma ordem da sidebar; cada um com setor (grupo).
+const RELATORIOS = [
+  { setor: 'Comercial',     id: 'venda-diaria', label: 'Venda Diária' },
+  { setor: 'Comercial',     id: 'ruptura',      label: 'Ruptura' },
+  { setor: 'Comercial',     id: 'troca',        label: 'Troca' },
+  { setor: 'Comercial',     id: 'kpis',         label: 'KPIs Comerciais' },
+  { setor: 'Comercial',     id: 'estrategia',   label: 'Nível Estratégia' },
+  { setor: 'Comercial',     id: 'margem',       label: 'Margem' },
+  { setor: 'Financeiro',    id: 'dre',          label: 'DRE PowerBI' },
+  { setor: 'RH / DP',       id: 'vagas',        label: 'Vagas em Aberto' },
+  { setor: 'Operação',      id: 'operacao',     label: 'Operação' },
+  { setor: 'Operação',      id: 'margem-loja',  label: 'Margem por Loja' },
+  { setor: 'Administração', id: 'metas',        label: 'Metas Manuais' },
+];
+
+const PERM_KEY = 'admin_permissoes_niveis';
+// Estrutura: { [nivelId]: { [relatorioId]: true|false } }
+let PERMS = null;
+let PERMS_PRISTINE = null; // snapshot pra detectar dirty
+
+function carregarPermissoes() {
+  try {
+    const raw = localStorage.getItem(PERM_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  // Default: nada marcado pros não-admin
+  const base = {};
+  for (const n of NIVEIS) base[n.id] = {};
+  return base;
+}
+
+function permEstaDirty() {
+  return JSON.stringify(PERMS) !== JSON.stringify(PERMS_PRISTINE);
+}
+
+function atualizarBotaoSalvar() {
+  const btn = $('#btnSalvarPermissoes');
+  const stat = $('#permStatus');
+  if (!btn) return;
+  const dirty = permEstaDirty();
+  btn.disabled = !dirty;
+  if (stat) {
+    if (dirty) {
+      stat.textContent = 'Alterações não salvas';
+      stat.className = 'perm-status dirty';
+    } else {
+      stat.textContent = '';
+      stat.className = 'perm-status';
+    }
+  }
+}
+
+function renderPermissoes() {
+  const tbody = $('#permissionsTbody');
+  if (!tbody) return;
+  if (!PERMS) {
+    PERMS = carregarPermissoes();
+    PERMS_PRISTINE = JSON.parse(JSON.stringify(PERMS));
+  }
+  const linhas = [];
+  for (const n of NIVEIS) {
+    RELATORIOS.forEach((r, idx) => {
+      const isFirst = idx === 0;
+      const checked = n.tudo
+        ? true
+        : !!(PERMS[n.id] && PERMS[n.id][r.id]);
+      const disabled = !!n.tudo;
+      linhas.push(`
+        <tr class="perm-row${isFirst ? ' perm-row-first' : ''}">
+          <td class="nivel-cell">${isFirst ? `<span class="nivel-badge ${n.cls}">${n.label}</span>` : ''}</td>
+          <td>${r.setor}</td>
+          <td>${r.label}</td>
+          <td class="center-cell">
+            <input type="checkbox" class="perm-check"
+              data-nivel="${n.id}" data-rel="${r.id}"
+              ${checked ? 'checked' : ''} ${disabled ? 'disabled' : ''}>
+          </td>
+        </tr>
+      `);
+    });
+  }
+  tbody.innerHTML = linhas.join('');
+  atualizarBotaoSalvar();
+}
+
+// Handler de mudança nos checkboxes
+document.addEventListener('change', (e) => {
+  const cb = e.target.closest('.perm-check');
+  if (!cb || cb.disabled) return;
+  const nivel = cb.dataset.nivel;
+  const rel = cb.dataset.rel;
+  if (!PERMS[nivel]) PERMS[nivel] = {};
+  if (cb.checked) PERMS[nivel][rel] = true;
+  else delete PERMS[nivel][rel];
+  atualizarBotaoSalvar();
+});
+
+// Salvar
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('#btnSalvarPermissoes');
+  if (!btn || btn.disabled) return;
+  try {
+    localStorage.setItem(PERM_KEY, JSON.stringify(PERMS));
+    PERMS_PRISTINE = JSON.parse(JSON.stringify(PERMS));
+    const stat = $('#permStatus');
+    if (stat) {
+      stat.textContent = '✓ Salvo';
+      stat.className = 'perm-status saved';
+      setTimeout(() => { stat.textContent = ''; stat.className = 'perm-status'; }, 2200);
+    }
+    atualizarBotaoSalvar();
+  } catch (err) {
+    alert('Erro salvando permissões: ' + err.message);
+  }
+});
+
 // ===== Abas de Configurações (Usuários / Níveis de acesso / Dimensões) =====
 const TABS_KEY = 'admin_aba_ativa';
 function ativarAba(nome) {
   $$('.config-tab').forEach(b => b.classList.toggle('active', b.dataset.configTab === nome));
   $$('.config-pane').forEach(p => p.classList.toggle('active', p.id === 'pane' + nome.charAt(0).toUpperCase() + nome.slice(1)));
   try { localStorage.setItem(TABS_KEY, nome); } catch {}
+  // Lazy render da matriz de permissões na primeira ativação
+  if (nome === 'acessos') renderPermissoes();
 }
 $$('.config-tab').forEach(btn => {
   btn.addEventListener('click', () => ativarAba(btn.dataset.configTab));

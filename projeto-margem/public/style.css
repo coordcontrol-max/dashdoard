@@ -175,9 +175,11 @@ html, body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFo
   font-weight: 600;
   font-size: 13px;
   text-decoration: none;
-  cursor: default;
+  cursor: pointer;
   transition: background .12s, color .12s;
+  user-select: none;
 }
+.sidebar-group-title:hover { background: var(--bg-elev-3); }
 .sidebar-group-title .group-icon {
   width: 18px; height: 18px;
   display: inline-flex; align-items: center; justify-content: center;
@@ -185,6 +187,18 @@ html, body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFo
   flex-shrink: 0;
 }
 .sidebar-group-title .group-icon svg { width: 18px; height: 18px; }
+.sidebar-group-title .group-chevron {
+  margin-left: auto;
+  color: var(--text-muted);
+  transition: transform .18s ease;
+  flex-shrink: 0;
+}
+.sidebar-group.is-closed .sidebar-group-title .group-chevron {
+  transform: rotate(-90deg);
+}
+.sidebar-group.is-closed .sidebar-item { display: none; }
+/* Quando a sidebar inteira está colapsada (só ícones), some o chevron. */
+.sidebar.collapsed .sidebar-group-title .group-chevron { display: none; }
 
 /* Items dos grupos */
 .sidebar-item {

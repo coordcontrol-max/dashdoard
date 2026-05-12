@@ -1,14 +1,23 @@
 // Renderiza a sidebar dinamicamente em todas as páginas autenticadas.
-// Suporta colapsar/expandir via botão toggle (estado salvo em localStorage).
+// Suporta colapsar/expandir o painel todo (botão toggle) e drilldown por grupo.
 (async function () {
   const aside = document.querySelector('.sidebar');
   if (!aside) return;
 
   const KEY = 'sidebar_colapsada';
+  const KEY_GRUPOS = 'sidebar_grupos_estado'; // { 'Comercial': 'open'|'closed', ... }
   const colapsadaInicial = (function () {
     try { return localStorage.getItem(KEY) === '1'; } catch { return false; }
   })();
   if (colapsadaInicial) aside.classList.add('collapsed');
+
+  function lerEstadoGrupos() {
+    try { return JSON.parse(localStorage.getItem(KEY_GRUPOS) || '{}'); }
+    catch { return {}; }
+  }
+  function salvarEstadoGrupos(obj) {
+    try { localStorage.setItem(KEY_GRUPOS, JSON.stringify(obj)); } catch {}
+  }
 
   let isAdmin = false;
   try {
@@ -26,6 +35,12 @@
         { label: 'Troca', href: '/troca' },
         { label: "KPIs Comerciais", href: '/kpis' },
         { label: 'Nível Estratégia', href: '/estrategia' },
+      ],
+    },
+    {
+      name: 'Financeiro',
+      icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>`,
+      items: [
         { label: 'DRE PowerBI', href: '/dre' },
       ],
     },
@@ -65,6 +80,7 @@
   }
 
   const path = location.pathname.replace(/\/$/, '') || '/';
+  const estadoGrupos = lerEstadoGrupos();
 
   const html = [];
   html.push(`
@@ -82,18 +98,27 @@
   `);
 
   for (const g of SIDEBAR_GROUPS) {
-    // Quando colapsado, o ícone do grupo vira link pro primeiro item.
     const primeiroHref = g.items[0]?.href || '#';
     const itemsHtml = g.items.map(it => {
       const isActive = (it.href === '/' && path === '/') || (it.href !== '/' && (path === it.href || path.startsWith(it.href + '/')));
       return `<a href="${it.href}" class="sidebar-item${isActive ? ' active' : ''}">${it.label}</a>`;
     }).join('');
     const grupoAtivo = g.items.some(it => (it.href === '/' && path === '/') || (it.href !== '/' && path === it.href));
+
+    // Drilldown: por padrão o grupo da página atual fica aberto, os demais fechados.
+    // Estado salvo em localStorage por grupo sobrescreve o padrão.
+    const estadoSalvo = estadoGrupos[g.name];
+    const aberto = estadoSalvo ? (estadoSalvo === 'open') : grupoAtivo;
+    const groupClasses = ['sidebar-group'];
+    if (grupoAtivo) groupClasses.push('has-active');
+    if (!aberto) groupClasses.push('is-closed');
+
     html.push(`
-      <div class="sidebar-group${grupoAtivo ? ' has-active' : ''}">
+      <div class="${groupClasses.join(' ')}" data-group="${g.name}">
         <a href="${primeiroHref}" class="sidebar-group-title" title="${g.name}">
           <span class="group-icon">${g.icon}</span>
           <span class="group-name">${g.name}</span>
+          <svg class="group-chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
         </a>
         ${itemsHtml}
       </div>
@@ -102,7 +127,7 @@
 
   aside.innerHTML = html.join('');
 
-  // Toggle handler (desktop)
+  // Toggle do painel inteiro (desktop)
   const btn = aside.querySelector('.sidebar-toggle');
   btn?.addEventListener('click', (e) => {
     e.preventDefault();
@@ -111,6 +136,24 @@
     const colapsada = aside.classList.contains('collapsed');
     try { localStorage.setItem(KEY, colapsada ? '1' : '0'); } catch {}
     btn.title = colapsada ? 'Expandir menu' : 'Recolher menu';
+  });
+
+  // Drilldown: clique no título do grupo alterna abrir/fechar (sem navegar).
+  // Quando a sidebar está colapsada (só ícones), o clique mantém o comportamento
+  // antigo de navegar pro primeiro item.
+  aside.addEventListener('click', (e) => {
+    const title = e.target.closest('.sidebar-group-title');
+    if (!title) return;
+    if (aside.classList.contains('collapsed')) return; // ícones: deixa navegar
+    e.preventDefault();
+    const grupo = title.closest('.sidebar-group');
+    const nome = grupo?.dataset.group;
+    if (!grupo || !nome) return;
+    grupo.classList.toggle('is-closed');
+    const fechado = grupo.classList.contains('is-closed');
+    const estado = lerEstadoGrupos();
+    estado[nome] = fechado ? 'closed' : 'open';
+    salvarEstadoGrupos(estado);
   });
 
   // ===== Mobile: botão hamburguer + backdrop =====

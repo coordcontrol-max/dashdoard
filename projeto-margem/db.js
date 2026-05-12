@@ -84,6 +84,63 @@ export async function migrate() {
     CREATE UNIQUE INDEX IF NOT EXISTS users_email_unique ON users (LOWER(email)) WHERE email IS NOT NULL;
   `);
 
+  // ===== Dimensões (Configurações > Dimensões) =====
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS dim_lojas (
+      nroempresa INTEGER PRIMARY KEY,
+      nome TEXT NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS dim_anos (
+      ano INTEGER PRIMARY KEY
+    );
+    CREATE TABLE IF NOT EXISTS dim_meses (
+      numero INTEGER PRIMARY KEY,
+      nome TEXT NOT NULL
+    );
+  `);
+
+  // Seeds idempotentes (ON CONFLICT DO NOTHING — não sobrescreve edição futura)
+  await pool.query(`
+    INSERT INTO dim_lojas (nroempresa, nome) VALUES
+      (5,   'WBL'),
+      (10,  'ARBS'),
+      (11,  'RAWL'),
+      (12,  'SV'),
+      (13,  'SARW'),
+      (14,  'VS'),
+      (16,  'LUZ'),
+      (18,  'LUNA ATAC'),
+      (20,  'JARDIM'),
+      (21,  'AGUAS'),
+      (23,  'CAMPING'),
+      (26,  'NSP MATRIZ'),
+      (27,  'NSP 02'),
+      (28,  'NSF 02'),
+      (29,  'NSF MATRIZ'),
+      (101, 'NSP 04'),
+      (102, 'NSM 02'),
+      (103, 'NSP 05'),
+      (104, 'NSM 03'),
+      (106, 'NSM MATRIZ'),
+      (108, 'NSP 03'),
+      (109, 'NSF 04'),
+      (112, 'NSM 04'),
+      (117, 'NSF 03'),
+      (125, 'STMJ MATRIZ'),
+      (215, 'STMJ 02'),
+      (219, 'STMJ 03'),
+      (222, 'STMJ 04')
+    ON CONFLICT (nroempresa) DO NOTHING;
+
+    INSERT INTO dim_anos (ano) VALUES (2026) ON CONFLICT (ano) DO NOTHING;
+
+    INSERT INTO dim_meses (numero, nome) VALUES
+      (1, 'Janeiro'), (2, 'Fevereiro'), (3, 'Março'), (4, 'Abril'),
+      (5, 'Maio'), (6, 'Junho'), (7, 'Julho'), (8, 'Agosto'),
+      (9, 'Setembro'), (10, 'Outubro'), (11, 'Novembro'), (12, 'Dezembro')
+    ON CONFLICT (numero) DO NOTHING;
+  `);
+
   // Snapshot diário da ruptura por comprador (alimenta a "Evolução Diária").
   await pool.query(`
     CREATE TABLE IF NOT EXISTS ruptura_historico (

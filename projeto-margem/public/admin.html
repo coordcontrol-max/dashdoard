@@ -193,6 +193,40 @@
   .nivel-badge.supervisor     { background: color-mix(in srgb, #a855f7 14%, transparent); color: #c084fc;       border-color: color-mix(in srgb, #a855f7 45%, transparent); }
   .nivel-badge.comprador      { background: color-mix(in srgb, #14b8a6 14%, transparent); color: #2dd4bf;       border-color: color-mix(in srgb, #14b8a6 45%, transparent); }
 
+  /* Cards de dimensões */
+  .dim-grid {
+    display: grid;
+    grid-template-columns: minmax(0,2fr) minmax(220px,1fr) minmax(260px,1fr);
+    gap: 14px;
+    align-items: start;
+  }
+  @media (max-width: 980px) {
+    .dim-grid { grid-template-columns: 1fr; }
+  }
+  .dim-card {
+    background: var(--bg-elev-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .dim-card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 14px;
+    background: var(--bg-elev-3);
+    border-bottom: 1px solid var(--border);
+  }
+  .dim-card-header h3 { margin: 0; color: var(--text); font-size: 14px; font-weight: 600; }
+  .dim-count {
+    color: var(--text-muted); font-size: 11px;
+    background: var(--bg-input); border: 1px solid var(--border-2);
+    border-radius: 999px; padding: 2px 10px;
+  }
+  .dim-card-body { padding: 0; }
+  .dim-card .users-card {
+    border: none; border-radius: 0;
+    max-height: 420px; overflow: auto;
+  }
+
   /* Tabela de permissões */
   .perm-row-first td { border-top: 2px solid var(--border); }
   .perm-row td.nivel-cell { vertical-align: top; padding-top: 14px; }
@@ -326,20 +360,79 @@
         <button class="dim-subtab" data-dim-tab="dfc" type="button" role="tab">DFC</button>
       </div>
       <div id="dimContent">
-        <div class="placeholder-card" data-dim-pane="geral">
-          <div class="ph-icon">📋</div>
-          <div class="ph-title">Geral</div>
-          <div class="ph-desc">Cadastros gerais: Lojas, Empresas, Departamentos, Centros de Custo. Em construção.</div>
+        <!-- Sub-aba: Geral (Lojas, Anos, Meses) -->
+        <div data-dim-pane="geral">
+          <div class="dim-grid">
+            <div class="dim-card">
+              <div class="dim-card-header">
+                <h3>Lojas</h3>
+                <span class="dim-count" id="dimLojasCount">—</span>
+              </div>
+              <div class="dim-card-body">
+                <div class="users-card">
+                  <table class="users-table">
+                    <thead>
+                      <tr>
+                        <th style="width:140px;">NROEMPRESA</th>
+                        <th>NOME DA LOJA</th>
+                      </tr>
+                    </thead>
+                    <tbody id="dimLojasTbody"><tr><td colspan="2" style="text-align:center;padding:18px;color:var(--text-muted);">Carregando…</td></tr></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="dim-card">
+              <div class="dim-card-header">
+                <h3>Anos</h3>
+                <span class="dim-count" id="dimAnosCount">—</span>
+              </div>
+              <div class="dim-card-body">
+                <div class="users-card">
+                  <table class="users-table">
+                    <thead><tr><th>Ano</th></tr></thead>
+                    <tbody id="dimAnosTbody"><tr><td style="text-align:center;padding:18px;color:var(--text-muted);">Carregando…</td></tr></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="dim-card">
+              <div class="dim-card-header">
+                <h3>Meses</h3>
+                <span class="dim-count" id="dimMesesCount">—</span>
+              </div>
+              <div class="dim-card-body">
+                <div class="users-card">
+                  <table class="users-table">
+                    <thead>
+                      <tr><th style="width:80px;">Nº</th><th>Mês</th></tr>
+                    </thead>
+                    <tbody id="dimMesesTbody"><tr><td colspan="2" style="text-align:center;padding:18px;color:var(--text-muted);">Carregando…</td></tr></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="placeholder-card" data-dim-pane="dre" style="display:none;">
-          <div class="ph-icon">📊</div>
-          <div class="ph-title">DRE</div>
-          <div class="ph-desc">Plano de Contas, Agrupamentos da DRE, Linhas de resultado. Em construção.</div>
+
+        <!-- Sub-aba: DRE -->
+        <div data-dim-pane="dre" style="display:none;">
+          <div class="placeholder-card">
+            <div class="ph-icon">📊</div>
+            <div class="ph-title">DRE</div>
+            <div class="ph-desc">Plano de Contas, Agrupamentos da DRE, Linhas de resultado. Em construção.</div>
+          </div>
         </div>
-        <div class="placeholder-card" data-dim-pane="dfc" style="display:none;">
-          <div class="ph-icon">💸</div>
-          <div class="ph-title">DFC</div>
-          <div class="ph-desc">Bancos, Linhas do Fluxo de Caixa, Agrupamentos do DFC. Em construção.</div>
+
+        <!-- Sub-aba: DFC -->
+        <div data-dim-pane="dfc" style="display:none;">
+          <div class="placeholder-card">
+            <div class="ph-icon">💸</div>
+            <div class="ph-title">DFC</div>
+            <div class="ph-desc">Bancos, Linhas do Fluxo de Caixa, Agrupamentos do DFC. Em construção.</div>
+          </div>
         </div>
       </div>
     </div>

@@ -328,6 +328,7 @@ function ativarAba(nome) {
   try { localStorage.setItem(TABS_KEY, nome); } catch {}
   // Lazy render da matriz de permissões na primeira ativação
   if (nome === 'acessos') renderPermissoes();
+  if (nome === 'dimensoes') carregarDimensoesGeral();
 }
 $$('.config-tab').forEach(btn => {
   btn.addEventListener('click', () => ativarAba(btn.dataset.configTab));
@@ -343,6 +344,49 @@ function ativarDimSubtab(nome) {
   $$('#dimContent [data-dim-pane]').forEach(p => {
     p.style.display = (p.dataset.dimPane === nome) ? '' : 'none';
   });
+  if (nome === 'geral') carregarDimensoesGeral();
+}
+
+let DIM_GERAL_CARREGADA = false;
+async function carregarDimensoesGeral() {
+  if (DIM_GERAL_CARREGADA) return;
+  try {
+    const [lojas, anos, meses] = await Promise.all([
+      api('GET', '/api/dim/lojas'),
+      api('GET', '/api/dim/anos'),
+      api('GET', '/api/dim/meses'),
+    ]);
+
+    const tbLojas = $('#dimLojasTbody');
+    tbLojas.innerHTML = lojas.length
+      ? lojas.map(l => `
+          <tr>
+            <td style="font-variant-numeric: tabular-nums; font-weight: 600;">${l.nroempresa}</td>
+            <td>${escapeHtml(l.nome)}</td>
+          </tr>`).join('')
+      : `<tr><td colspan="2" style="text-align:center;padding:18px;color:var(--text-muted);">Sem lojas cadastradas</td></tr>`;
+    $('#dimLojasCount').textContent = `${lojas.length} ${lojas.length === 1 ? 'loja' : 'lojas'}`;
+
+    const tbAnos = $('#dimAnosTbody');
+    tbAnos.innerHTML = anos.length
+      ? anos.map(a => `<tr><td style="font-variant-numeric: tabular-nums; font-weight: 600;">${a.ano}</td></tr>`).join('')
+      : `<tr><td style="text-align:center;padding:18px;color:var(--text-muted);">Sem anos cadastrados</td></tr>`;
+    $('#dimAnosCount').textContent = `${anos.length} ${anos.length === 1 ? 'ano' : 'anos'}`;
+
+    const tbMeses = $('#dimMesesTbody');
+    tbMeses.innerHTML = meses.length
+      ? meses.map(m => `
+          <tr>
+            <td style="font-variant-numeric: tabular-nums; font-weight: 600;">${m.numero}</td>
+            <td>${escapeHtml(m.nome)}</td>
+          </tr>`).join('')
+      : `<tr><td colspan="2" style="text-align:center;padding:18px;color:var(--text-muted);">Sem meses cadastrados</td></tr>`;
+    $('#dimMesesCount').textContent = `${meses.length} ${meses.length === 1 ? 'mês' : 'meses'}`;
+
+    DIM_GERAL_CARREGADA = true;
+  } catch (err) {
+    console.error('Erro carregando dimensões:', err);
+  }
 }
 $$('.dim-subtab').forEach(btn => {
   btn.addEventListener('click', () => ativarDimSubtab(btn.dataset.dimTab));

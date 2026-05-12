@@ -1237,6 +1237,20 @@ function cpfValido(s) {
 }
 
 // ===== API: usuários (admin) =====
+// ===== API: dimensões (Configurações > Dimensões > Geral) =====
+app.get('/api/dim/lojas', authRequired, async (req, res) => {
+  const rows = await query('SELECT nroempresa, nome FROM dim_lojas ORDER BY nroempresa');
+  res.json(rows);
+});
+app.get('/api/dim/anos', authRequired, async (req, res) => {
+  const rows = await query('SELECT ano FROM dim_anos ORDER BY ano DESC');
+  res.json(rows);
+});
+app.get('/api/dim/meses', authRequired, async (req, res) => {
+  const rows = await query('SELECT numero, nome FROM dim_meses ORDER BY numero');
+  res.json(rows);
+});
+
 app.get('/api/users', adminRequired, async (req, res) => {
   const rows = await query(`
     SELECT id, username, nome, email, telefone, cpf, cargo, nivel, ativo, is_admin, senha_definida, token_primeiro_acesso, token_expira_em, created_at

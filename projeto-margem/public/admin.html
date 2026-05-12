@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Supervendas · Admin</title>
+<title>Supervendas · Configurações</title>
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#1f6b35">
 <link rel="apple-touch-icon" href="/icon-192.png">
@@ -115,6 +115,67 @@
   .err { color: var(--neg); font-size: 13px; margin-top: 8px; min-height: 18px; }
   .ok { color: var(--pos); font-size: 13px; margin-top: 8px; }
 
+  /* Abas (Usuários / Níveis de acesso / Dimensões) */
+  .config-tabs {
+    display: flex; gap: 4px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 18px;
+    overflow-x: auto;
+  }
+  .config-tab {
+    background: transparent; border: none;
+    color: var(--text-muted);
+    padding: 11px 18px 12px;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color .12s, border-color .12s, background .12s;
+    white-space: nowrap;
+  }
+  .config-tab:hover { color: var(--text); background: var(--bg-elev-3); }
+  .config-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .config-pane { display: none; }
+  .config-pane.active { display: block; }
+
+  /* Sub-abas (dentro de Dimensões) */
+  .dim-subtabs {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin: 4px 0 16px;
+  }
+  .dim-subtab {
+    background: var(--bg-input); color: var(--text-muted);
+    border: 1px solid var(--border-2);
+    padding: 7px 14px;
+    border-radius: 999px; font-size: 12px; font-weight: 600;
+    cursor: pointer;
+    transition: background .12s, color .12s, border-color .12s;
+  }
+  .dim-subtab:hover { background: var(--bg-button-h); color: var(--text); }
+  .dim-subtab.active {
+    background: var(--bg-active);
+    color: var(--text-blue-strong);
+    border-color: var(--border-blue);
+  }
+
+  .config-pane-hint {
+    color: var(--text-muted); font-size: 12px;
+    margin: 0 0 14px; line-height: 1.5;
+  }
+
+  /* Cards de placeholder p/ painéis em construção */
+  .placeholder-card {
+    background: var(--bg-elev-3); border: 1px dashed var(--border-2);
+    border-radius: 12px; padding: 28px;
+    text-align: center; color: var(--text-muted);
+  }
+  .placeholder-card .ph-icon { font-size: 28px; margin-bottom: 10px; }
+  .placeholder-card .ph-title { color: var(--text); font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+  .placeholder-card .ph-desc { font-size: 12px; line-height: 1.5; max-width: 480px; margin: 0 auto; }
+
   /* Modal de "Link gerado" */
   .link-box {
     background: var(--bg-input); border: 1px solid var(--border-2);
@@ -131,8 +192,8 @@
 <body>
 <header class="topbar">
   <div class="brand">
-    <h1>Admin · Usuários</h1>
-    <div class="sub">Cadastro e gerenciamento</div>
+    <h1>Configurações</h1>
+    <div class="sub">Usuários, níveis de acesso e dimensões</div>
   </div>
   <div class="actions">
     <a href="/" style="color:var(--text-link);text-decoration:none;font-size:12px;padding:6px 12px;border:1px solid var(--border-2);border-radius:6px;">← Voltar ao app</a>
@@ -148,30 +209,106 @@
 
 <div class="main-content">
   <div class="admin-wrap">
-    <div class="admin-header">
-      <div>
-        <h2>Usuários</h2>
-        <div class="sub" id="adminSub"></div>
+    <nav class="config-tabs" id="configTabs" aria-label="Configurações">
+      <button class="config-tab active" data-config-tab="usuarios" type="button">Usuários</button>
+      <button class="config-tab" data-config-tab="acessos" type="button">Níveis de acesso</button>
+      <button class="config-tab" data-config-tab="dimensoes" type="button">Dimensões</button>
+    </nav>
+
+    <!-- Aba: Usuários -->
+    <div class="config-pane active" id="paneUsuarios">
+      <div class="admin-header">
+        <div>
+          <h2>Usuários</h2>
+          <div class="sub" id="adminSub"></div>
+        </div>
+        <div class="toolbar">
+          <button class="btn primary" id="btnNovo">+ Novo usuário</button>
+        </div>
       </div>
-      <div class="toolbar">
-        <button class="btn primary" id="btnNovo">+ Novo usuário</button>
+
+      <div class="users-card">
+        <table class="users-table">
+          <thead>
+            <tr>
+              <th>Usuário</th>
+              <th>Status</th>
+              <th>Cargo</th>
+              <th>Telefone</th>
+              <th>CPF</th>
+              <th class="center">Opções</th>
+            </tr>
+          </thead>
+          <tbody id="usersTbody"></tbody>
+        </table>
       </div>
     </div>
 
-    <div class="users-card">
-      <table class="users-table">
-        <thead>
-          <tr>
-            <th>Usuário</th>
-            <th>Status</th>
-            <th>Cargo</th>
-            <th>Telefone</th>
-            <th>CPF</th>
-            <th class="center">Opções</th>
-          </tr>
-        </thead>
-        <tbody id="usersTbody"></tbody>
-      </table>
+    <!-- Aba: Níveis de acesso -->
+    <div class="config-pane" id="paneAcessos">
+      <div class="admin-header">
+        <div>
+          <h2>Liberações por nível de acesso</h2>
+          <div class="sub">Controle quais relatórios cada nível pode acessar</div>
+        </div>
+        <div class="toolbar">
+          <button class="btn primary" id="btnSalvarPermissoes" disabled>Salvar alterações</button>
+        </div>
+      </div>
+      <p class="config-pane-hint">
+        Marque quais relatórios cada nível pode acessar. Administrador e Diretoria têm acesso total
+        por padrão (não editável). As permissões aplicam-se a todos os usuários do nível correspondente.
+      </p>
+      <div class="users-card">
+        <table class="users-table">
+          <thead>
+            <tr>
+              <th>Nível de acesso</th>
+              <th>Setor</th>
+              <th>Relatório</th>
+              <th class="center">Acesso</th>
+            </tr>
+          </thead>
+          <tbody id="permissionsTbody">
+            <tr><td colspan="4" style="text-align:center;padding:24px;color:var(--text-muted);">Em construção — backend de permissões ainda não disponível neste app.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Aba: Dimensões -->
+    <div class="config-pane" id="paneDimensoes">
+      <div class="admin-header">
+        <div>
+          <h2>Dimensões</h2>
+          <div class="sub">Cadastros gerais usados pelos relatórios</div>
+        </div>
+      </div>
+      <p class="config-pane-hint">
+        Cadastros editáveis em tempo real. Use as sub-abas pra navegar entre os escopos.
+      </p>
+      <div class="dim-subtabs" id="dimSubtabs" role="tablist">
+        <button class="dim-subtab active" data-dim-tab="geral" type="button" role="tab">Geral</button>
+        <button class="dim-subtab" data-dim-tab="dre" type="button" role="tab">DRE</button>
+        <button class="dim-subtab" data-dim-tab="dfc" type="button" role="tab">DFC</button>
+      </div>
+      <div id="dimContent">
+        <div class="placeholder-card" data-dim-pane="geral">
+          <div class="ph-icon">📋</div>
+          <div class="ph-title">Geral</div>
+          <div class="ph-desc">Cadastros gerais: Lojas, Empresas, Departamentos, Centros de Custo. Em construção.</div>
+        </div>
+        <div class="placeholder-card" data-dim-pane="dre" style="display:none;">
+          <div class="ph-icon">📊</div>
+          <div class="ph-title">DRE</div>
+          <div class="ph-desc">Plano de Contas, Agrupamentos da DRE, Linhas de resultado. Em construção.</div>
+        </div>
+        <div class="placeholder-card" data-dim-pane="dfc" style="display:none;">
+          <div class="ph-icon">💸</div>
+          <div class="ph-title">DFC</div>
+          <div class="ph-desc">Bancos, Linhas do Fluxo de Caixa, Agrupamentos do DFC. Em construção.</div>
+        </div>
+      </div>
     </div>
   </div>
 </div>

@@ -178,11 +178,44 @@ $('#btnLogout').addEventListener('click', async () => {
   location.href = '/login.html';
 });
 
+// ===== Abas de Configurações (Usuários / Níveis de acesso / Dimensões) =====
+const TABS_KEY = 'admin_aba_ativa';
+function ativarAba(nome) {
+  $$('.config-tab').forEach(b => b.classList.toggle('active', b.dataset.configTab === nome));
+  $$('.config-pane').forEach(p => p.classList.toggle('active', p.id === 'pane' + nome.charAt(0).toUpperCase() + nome.slice(1)));
+  try { localStorage.setItem(TABS_KEY, nome); } catch {}
+}
+$$('.config-tab').forEach(btn => {
+  btn.addEventListener('click', () => ativarAba(btn.dataset.configTab));
+});
+
+// Sub-abas dentro de Dimensões
+function ativarDimSubtab(nome) {
+  $$('.dim-subtab').forEach(b => {
+    const on = b.dataset.dimTab === nome;
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
+  $$('#dimContent [data-dim-pane]').forEach(p => {
+    p.style.display = (p.dataset.dimPane === nome) ? '' : 'none';
+  });
+}
+$$('.dim-subtab').forEach(btn => {
+  btn.addEventListener('click', () => ativarDimSubtab(btn.dataset.dimTab));
+});
+
 // ===== Bootstrap =====
 (async () => {
   try {
     me = await api('GET', '/api/me');
     if (!me.is_admin) { location.href = '/'; return; }
     await carregarUsuarios();
+    // Restaura aba salva (se válida)
+    try {
+      const salva = localStorage.getItem(TABS_KEY);
+      if (salva && ['usuarios', 'acessos', 'dimensoes'].includes(salva)) {
+        ativarAba(salva);
+      }
+    } catch {}
   } catch (err) { console.error(err); }
 })();

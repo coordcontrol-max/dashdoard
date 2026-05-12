@@ -379,6 +379,16 @@
           <label>Cargo</label>
           <input id="fCargo" type="text" placeholder="Ex: Comprador, Gerente, Supervisor">
         </div>
+        <div class="field">
+          <label>Nível de acesso *</label>
+          <select id="fNivel" required>
+            <option value="comprador">Comprador</option>
+            <option value="supervisor">Supervisor</option>
+            <option value="gerente">Gerente</option>
+            <option value="ger-comercial">Ger Comercial</option>
+            <option value="administrador">Administrador</option>
+          </select>
+        </div>
         <div class="field-checkbox">
           <input id="fAdmin" type="checkbox">
           <label for="fAdmin" style="margin: 0;">Usuário administrador (pode cadastrar outros)</label>

@@ -1251,6 +1251,9 @@ app.post('/api/users', adminRequired, async (req, res) => {
   const telefone = String(req.body?.telefone || '').trim();
   const cpf = String(req.body?.cpf || '').trim();
   const cargo = String(req.body?.cargo || '').trim();
+  const nivelInput = String(req.body?.nivel || '').trim().toLowerCase();
+  const NIVEIS_VALIDOS = ['administrador', 'ger-comercial', 'gerente', 'supervisor', 'comprador'];
+  const nivel = NIVEIS_VALIDOS.includes(nivelInput) ? nivelInput : 'comprador';
   const is_admin = !!req.body?.is_admin;
 
   if (!nome) return res.status(400).json({ error: 'nome é obrigatório' });
@@ -1272,14 +1275,14 @@ app.post('/api/users', adminRequired, async (req, res) => {
   const exp = dataExpiraEm(7);
 
   const r = await run(`
-    INSERT INTO users (username, nome, email, telefone, cpf, cargo, is_admin, ativo, senha_definida, token_primeiro_acesso, token_expira_em)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, TRUE, FALSE, $8, $9)
+    INSERT INTO users (username, nome, email, telefone, cpf, cargo, nivel, is_admin, ativo, senha_definida, token_primeiro_acesso, token_expira_em)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, TRUE, FALSE, $9, $10)
     RETURNING id
-  `, [email, nome, email, telefoneDigits || null, cpfDigits || null, cargo || null, is_admin, token, exp]);
+  `, [email, nome, email, telefoneDigits || null, cpfDigits || null, cargo || null, nivel, is_admin, token, exp]);
 
   res.json({
     id: r.row.id,
-    nome, email, telefone: telefoneDigits, cpf: cpfDigits, cargo, is_admin,
+    nome, email, telefone: telefoneDigits, cpf: cpfDigits, cargo, nivel, is_admin,
     link_primeiro_acesso: `/primeiro-acesso?token=${token}`,
     expira_em: exp,
   });
@@ -1295,6 +1298,13 @@ app.put('/api/users/:id', adminRequired, async (req, res) => {
   const telefone = req.body?.telefone != null ? digitosOnly(req.body.telefone) : null;
   const cpf = req.body?.cpf != null ? digitosOnly(req.body.cpf) : null;
   const cargo = req.body?.cargo != null ? String(req.body.cargo).trim() : null;
+  let nivel = null;
+  if (req.body?.nivel != null) {
+    const v = String(req.body.nivel).trim().toLowerCase();
+    const NIVEIS_VALIDOS = ['administrador', 'ger-comercial', 'gerente', 'supervisor', 'comprador'];
+    if (!NIVEIS_VALIDOS.includes(v)) return res.status(400).json({ error: 'nível inválido' });
+    nivel = v;
+  }
   const ativo = req.body?.ativo != null ? !!req.body.ativo : null;
   const is_admin = req.body?.is_admin != null ? !!req.body.is_admin : null;
 
@@ -1316,10 +1326,11 @@ app.put('/api/users/:id', adminRequired, async (req, res) => {
       telefone = COALESCE($3, telefone),
       cpf = COALESCE($4, cpf),
       cargo = COALESCE($5, cargo),
-      ativo = COALESCE($6, ativo),
-      is_admin = COALESCE($7, is_admin)
-    WHERE id = $8
-  `, [nome, email, telefone, cpf, cargo, ativo, is_admin, id]);
+      nivel = COALESCE($6, nivel),
+      ativo = COALESCE($7, ativo),
+      is_admin = COALESCE($8, is_admin)
+    WHERE id = $9
+  `, [nome, email, telefone, cpf, cargo, nivel, ativo, is_admin, id]);
 
   res.json({ ok: true });
 });

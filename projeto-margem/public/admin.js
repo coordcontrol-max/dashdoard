@@ -30,6 +30,18 @@ function fmtCpf(d) {
   return x;
 }
 
+function nivelLabel(nivelId) {
+  if (!nivelId) return null;
+  const map = {
+    'administrador': { label: 'Administrador', cls: 'administrador' },
+    'ger-comercial': { label: 'Ger Comercial', cls: 'ger-comercial' },
+    'gerente':       { label: 'Gerente',       cls: 'gerente' },
+    'supervisor':    { label: 'Supervisor',    cls: 'supervisor' },
+    'comprador':     { label: 'Comprador',     cls: 'comprador' },
+  };
+  return map[nivelId] || null;
+}
+
 async function carregarUsuarios() {
   USERS = await api('GET', '/api/users');
   const ativos = USERS.filter(u => u.ativo).length;
@@ -41,13 +53,17 @@ async function carregarUsuarios() {
       : !u.senha_definida ? `<span class="badge pendente">Pendente 1º acesso</span>`
       : `<span class="badge ativo">Ativo</span>`;
     const adminBadge = u.is_admin ? `<span class="badge admin">admin</span>` : '';
+    const nivelInfo = nivelLabel(u.nivel);
+    const nivelBadge = nivelInfo
+      ? `<span class="nivel-badge ${nivelInfo.cls}" style="margin-left:6px;">${nivelInfo.label}</span>`
+      : '';
     const nome = u.nome || u.username;
     const email = u.email || u.username;
 
     return `
       <tr data-id="${u.id}">
         <td>
-          <div class="user-name">${escapeHtml(nome)}${adminBadge}</div>
+          <div class="user-name">${escapeHtml(nome)}${adminBadge}${nivelBadge}</div>
           <div class="user-email">${escapeHtml(email)}</div>
         </td>
         <td>${status}</td>
@@ -75,6 +91,7 @@ function abrirModal(user) {
   $('#fTelefone').value = user?.telefone ? fmtTelefone(user.telefone) : '';
   $('#fCpf').value = user?.cpf ? fmtCpf(user.cpf) : '';
   $('#fCargo').value = user?.cargo || '';
+  $('#fNivel').value = user?.nivel || 'comprador';
   $('#fAdmin').checked = !!user?.is_admin;
   $('#modalTitle').textContent = user ? `Editar usuário` : 'Novo usuário';
   $('#formErr').textContent = '';
@@ -98,6 +115,7 @@ $('#formUser').addEventListener('submit', async e => {
     telefone: $('#fTelefone').value,
     cpf: $('#fCpf').value,
     cargo: $('#fCargo').value.trim(),
+    nivel: $('#fNivel').value,
     is_admin: $('#fAdmin').checked,
   };
   try {

@@ -194,83 +194,6 @@ function renderMini(dados) {
     : 'Mês encerrado';
 }
 
-function renderChart(dados) {
-  const dias = dados.dias || [];
-  const chart = $('#pvChart');
-  if (!dias.length) { chart.innerHTML = ''; return; }
-
-  // Escala: maior entre venda e meta no mês
-  let maxV = 0;
-  for (const d of dias) {
-    maxV = Math.max(maxV, d.realizado || 0, d.meta_venda || 0);
-  }
-  if (maxV === 0) maxV = 1;
-
-  let html = '';
-  for (const d of dias) {
-    const v = d.realizado || 0;
-    const m = d.meta_venda || 0;
-    const pct = m > 0 ? v / m : null;
-    const barH = (v / maxV) * 100;
-    const metaTop = 100 - (m / maxV) * 100;
-
-    let cls = '';
-    if (!d.fechado && v === 0) cls = 'future';
-    else if (!d.fechado) cls = 'partial';
-    else if (pct == null) cls = '';
-    else if (pct >= 1.0) cls = '';
-    else if (pct >= 0.92) cls = 'warn';
-    else cls = 'bad';
-
-    const dia = d.data.slice(8, 10);
-    html += `
-      <div class="pv-day" title="${dia}/${d.data.slice(5,7)} ${d.dia_semana || ''}">
-        <div class="pv-day-meta" style="top: ${metaTop}%;"></div>
-        <div class="pv-day-bar ${cls}" style="height: ${barH}%;"></div>
-        <div class="pv-day-num">${dia}</div>
-        <div class="pv-day-tooltip">
-          <b>${dia}/${d.data.slice(5,7)}</b> · ${d.dia_semana || ''}<br>
-          Venda: <b>${fmtRsK(v)}</b><br>
-          Meta:  ${fmtRsK(m)}<br>
-          ${pct != null ? '% Ating: ' + fmtPct(pct) : ''}
-        </div>
-      </div>
-    `;
-  }
-  chart.innerHTML = html;
-}
-
-function renderTabela(dados) {
-  const dias = (dados.dias || []).slice();
-  // Últimos 10 dias (ordem mais recente primeiro)
-  const ultimos = dias.slice(-10).reverse();
-  const idxParcial = dados.dias.findIndex(d => !d.fechado);
-  const hojeIso = idxParcial >= 0 ? dados.dias[idxParcial].data : (dados.dias.length ? dados.dias[dados.dias.length - 1].data : null);
-
-  const html = ultimos.map(d => {
-    const v = d.realizado || 0;
-    const m = d.meta_venda || 0;
-    const diff = v - m;
-    const pct = m > 0 ? v / m : null;
-    const mg = d.margem_realizada;
-    const mgPct = (v && v !== 0) ? mg / v : null;
-    const isHoje = d.data === hojeIso;
-    return `
-      <tr class="${isHoje ? 'hoje' : ''}">
-        <td>${fmtData(d.data)}${d.fechado ? '' : ' <small style="color:var(--text-muted);">(parcial)</small>'}</td>
-        <td>${escapeHtml(d.dia_semana || '')}</td>
-        <td class="num">${fmtRs(v)}</td>
-        <td class="num">${fmtRs(m)}</td>
-        <td class="num ${diff >= 0 ? 'pos' : 'neg'}">${fmtRsSig(diff)}</td>
-        <td class="num">${fmtPct(pct)}</td>
-        <td class="num">${fmtRs(mg)}</td>
-        <td class="num">${fmtPct(mgPct)}</td>
-      </tr>
-    `;
-  }).join('');
-  $('#pvTbody').innerHTML = html;
-}
-
 async function carregar() {
   try {
     const d = await api('GET', '/api/vendas');
@@ -278,8 +201,6 @@ async function carregar() {
 
     renderHero(d);
     renderMini(d);
-    renderChart(d);
-    renderTabela(d);
 
     $('#atualizadoEm').textContent = 'atualizado às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   } catch (err) {

@@ -42,6 +42,7 @@ if alvo in ('ruptura', 'ambos'):      carrega('data/ruptura.json',      'ruptura
 if alvo in ('margem_loja', 'ambos'):  carrega('data/margem_loja.json',  'margem_loja')
 if alvo in ('operacao', 'ambos'):     carrega('data/operacao.json',     'operacao')
 if alvo in ('estrategia', 'ambos'):   carrega('data/estrategia.json',   'estrategia')
+if alvo in ('inv_rotativo', 'ambos'): carrega('data/inv_rotativo.json', 'inv_rotativo')
 if not payload:
     sys.stderr.write(f"alvo inválido: {alvo}\n"); sys.exit(2)
 with open(out, 'w') as f: json.dump(payload, f)

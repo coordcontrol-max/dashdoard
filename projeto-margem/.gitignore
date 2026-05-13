@@ -13,3 +13,5 @@ data/data.json
 data/vendas.json
 data/*.xlsx
 data/ruptura.json
+data/Inventario_Rotativo.xlsx
+data/inv_rotativo.json

@@ -489,7 +489,8 @@
     </div>
     <div class="modal-body">
       <div class="ru-info-bar" id="modalInvRotTotalInfo"></div>
-      <div class="ru-tabela-wrap" style="max-height:60vh;margin-top:8px;">
+      <div class="op-quebra-tabs" id="modalInvRotTotalTabs" style="margin:8px 0;display:flex;gap:6px;flex-wrap:wrap;"></div>
+      <div class="ru-tabela-wrap" style="max-height:55vh;margin-top:8px;">
         <table id="tblInvRotTotal">
           <thead>
             <tr>
@@ -499,7 +500,6 @@
               <th class="num sortable" data-sort-total="valor">Inventário <span class="sort-ico"></span></th>
               <th class="num sortable" data-sort-total="venda">Venda <span class="sort-ico"></span></th>
               <th class="num sortable" data-sort-total="pct_venda">% Venda <span class="sort-ico"></span></th>
-              <th class="num sortable" data-sort-total="n_lojas">Lojas <span class="sort-ico"></span></th>
             </tr>
           </thead>
           <tbody id="tbodyInvRotTotal"></tbody>
@@ -653,6 +653,6 @@
 </div>
 
 <script src="sidebar.js"></script>
-<script src="operacao.js?v=22"></script>
+<script src="operacao.js?v=23"></script>
 </body>
 </html>

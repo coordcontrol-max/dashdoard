@@ -592,14 +592,17 @@ async function abrirModalInvRot(nroempresaStr) {
 let INV_ROT_TOTAL = null;
 let invRotTotalSortField = 'valor';
 let invRotTotalSortDir = 'desc';
+let invRotTotalFiltroComprador = null;
 const INV_ROT_TOTAL_SORT_TEXT = new Set(['produto', 'comprador']);
 const INV_ROT_TOTAL_EXPANDED = new Set();   // keys de produtos com loja-drill aberto
 
 async function abrirModalInvRotTotal() {
   $('#modalInvRotTotalInfo').innerHTML = 'Carregando itens agregados…';
-  $('#tbodyInvRotTotal').innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text-muted);">Carregando…</td></tr>`;
+  $('#modalInvRotTotalTabs').innerHTML = '';
+  $('#tbodyInvRotTotal').innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted);">Carregando…</td></tr>`;
   $('#modalInvRotTotal').classList.add('open');
   INV_ROT_TOTAL_EXPANDED.clear();
+  invRotTotalFiltroComprador = null;
 
   if (!INV_ROT_TOTAL) {
     try {
@@ -611,21 +614,39 @@ async function abrirModalInvRotTotal() {
     }
   }
 
+  // Constrói tabs por comprador (agrega valor de inventário pra cada)
+  const comps = {};
+  for (const it of INV_ROT_TOTAL) {
+    const c = it.comprador || '—';
+    if (!comps[c]) comps[c] = { valor: 0, count: 0 };
+    comps[c].valor += it.valor || 0;
+    comps[c].count++;
+  }
+  const compsOrdenados = Object.entries(comps).sort((a, b) => Math.abs(b[1].valor) - Math.abs(a[1].valor));
+  let tabs = `<button class="qb-tab active" data-comp-invrot-total="">Todos (${INV_ROT_TOTAL.length})</button>`;
+  for (const [c, info] of compsOrdenados) {
+    tabs += `<button class="qb-tab" data-comp-invrot-total="${escapeHtml(c)}">${escapeHtml(c)} · ${fmtRs(info.valor)} (${info.count})</button>`;
+  }
+  $('#modalInvRotTotalTabs').innerHTML = tabs;
+
   const totalItens = INV_ROT_TOTAL.length;
   const inv = INV_ROT_TOTAL.reduce((s, x) => s + (x.valor || 0), 0);
   const ven = INV_ROT_TOTAL.reduce((s, x) => s + (x.venda || 0), 0);
   $('#modalInvRotTotalInfo').innerHTML = `
-    <b>${fmtNum(totalItens)}</b> produtos distintos · Inventário: <b>${fmtRs(inv)}</b> · Venda: <b>${fmtRs(ven)}</b> · ${fmtPct(ven ? inv / ven : null)}
+    <b>${fmtNum(totalItens)}</b> produtos distintos · Inventário: <b>${fmtRs(inv)}</b> · Venda: <b>${fmtRs(ven)}</b> · ${fmtPct(ven ? inv / ven : null)} · ${Object.keys(comps).length} compradores
   `;
   renderModalInvRotTotalLista();
 }
 
 function renderModalInvRotTotalLista() {
   if (!INV_ROT_TOTAL) return;
+  // Filtro por comprador
+  const baseLista = invRotTotalFiltroComprador
+    ? INV_ROT_TOTAL.filter(it => it.comprador === invRotTotalFiltroComprador)
+    : INV_ROT_TOTAL;
   // Decora
-  const decorados = INV_ROT_TOTAL.map(it => ({
+  const decorados = baseLista.map(it => ({
     ...it,
-    n_lojas: it.lojas ? it.lojas.length : 0,
     pct_venda: (it.valor != null && it.venda != null && it.venda !== 0) ? it.valor / it.venda : null,
   }));
 
@@ -660,7 +681,6 @@ function renderModalInvRotTotalLista() {
         <td class="num">${cell(it.valor, fmtRs)}</td>
         <td class="num">${cell(it.venda, fmtRs)}</td>
         <td class="num">${cell(it.pct_venda, fmtPct)}</td>
-        <td class="num">${fmtNum(it.n_lojas)}</td>
       </tr>
     `;
     if (isOpen) {
@@ -674,13 +694,12 @@ function renderModalInvRotTotalLista() {
             <td class="num">${cell(l.valor, fmtRs)}</td>
             <td class="num">${cell(l.venda, fmtRs)}</td>
             <td class="num">${cell(pctL, fmtPct)}</td>
-            <td class="num">—</td>
           </tr>
         `;
       }
     }
   }
-  $('#tbodyInvRotTotal').innerHTML = html;
+  $('#tbodyInvRotTotal').innerHTML = html || `<tr><td colspan="6" style="text-align:center;padding:18px;color:var(--text-muted);">sem itens</td></tr>`;
 }
 
 function renderModalInvRotLista() {
@@ -1519,6 +1538,16 @@ async function init() {
     const produto = row.dataset.produto;
     if (INV_ROT_TOTAL_EXPANDED.has(produto)) INV_ROT_TOTAL_EXPANDED.delete(produto);
     else INV_ROT_TOTAL_EXPANDED.add(produto);
+    renderModalInvRotTotalLista();
+  });
+  // Filtro por comprador (tabs) no modal TOTAL
+  $('#modalInvRotTotalTabs').addEventListener('click', e => {
+    const tab = e.target.closest('.qb-tab');
+    if (!tab) return;
+    $$('#modalInvRotTotalTabs .qb-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    invRotTotalFiltroComprador = tab.dataset.compInvrotTotal || null;
+    INV_ROT_TOTAL_EXPANDED.clear();
     renderModalInvRotTotalLista();
   });
   // Sort por clique nas colunas do modal Inv. Rotativo

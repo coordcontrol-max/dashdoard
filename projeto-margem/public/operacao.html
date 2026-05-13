@@ -461,11 +461,13 @@
         <table id="tblInvRotComp">
           <thead>
             <tr>
-              <th>Comprador</th>
-              <th>Produto</th>
-              <th class="num">Qtd</th>
-              <th class="num">Valor</th>
-              <th class="num">% do Total</th>
+              <th class="sortable" data-sort="comprador">Comprador <span class="sort-ico"></span></th>
+              <th class="sortable" data-sort="produto">Produto <span class="sort-ico"></span></th>
+              <th class="num sortable" data-sort="qtd">Qtd <span class="sort-ico"></span></th>
+              <th class="num sortable" data-sort="valor">Inventário <span class="sort-ico"></span></th>
+              <th class="num sortable" data-sort="venda">Venda <span class="sort-ico"></span></th>
+              <th class="num sortable" data-sort="pct_venda">% Venda <span class="sort-ico"></span></th>
+              <th class="num sortable" data-sort="pct_total">% do Total <span class="sort-ico"></span></th>
             </tr>
           </thead>
           <tbody id="tbodyInvRotComp"></tbody>

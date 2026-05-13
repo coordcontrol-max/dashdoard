@@ -178,34 +178,43 @@ def main():
 
     cur.close(); conn.close()
 
-    # ===== Normalização =====
+    # ===== Normalização do Inventário =====
     # Q1 cols: ANO, MES, NROEMPRESA, COMPRADOR, CAMINHOCOMPLETO, SEQPRODUTO, PRODUTO, QTD_DIFERENCA, VLR_DIFERENCA
     inv = []
     for r in rows_inv:
         ano = str(r[0]) if r[0] is not None else None
         mes = str(r[1]).zfill(2) if r[1] is not None else None
         nro = int(r[2]) if r[2] is not None else None
-        if not (ano and mes and nro is not None): continue
+        seq = int(r[5]) if r[5] is not None else None
+        if not (ano and mes and nro is not None and seq is not None): continue
         inv.append({
             'ano': int(ano), 'mes': mes, 'nroempresa': nro,
             'comprador':  r[3] or '',
-            'secao':      r[4] or '',
-            'seqproduto': int(r[5]) if r[5] is not None else None,
+            'seqproduto': seq,
             'produto':    r[6] or '',
             'qtd':        float(r[7] or 0),
             'valor':      float(r[8] or 0),
         })
     print(f'Inventário: {len(inv)} linhas')
 
+    # ===== Vendas por (nroempresa, seqproduto) =====
     # Q2 cols: ANO, MES, NROEMPRESA, COMPRADOR, CAMINHOCOMPLETO, SEQPRODUTO, PRODUTO, VENDA
-    venda_loja = defaultdict(float)  # (ano,mes,nroempresa) -> sum(VENDA)
+    # Mesma chave que Inventário pro full-outer-join por produto×loja.
+    vendas = []
     for r in rows_vendas:
-        ano = int(r[0]) if r[0] is not None else None
+        ano = str(r[0]) if r[0] is not None else None
         mes = str(r[1]).zfill(2) if r[1] is not None else None
         nro = int(r[2]) if r[2] is not None else None
-        if not (ano and mes and nro is not None): continue
-        venda_loja[(ano, mes, nro)] += float(r[7] or 0)
-    print(f'Vendas: {len(venda_loja)} agregados (ano,mes,empresa)')
+        seq = int(r[5]) if r[5] is not None else None
+        if not (ano and mes and nro is not None and seq is not None): continue
+        vendas.append({
+            'ano': int(ano), 'mes': mes, 'nroempresa': nro,
+            'comprador':  r[3] or '',
+            'seqproduto': seq,
+            'produto':    r[6] or '',
+            'venda':      float(r[7] or 0),
+        })
+    print(f'Vendas: {len(vendas)} linhas')
 
     # ===== Período mais recente (do Inventário) =====
     periodos = sorted({(r['ano'], r['mes']) for r in inv}, reverse=True)
@@ -214,23 +223,39 @@ def main():
     ano_atual, mes_atual = periodos[0]
     print(f'Período mais recente: {ano_atual}/{mes_atual}')
 
-    inv_periodo = [r for r in inv if r['ano'] == ano_atual and r['mes'] == mes_atual]
+    inv_per = [r for r in inv    if r['ano'] == ano_atual and r['mes'] == mes_atual]
+    ven_per = [r for r in vendas if r['ano'] == ano_atual and r['mes'] == mes_atual]
 
-    # ===== Agrega por loja =====
-    por_loja = defaultdict(lambda: {'valor': 0.0, 'qtd': 0.0})
-    for r in inv_periodo:
-        por_loja[r['nroempresa']]['valor'] += r['valor']
-        por_loja[r['nroempresa']]['qtd']   += r['qtd']
+    # ===== Índices por (nroempresa, seqproduto) =====
+    # Inventário: já vem GROUP BY produto, então 1 linha por chave (por nroempresa).
+    # Vendas: GROUP BY produto também — 1 linha por chave.
+    inv_idx = {}
+    for r in inv_per:
+        inv_idx[(r['nroempresa'], r['seqproduto'])] = r
+    ven_idx = {}
+    for r in ven_per:
+        ven_idx[(r['nroempresa'], r['seqproduto'])] = r
 
+    # ===== Agrega por loja (lojas[] mantém o mesmo formato) =====
+    por_loja_inv = defaultdict(lambda: {'valor': 0.0, 'qtd': 0.0})
+    for r in inv_per:
+        por_loja_inv[r['nroempresa']]['valor'] += r['valor']
+        por_loja_inv[r['nroempresa']]['qtd']   += r['qtd']
+    por_loja_ven = defaultdict(float)
+    for r in ven_per:
+        por_loja_ven[r['nroempresa']] += r['venda']
+
+    nroempresas = sorted(set(por_loja_inv.keys()) | set(por_loja_ven.keys()))
     lojas = []
-    for nro, agg in sorted(por_loja.items()):
-        v = venda_loja.get((ano_atual, mes_atual, nro), 0.0)
+    for nro in nroempresas:
+        agg = por_loja_inv.get(nro) or {'valor': 0.0, 'qtd': 0.0}
+        venda_l = por_loja_ven.get(nro, 0.0)
         lojas.append({
             'nroempresa': nro,
             'valor': round(agg['valor'], 2),
             'qtd':   round(agg['qtd'], 3),
-            'venda': round(v, 2),
-            'pct':   (agg['valor'] / v) if v else None,
+            'venda': round(venda_l, 2),
+            'pct':   (agg['valor'] / venda_l) if venda_l else None,
         })
 
     tot_v = sum(l['valor'] for l in lojas)
@@ -243,15 +268,26 @@ def main():
         'pct':   (tot_v / tot_x) if tot_x else None,
     }
 
-    itens = [{
-        'nroempresa': r['nroempresa'],
-        'comprador':  r['comprador'],
-        'secao':      r['secao'],
-        'seqproduto': r['seqproduto'],
-        'produto':    r['produto'],
-        'qtd':        round(r['qtd'], 3),
-        'valor':      round(r['valor'], 2),
-    } for r in inv_periodo]
+    # ===== Itens (full outer join Inventário × Vendas por produto×loja) =====
+    # Cada item carrega valor/qtd do Inventário e venda das Vendas. Quando um
+    # produto só tem inventário (sem venda), venda=None. Quando só tem venda
+    # (sem inventário), valor=None e qtd=None. O frontend renderiza '-' nos nulls
+    # e calcula '% Venda' = valor/venda quando ambos != None.
+    todas_chaves = set(inv_idx.keys()) | set(ven_idx.keys())
+    itens = []
+    for k in todas_chaves:
+        inv_r = inv_idx.get(k)
+        ven_r = ven_idx.get(k)
+        base = inv_r or ven_r
+        itens.append({
+            'nroempresa': base['nroempresa'],
+            'comprador':  base['comprador'],
+            'produto':    base['produto'],
+            'qtd':        round(inv_r['qtd'], 3) if inv_r else None,
+            'valor':      round(inv_r['valor'], 2) if inv_r else None,
+            'venda':      round(ven_r['venda'], 2) if ven_r else None,
+        })
+    print(f'Itens (merge): {len(itens)} — inv-only: {sum(1 for k in todas_chaves if k not in ven_idx)}, ven-only: {sum(1 for k in todas_chaves if k not in inv_idx)}, ambos: {sum(1 for k in todas_chaves if k in inv_idx and k in ven_idx)}')
 
     out = {
         'gerado_em': datetime.now().isoformat(timespec='seconds'),

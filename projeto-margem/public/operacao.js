@@ -425,6 +425,11 @@ function renderTudo() {
 let INV_ROT = null;
 let invRotLojaAtiva = null;
 let invRotFiltroComprador = null;
+// Ordenação da tabela do modal: campo + direção. Default = 'valor' desc
+// (maior |inventário| primeiro, mesmo comportamento de antes da feature).
+let invRotSortField = 'valor';
+let invRotSortDir = 'desc';
+const INV_ROT_SORT_TEXT = new Set(['comprador', 'produto']);
 
 async function carregarInvRotativo() {
   try {
@@ -566,26 +571,63 @@ function renderModalInvRotLista() {
   const itens = (INV_ROT.itens || [])
     .filter(it => it.nroempresa === invRotLojaAtiva)
     .filter(it => !invRotFiltroComprador || it.comprador === invRotFiltroComprador);
+
+  // Total filtrado = soma do INVENTÁRIO (não da venda). Itens só-venda têm valor null e não contam aqui.
   const totalFiltrado = itens.reduce((s, x) => s + (x.valor || 0), 0);
 
+  // Decora cada item com pct_venda (item.valor/item.venda) e pct_total (item.valor/totalFiltrado)
+  // pra ordenação trabalhar uniformemente.
+  const decorados = itens.map(it => {
+    const pct_venda = (it.valor != null && it.venda != null && it.venda !== 0) ? it.valor / it.venda : null;
+    const pct_total = (it.valor != null && totalFiltrado !== 0) ? it.valor / totalFiltrado : null;
+    return { ...it, pct_venda, pct_total };
+  });
+
+  // Ordenação: nulls vão pro fim. Texto = localeCompare pt-BR; número = numérico.
+  const f = invRotSortField, dir = invRotSortDir;
+  const sign = dir === 'asc' ? 1 : -1;
+  decorados.sort((a, b) => {
+    const av = a[f], bv = b[f];
+    if (av == null && bv == null) return 0;
+    if (av == null) return 1;       // nulls always last
+    if (bv == null) return -1;
+    if (INV_ROT_SORT_TEXT.has(f)) {
+      return sign * String(av).localeCompare(String(bv), 'pt-BR');
+    }
+    return sign * (av - bv);
+  });
+
+  // Sort indicator nas <th>
+  $$('#tblInvRotComp th.sortable').forEach(th => {
+    th.classList.remove('sort-asc', 'sort-desc');
+    if (th.dataset.sort === f) th.classList.add(dir === 'asc' ? 'sort-asc' : 'sort-desc');
+  });
+
+  // Render
+  const cell = (v, fmt) => v == null ? '<span style="color:var(--text-muted);">—</span>' : fmt(v);
   let html = '';
-  for (const it of itens) {
-    const pct = totalFiltrado !== 0 ? it.valor / totalFiltrado : null;
+  for (const it of decorados) {
     html += `
       <tr>
         <td>${escapeHtml(it.comprador || '—')}</td>
         <td>${escapeHtml(it.produto || '—')}</td>
-        <td class="num">${fmtNum(it.qtd)}</td>
-        <td class="num">${fmtRs(it.valor)}</td>
-        <td class="num">${fmtPct(pct)}</td>
+        <td class="num">${cell(it.qtd,   fmtNum)}</td>
+        <td class="num">${cell(it.valor, fmtRs)}</td>
+        <td class="num">${cell(it.venda, fmtRs)}</td>
+        <td class="num">${cell(it.pct_venda, fmtPct)}</td>
+        <td class="num">${cell(it.pct_total, fmtPct)}</td>
       </tr>
     `;
   }
+  const totQtd   = decorados.reduce((s, x) => s + (x.qtd   || 0), 0);
+  const totVenda = decorados.reduce((s, x) => s + (x.venda || 0), 0);
   html += `
     <tr class="total">
       <td colspan="2">TOTAL ${invRotFiltroComprador ? '(' + escapeHtml(invRotFiltroComprador) + ')' : ''}</td>
-      <td class="num"><b>${fmtNum(itens.reduce((s, x) => s + (x.qtd || 0), 0))}</b></td>
+      <td class="num"><b>${fmtNum(totQtd)}</b></td>
       <td class="num"><b>${fmtRs(totalFiltrado)}</b></td>
+      <td class="num"><b>${fmtRs(totVenda)}</b></td>
+      <td class="num"><b>${fmtPct(totVenda ? totalFiltrado / totVenda : null)}</b></td>
       <td class="num"><b>100,00%</b></td>
     </tr>
   `;
@@ -1334,6 +1376,20 @@ async function init() {
   $('#modalInvRotClose').addEventListener('click', () => $('#modalInvRot').classList.remove('open'));
   $('#modalInvRotFechar').addEventListener('click', () => $('#modalInvRot').classList.remove('open'));
   $('#modalInvRot').addEventListener('click', e => { if (e.target.id === 'modalInvRot') $('#modalInvRot').classList.remove('open'); });
+  // Sort por clique nas colunas do modal Inv. Rotativo
+  $('#tblInvRotComp thead').addEventListener('click', e => {
+    const th = e.target.closest('th.sortable');
+    if (!th) return;
+    const field = th.dataset.sort;
+    if (invRotSortField === field) {
+      invRotSortDir = invRotSortDir === 'asc' ? 'desc' : 'asc';
+    } else {
+      invRotSortField = field;
+      // Texto começa asc (A-Z), número começa desc (maior primeiro)
+      invRotSortDir = INV_ROT_SORT_TEXT.has(field) ? 'asc' : 'desc';
+    }
+    renderModalInvRotLista();
+  });
 
   // Carrega Inv. Rotativo (independente do Operação principal)
   carregarInvRotativo();

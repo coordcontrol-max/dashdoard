@@ -290,3 +290,22 @@ body, .topbar, .sidebar, .main-content, .op-bloco {
   font-style: italic;
 }
 .op-placeholder-big a { color: var(--text-link); text-decoration: underline; }
+
+/* ===== Ordenação por clique em th — usado no modal de Inv. Rotativo ===== */
+th.sortable {
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  white-space: nowrap;
+}
+th.sortable:hover { background: var(--bg-elev-3); color: var(--text); }
+th.sortable .sort-ico {
+  display: inline-block;
+  width: 10px;
+  margin-left: 4px;
+  color: var(--text-muted);
+  font-size: 10px;
+  vertical-align: middle;
+}
+th.sortable.sort-asc  .sort-ico::before { content: '▲'; color: var(--accent); }
+th.sortable.sort-desc .sort-ico::before { content: '▼'; color: var(--accent); }

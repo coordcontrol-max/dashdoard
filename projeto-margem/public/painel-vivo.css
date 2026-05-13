@@ -2,34 +2,68 @@
 
 .pv-wrap { padding: 14px; display: flex; flex-direction: column; gap: 12px; max-width: 1200px; margin: 0 auto; width: 100%; }
 
-/* Filtro de data */
-.pv-filtro {
-  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-  background: var(--bg-elev-2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 10px 14px;
+/* Esconde legenda abaixo do título no celular (otimiza espaço) */
+@media (max-width: 720px) {
+  .pv-sub-mobile-off { display: none !important; }
 }
-.pv-filtro label { display: flex; align-items: center; gap: 8px; }
-.pv-filtro-label {
-  color: var(--text-muted); font-size: 11px;
-  font-weight: 700; letter-spacing: .4px; text-transform: uppercase;
-}
-.pv-filtro input[type=date] {
+
+/* Botão filtro no header */
+.btn-filtro {
+  position: relative;
   background: var(--bg-input); color: var(--text);
-  border: 1px solid var(--border-2); padding: 7px 10px;
-  border-radius: 8px; font-size: 13px;
-  font-variant-numeric: tabular-nums;
+  border: 1px solid var(--border-2);
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  display: inline-flex; align-items: center;
+  transition: background .12s;
+}
+.btn-filtro:hover { background: var(--bg-button-h); }
+.btn-filtro.active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.btn-filtro-badge {
+  position: absolute;
+  top: -4px; right: -4px;
+  background: var(--accent);
+  color: white;
+  border-radius: 999px;
+  min-width: 16px; height: 16px;
+  font-size: 10px; font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 0 4px;
+}
+
+/* Form fields no modal de filtros */
+#modalFiltro .field { margin-bottom: 14px; }
+#modalFiltro .field label {
+  display: block; color: var(--text); font-size: 12px;
+  font-weight: 600; margin-bottom: 5px;
+  text-transform: uppercase; letter-spacing: .3px;
+}
+#modalFiltro .field input,
+#modalFiltro .field select {
+  width: 100%;
+  background: var(--bg-input); color: var(--text);
+  border: 1px solid var(--border-2);
+  padding: 10px 12px; border-radius: 8px;
+  font-size: 13px;
   color-scheme: dark light;
 }
-.pv-filtro input[type=date]:focus { border-color: var(--accent); outline: none; }
-.pv-filtro .btn-mini {
+#modalFiltro .field input:focus,
+#modalFiltro .field select:focus { border-color: var(--accent); outline: none; }
+#modalFiltro .btn-mini {
   background: var(--bg-input); color: var(--text);
-  border: 1px solid var(--border-2); padding: 6px 12px;
-  border-radius: 8px; font-size: 12px; cursor: pointer;
+  border: 1px solid var(--border-2); padding: 8px 14px;
+  border-radius: 8px; font-size: 13px; cursor: pointer;
 }
-.pv-filtro .btn-mini:hover { background: var(--bg-button-h); }
-.pv-filtro-hint { color: var(--text-muted); font-size: 11px; margin-left: auto; }
+#modalFiltro .btn-mini:hover { background: var(--bg-button-h); }
+#modalFiltro .btn-mini.primary {
+  background: var(--accent); color: white; border-color: var(--accent);
+  font-weight: 600;
+}
+#modalFiltro .btn-mini.primary:hover { filter: brightness(1.1); }
 
 /* Live dot pulsando */
 .live-dot {

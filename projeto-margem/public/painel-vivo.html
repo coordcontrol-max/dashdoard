@@ -17,11 +17,15 @@
 <header class="topbar">
   <div class="brand">
     <h1>Painel ao Vivo <span class="live-dot" title="Atualizando automaticamente"></span></h1>
-    <div class="sub">Venda e Meta · <span id="mesRef">—</span> · clique em <b>Atualizar</b> pra puxar a venda atual · <small id="atualizadoEm" style="color:var(--text-muted);">—</small></div>
+    <div class="sub pv-sub-mobile-off">Venda e Meta · <span id="mesRef">—</span> · <small id="filtroResumo" style="color:var(--text-blue-strong);font-weight:600;"></small> <small id="atualizadoEm" style="color:var(--text-muted);">—</small></div>
   </div>
   <div class="actions">
     <span id="userInfo" class="user-info"></span>
     <a id="linkAdmin" href="/admin" style="display:none;color:var(--text-link);text-decoration:none;font-size:12px;padding:6px 12px;border:1px solid var(--border-2);border-radius:6px;">Admin</a>
+    <button id="btnFiltro" class="btn-filtro" title="Filtros (data, loja, comprador)" aria-label="Filtros">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+      <span id="btnFiltroBadge" class="btn-filtro-badge" style="display:none;"></span>
+    </button>
     <button id="btnRefresh" class="btn-atualizar" title="Atualizar agora">🔄 Atualizar</button>
     <button class="btn-fullscreen" title="Tela cheia"></button>
     <button class="btn-theme" title="Trocar tema">☀️</button>
@@ -34,16 +38,6 @@
 <aside class="sidebar"></aside>
 <div class="main-content">
   <div class="pv-wrap">
-    <!-- ===== Filtro de data ===== -->
-    <section class="pv-filtro">
-      <label>
-        <span class="pv-filtro-label">Data de referência</span>
-        <input type="date" id="filtroData">
-      </label>
-      <button class="btn-mini" id="btnHoje" type="button">Hoje</button>
-      <span class="pv-filtro-hint" id="filtroDataHint">Acumulado é somado até a data selecionada (inclusive).</span>
-    </section>
-
     <!-- ===== 10 cartões na ordem: Venda Dia | Meta Dia | Venda Mês | Meta Parcial | Projeção | Meta Mensal | Var Ano Ant | Var Mês Ant | Margem Dia | Margem Mês ===== -->
     <section class="pv-grid">
       <div class="pv-tile" id="tile-vendaDia">
@@ -120,7 +114,43 @@
 </div>
 </div>
 
+<!-- ===== Modal de Filtros ===== -->
+<div class="modal-backdrop" id="modalFiltro">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-head">
+      <h3>Filtros</h3>
+      <button class="modal-close" id="modalFiltroClose">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Data de referência</label>
+        <input type="date" id="filtroData">
+        <div class="hint" style="font-size:11px;color:var(--text-muted);margin-top:4px;">Acumulado é somado até a data selecionada (inclusive).</div>
+      </div>
+      <div class="field">
+        <label>Loja</label>
+        <select id="filtroLoja">
+          <option value="">Todas as lojas</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Comprador</label>
+        <select id="filtroComprador">
+          <option value="">Todos os compradores</option>
+        </select>
+      </div>
+      <div class="hint" id="filtroAviso" style="font-size:11px;color:var(--warn);margin-top:4px;display:none;">
+        Combinar loja + comprador não está disponível — apenas um por vez.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-mini" id="btnLimparFiltros">Limpar</button>
+      <button type="button" class="btn-mini primary" id="btnAplicarFiltros">Aplicar</button>
+    </div>
+  </div>
+</div>
+
 <script src="sidebar.js"></script>
-<script src="painel-vivo.js?v=6"></script>
+<script src="painel-vivo.js?v=7"></script>
 </body>
 </html>

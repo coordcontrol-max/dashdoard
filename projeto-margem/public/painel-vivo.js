@@ -31,7 +31,7 @@ const fmtData = (iso) => {
 };
 
 let REFRESH_TIMER = null;
-const REFRESH_MS = 5 * 60 * 1000;  // 5 min
+const REFRESH_MS = 15 * 60 * 1000;  // 15 min — mesmo ciclo da ingestão de Venda Atual no Oracle
 
 async function api(method, url, body) {
   const opts = { method, credentials: 'same-origin', headers: {} };

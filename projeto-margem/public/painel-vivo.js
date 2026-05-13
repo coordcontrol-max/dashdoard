@@ -1,43 +1,36 @@
-// Painel ao Vivo · venda × meta do dia e acumulado
-// Auto-refresh a cada 5 minutos. Lê /api/vendas (já tem dia a dia + totais).
+// Painel ao Vivo · venda × meta com 10 cards + gauge.
+// On-demand refresh via fila + worker no PC. Filtro de data muda cutoff acumulado.
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => document.querySelectorAll(s);
 const escapeHtml = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-// Helpers de formatação (mesmo padrão das outras páginas)
-const fmtRs   = (v) => v == null || isNaN(v) ? '—' : 'R$ ' + Math.round(v).toLocaleString('pt-BR');
-const fmtRsK  = (v) => {
+const fmtRs  = (v) => v == null || isNaN(v) ? '—' : 'R$ ' + Math.round(v).toLocaleString('pt-BR');
+const fmtRs2 = (v) => v == null || isNaN(v) ? '—' : 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmtRsK = (v) => {
   if (v == null || isNaN(v)) return '—';
   const abs = Math.abs(v);
   if (abs >= 1e6) return 'R$ ' + (v / 1e6).toFixed(2).replace('.', ',') + ' mi';
-  if (abs >= 1e3) return 'R$ ' + (v / 1e3).toFixed(0) + 'k';
   return fmtRs(v);
 };
-const fmtRsSig = (v) => {
-  if (v == null || isNaN(v)) return '—';
-  const s = fmtRs(Math.abs(v));
-  return (v >= 0 ? '+' : '−') + s.slice(2); // tira "R$ "
-};
-const fmtPct  = (v) => v == null || isNaN(v) ? '—' : (v * 100).toFixed(1).replace('.', ',') + '%';
+const fmtPct  = (v) => v == null || isNaN(v) ? '—' : (v * 100).toFixed(2).replace('.', ',') + '%';
+const fmtPct1 = (v) => v == null || isNaN(v) ? '—' : (v * 100).toFixed(1).replace('.', ',') + '%';
 const fmtPctSig = (v) => {
   if (v == null || isNaN(v)) return '—';
-  return (v >= 0 ? '+' : '') + (v * 100).toFixed(1).replace('.', ',') + '%';
+  return (v >= 0 ? '+' : '') + (v * 100).toFixed(2).replace('.', ',') + '%';
 };
 const fmtData = (iso) => {
   if (!iso) return '—';
   const [y, m, d] = iso.split('-');
-  return `${d}/${m}`;
+  return `${d}/${m}/${y}`;
 };
 
-// Atualização on-demand: botão "Atualizar" cria solicitação na fila → worker
-// no PC do João processa em ~1-2 min → frontend polla até status final.
+// ===== Estado =====
 let POLL_TIMER = null;
 const POLL_MS = 3000;
-
-// Filtro de data: ISO YYYY-MM-DD ou null (= "ao vivo" = primeiro dia não-fechado).
-let DATA_SELECIONADA = null;
-let DADOS_CACHE = null;
+let DATA_SELECIONADA = null;   // ISO YYYY-MM-DD ou null (auto = ao vivo)
+let DADOS_VENDAS = null;       // cache /api/vendas
+let DADOS_ESTR = null;         // cache /api/estrategia (pra var ano/mês ant)
 
 async function api(method, url, body) {
   const opts = { method, credentials: 'same-origin', headers: {} };
@@ -51,66 +44,7 @@ async function api(method, url, body) {
   return r.json();
 }
 
-// Classifica % atingimento → estilo visual
-function classPct(p) {
-  if (p == null || isNaN(p)) return '';
-  if (p >= 1.0)   return 'pos';
-  if (p >= 0.92)  return 'warn';
-  return 'neg';
-}
-function classBar(p) {
-  if (p == null) return '';
-  if (p >= 1.0)  return '';
-  if (p >= 0.92) return 'warn';
-  return 'bad';
-}
-function classCardStatus(p) {
-  if (p == null) return '';
-  if (p >= 1.0)   return 'ok-100';
-  if (p >= 0.92)  return 'ok-warn';
-  return 'ok-bad';
-}
-
-function aplicarKPI(prefix, venda, meta, opts = {}) {
-  const elValor = $('#' + prefix + 'Venda');
-  const elMeta  = $('#' + prefix + 'Meta');
-  const elDiff  = $('#' + prefix + 'Diff');
-  const elBar   = $('#' + prefix + 'Bar');
-  const elPct   = $('#' + prefix + 'Pct');
-  const cardEl  = elValor?.closest('.pv-card');
-
-  const pct  = (meta && meta !== 0) ? venda / meta : null;
-  const diff = (venda != null && meta != null) ? venda - meta : null;
-
-  if (elValor) elValor.textContent = opts.compact ? fmtRsK(venda) : fmtRs(venda);
-  if (elMeta)  elMeta.textContent  = opts.compact ? fmtRsK(meta)  : fmtRs(meta);
-
-  if (elDiff) {
-    elDiff.textContent = fmtRsSig(diff);
-    elDiff.classList.remove('pos', 'neg');
-    if (diff != null) elDiff.classList.add(diff >= 0 ? 'pos' : 'neg');
-  }
-
-  if (elBar) {
-    const w = pct != null ? Math.min(Math.max(pct * 100, 0), 130) : 0;
-    elBar.style.width = w + '%';
-    elBar.className = 'pv-bar-fill ' + classBar(pct);
-  }
-
-  if (elPct) {
-    elPct.textContent = fmtPct(pct);
-    elPct.className = 'pv-card-pct ' + classPct(pct);
-  }
-
-  if (cardEl) {
-    cardEl.classList.remove('ok-100', 'ok-warn', 'ok-bad');
-    const cls = classCardStatus(pct);
-    if (cls) cardEl.classList.add(cls);
-  }
-}
-
-// Resolve o "dia ativo" — se DATA_SELECIONADA está setada, usa ela;
-// senão default: primeiro dia não-fechado (ao vivo) ou último dia.
+// ===== Helpers =====
 function resolverDiaAtivo(dias) {
   if (DATA_SELECIONADA) {
     const d = dias.find(x => x.data === DATA_SELECIONADA);
@@ -121,108 +55,122 @@ function resolverDiaAtivo(dias) {
   return dias.length ? dias[dias.length - 1] : null;
 }
 
-function renderHero(dados) {
-  const dias = dados.dias || [];
-  const total = dados.totais_principal || {};
-
-  // Dia ativo conforme filtro (ou auto-ao-vivo se sem filtro)
-  const diaAtivo = resolverDiaAtivo(dias);
-
-  // Card 1 — dia
-  if (diaAtivo) {
-    const sufixo = DATA_SELECIONADA ? '' : (diaAtivo.fechado ? '' : ' · em curso');
-    $('#kpiDiaData').textContent = `${fmtData(diaAtivo.data)} · ${diaAtivo.dia_semana || ''}${sufixo}`;
-    aplicarKPI('kpiDia', diaAtivo.realizado || 0, diaAtivo.meta_venda || 0);
-  }
-
-  // Acumulado até hoje (inclusive parcial)
-  let vendaAcum = 0, metaAcum = 0;
-  const cutoff = diaAtivo ? diaAtivo.data : null;
-  for (const d of dias) {
-    if (cutoff && d.data > cutoff) break;
-    vendaAcum += d.realizado || 0;
-    metaAcum  += d.meta_venda || 0;
-  }
-  aplicarKPI('kpiMes', vendaAcum, metaAcum);
-
-  // Projeção: ritmo até hoje × dias do mês / dias decorridos
-  // diasDecorridos = nº de dias contados no acum (inclusive parcial).
-  let diasDecorridos = 0;
-  for (const d of dias) {
-    if (cutoff && d.data > cutoff) break;
-    diasDecorridos++;
-  }
-  const totalDias = dias.length || 1;
-  const ritmo = diasDecorridos > 0 ? (vendaAcum / diasDecorridos) : 0;
-  const projecao = ritmo * totalDias;
-  const metaMensal = total.meta_venda || 0;
-  aplicarKPI('kpiProj', projecao, metaMensal, { compact: true });
+// Classes de cor pelo % atingimento (0-1, 1=100%)
+function classPct(p) {
+  if (p == null || isNaN(p)) return '';
+  if (p >= 1.0)  return 'pos';
+  if (p >= 0.92) return 'warn';
+  return 'neg';
+}
+function classTile(p) {
+  if (p == null || isNaN(p)) return '';
+  if (p >= 1.0)  return 'ok-100';
+  if (p >= 0.92) return 'ok-warn';
+  return 'ok-bad';
 }
 
-function renderMini(dados) {
-  const dias = dados.dias || [];
-  const total = dados.totais_principal || {};
-
-  const diaAtivo = resolverDiaAtivo(dias);
-
-  // Margem do dia
-  if (diaAtivo) {
-    const mDia = diaAtivo.margem_realizada;
-    const metaMDia = diaAtivo.meta_margem_geral;
-    const mDiaPct = (diaAtivo.realizado && diaAtivo.realizado !== 0) ? mDia / diaAtivo.realizado : null;
-    $('#miniMargemDia').textContent = fmtRsK(mDia);
-    const sub = $('#miniMargemDiaPct');
-    sub.textContent = `${fmtPct(mDiaPct)} · meta ${fmtRsK(metaMDia)}`;
-    sub.className = 'pv-mini-sub ' + ((mDia >= (metaMDia || 0)) ? 'pos' : 'neg');
-  }
-
-  // Margem acumulada do mês
-  $('#miniMargemMes').textContent = fmtRsK(total.margem_realizada);
-  const mPct = total.realizado ? total.margem_realizada / total.realizado : null;
-  $('#miniMargemMesPct').textContent = `${fmtPct(mPct)} · meta ${fmtRsK(total.meta_margem_geral)}`;
-
-  // Margem PDV
-  $('#miniMargemPdv').textContent = fmtRsK(total.margem_pdv);
-  const mpdvPct = total.realizado ? total.margem_pdv / total.realizado : null;
-  $('#miniMargemPdvPct').textContent = `${fmtPct(mpdvPct)} · meta ${fmtRsK(total.meta_margem_pdv)}`;
-
-  // Ritmo / "precisa por dia"
-  let vendaAcum = 0;
-  let metaAcum = 0;
-  let diasDecorridos = 0;
-  const cutoff = diaAtivo ? diaAtivo.data : null;
-  for (const d of dias) {
-    if (cutoff && d.data > cutoff) break;
-    vendaAcum += d.realizado || 0;
-    metaAcum  += d.meta_venda || 0;
-    diasDecorridos++;
-  }
-  const ritmo = diasDecorridos > 0 ? vendaAcum / diasDecorridos : 0;
-  const totalDias = dias.length || 1;
-  const diasRestantes = Math.max(totalDias - diasDecorridos, 0);
-  const faltando = Math.max((total.meta_venda || 0) - vendaAcum, 0);
-  const precisaPorDia = diasRestantes > 0 ? faltando / diasRestantes : 0;
-  $('#miniRitmo').textContent = fmtRsK(ritmo);
-  $('#miniRitmoNeed').textContent = diasRestantes > 0
-    ? `Precisa: ${fmtRsK(precisaPorDia)}/dia (${diasRestantes} d)`
-    : 'Mês encerrado';
-}
-
+// ===== Render =====
 function renderTudo() {
-  if (!DADOS_CACHE) return;
-  renderHero(DADOS_CACHE);
-  renderMini(DADOS_CACHE);
+  if (!DADOS_VENDAS) return;
+  const dias = DADOS_VENDAS.dias || [];
+  const total = DADOS_VENDAS.totais_principal || {};
+  const diaAtivo = resolverDiaAtivo(dias);
+
+  // Acumulado até diaAtivo (inclusive)
+  const cutoff = diaAtivo ? diaAtivo.data : null;
+  let vendaAcum = 0, metaAcum = 0, margemAcum = 0;
+  let diasContados = 0;
+  for (const d of dias) {
+    if (cutoff && d.data > cutoff) break;
+    vendaAcum  += d.realizado || 0;
+    metaAcum   += d.meta_venda || 0;
+    margemAcum += d.margem_realizada || 0;
+    diasContados++;
+  }
+  const totalDias = dias.length || 1;
+  const projecao = diasContados > 0 ? (vendaAcum / diasContados) * totalDias : 0;
+  const metaMensal = total.meta_venda || 0;
+
+  // 1 — Venda do Dia
+  const vDia = diaAtivo ? (diaAtivo.realizado || 0) : 0;
+  const mDia = diaAtivo ? (diaAtivo.meta_venda || 0) : 0;
+  const pctDia = mDia > 0 ? vDia / mDia : null;
+  $('#vendaDiaVal').textContent = fmtRs2(vDia);
+  const tag = $('#vendaDiaTag');
+  if (diaAtivo && !diaAtivo.fechado && !DATA_SELECIONADA) {
+    tag.textContent = 'em curso';
+  } else {
+    tag.textContent = diaAtivo ? fmtData(diaAtivo.data).slice(0,5) : '';
+  }
+  // Status do tile da Venda do Dia
+  const tileDia = $('#tile-vendaDia');
+  tileDia.classList.remove('ok-100','ok-warn','ok-bad');
+  const c1 = classTile(pctDia); if (c1) tileDia.classList.add(c1);
+
+  // 2 — Meta do Dia
+  $('#metaDiaVal').textContent = fmtRs2(mDia);
+
+  // 3 — Venda do Mês (acumulado)
+  $('#vendaMesVal').textContent = fmtRs2(vendaAcum);
+
+  // 4 — Meta Parcial (acumulada até hoje)
+  $('#metaParcialVal').textContent = fmtRs2(metaAcum);
+  const pctParcial = metaAcum > 0 ? vendaAcum / metaAcum : null;
+  const tileVMes = $('#tile-vendaMes');
+  tileVMes.classList.remove('ok-100','ok-warn','ok-bad');
+  const c3 = classTile(pctParcial); if (c3) tileVMes.classList.add(c3);
+
+  // 5 — Projeção
+  $('#projecaoVal').textContent = fmtRs2(projecao);
+  const pctProj = metaMensal > 0 ? projecao / metaMensal : null;
+  const tileProj = $('#tile-projecao');
+  tileProj.classList.remove('ok-100','ok-warn','ok-bad');
+  const c5 = classTile(pctProj); if (c5) tileProj.classList.add(c5);
+
+  // 6 — Meta Mensal
+  $('#metaMensalVal').textContent = fmtRs2(metaMensal);
+
+  // 7 e 8 — Variações (vêm de /api/estrategia)
+  const tot_est = DADOS_ESTR?.total || {};
+  const varAno = tot_est.desvio_pct_ano;
+  const varMes = tot_est.desvio_pct_mes;
+  const elVarAno = $('#varAnoVal');
+  elVarAno.textContent = fmtPctSig(varAno);
+  elVarAno.classList.remove('pos','neg');
+  if (varAno != null) elVarAno.classList.add(varAno >= 0 ? 'pos' : 'neg');
+  const elVarMes = $('#varMesVal');
+  elVarMes.textContent = fmtPctSig(varMes);
+  elVarMes.classList.remove('pos','neg');
+  if (varMes != null) elVarMes.classList.add(varMes >= 0 ? 'pos' : 'neg');
+
+  // 9 — Margem Dia
+  const margemDia = diaAtivo ? (diaAtivo.margem_realizada || 0) : 0;
+  const margemDiaPct = vDia > 0 ? margemDia / vDia : null;
+  $('#margemDiaVal').textContent = fmtRs2(margemDia);
+  $('#margemDiaSub').textContent = fmtPct1(margemDiaPct);
+
+  // 10 — Margem Mês (acumulado)
+  const margemMesPct = vendaAcum > 0 ? margemAcum / vendaAcum : null;
+  $('#margemMesVal').textContent = fmtRs2(margemAcum);
+  $('#margemMesSub').textContent = fmtPct1(margemMesPct);
+
+  // Gauge — % atingimento da meta do dia
+  const gPct = pctDia != null ? Math.min(Math.max(pctDia, 0), 1) : 0;
+  const arcLen = 251.3;
+  const offset = arcLen * (1 - gPct);
+  $('#gaugeFill').setAttribute('stroke-dashoffset', offset);
+  const elPct = $('#gaugePct');
+  elPct.textContent = fmtPct1(pctDia);
+  elPct.className = 'pv-gauge-pct ' + classPct(pctDia);
 }
 
-// Aplica limites do input[type=date] (min/max) e o valor inicial.
 function configurarFiltro() {
   const inp = $('#filtroData');
-  if (!inp || !DADOS_CACHE) return;
-  const dias = DADOS_CACHE.dias || [];
+  if (!inp || !DADOS_VENDAS) return;
+  const dias = DADOS_VENDAS.dias || [];
   if (!dias.length) return;
   inp.min = dias[0].data;
   inp.max = dias[dias.length - 1].data;
-  // Default = dia ativo (ao vivo) na primeira carga
   if (!inp.value) {
     const da = resolverDiaAtivo(dias);
     if (da) inp.value = da.data;
@@ -231,12 +179,15 @@ function configurarFiltro() {
 
 async function carregar() {
   try {
-    const d = await api('GET', '/api/vendas');
-    DADOS_CACHE = d;
-    $('#mesRef').textContent = d.mes_referencia ? `${d.mes_referencia.slice(5,7)}/${d.mes_referencia.slice(0,4)}` : '—';
+    const [v, e] = await Promise.all([
+      api('GET', '/api/vendas'),
+      api('GET', '/api/estrategia').catch(() => null), // estrategia opcional
+    ]);
+    DADOS_VENDAS = v;
+    DADOS_ESTR = e;
+    $('#mesRef').textContent = v.mes_referencia ? `${v.mes_referencia.slice(5,7)}/${v.mes_referencia.slice(0,4)}` : '—';
     configurarFiltro();
     renderTudo();
-
     $('#atualizadoEm').textContent = 'atualizado às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   } catch (err) {
     console.error('Erro carregando painel:', err);
@@ -244,27 +195,25 @@ async function carregar() {
   }
 }
 
-// Solicita refresh on-demand (cria pendente na fila) e fica pollando até finalizar.
+// ===== Refresh on-demand via fila/worker =====
 async function solicitarAtualizacao() {
   const btn = $('#btnRefresh');
   const status = $('#atualizadoEm');
   btn.disabled = true;
   btn.textContent = '⏳ Atualizando…';
   status.textContent = 'pedindo atualização…';
-
   try {
     const r = await api('POST', '/api/vendas/atualizar');
     const id = r.solicitacao?.id;
     if (!id) throw new Error('sem id da solicitação');
-
     if (POLL_TIMER) clearInterval(POLL_TIMER);
     POLL_TIMER = setInterval(async () => {
       try {
         const s = await api('GET', '/api/vendas/status');
         const sol = s.ultima_solicitacao;
         if (!sol || sol.id < id) return;
-        if (sol.status === 'pendente')   { status.textContent = 'aguardando worker (fila)…'; return; }
-        if (sol.status === 'processando'){ status.textContent = 'rodando query Oracle…';       return; }
+        if (sol.status === 'pendente')    { status.textContent = 'aguardando worker (fila)…'; return; }
+        if (sol.status === 'processando') { status.textContent = 'rodando query Oracle…';     return; }
         clearInterval(POLL_TIMER); POLL_TIMER = null;
         if (sol.status === 'ok') {
           await carregar();
@@ -297,17 +246,15 @@ async function solicitarAtualizacao() {
 
   $('#btnLogout').addEventListener('click', async () => { await api('POST', '/api/logout'); location.href = '/login.html'; });
   $('#btnRefresh').addEventListener('click', solicitarAtualizacao);
-
-  // Filtro de data
   $('#filtroData').addEventListener('change', (e) => {
     DATA_SELECIONADA = e.target.value || null;
     renderTudo();
   });
   $('#btnHoje').addEventListener('click', () => {
     DATA_SELECIONADA = null;
-    const inp = $('#filtroData');
-    if (DADOS_CACHE) {
-      const da = resolverDiaAtivo(DADOS_CACHE.dias || []);
+    if (DADOS_VENDAS) {
+      const da = resolverDiaAtivo(DADOS_VENDAS.dias || []);
+      const inp = $('#filtroData');
       if (da && inp) inp.value = da.data;
     }
     renderTudo();
@@ -315,17 +262,14 @@ async function solicitarAtualizacao() {
 
   await carregar();
 
-  // Se já tem uma solicitação em andamento de outro usuário, mostra status
+  // Se já tem solicitação em andamento, acompanha
   try {
     const s = await api('GET', '/api/vendas/status');
     const sol = s.ultima_solicitacao;
     if (sol && (sol.status === 'pendente' || sol.status === 'processando')) {
-      // simula click pra acompanhar
       const btn = $('#btnRefresh');
-      btn.disabled = true;
-      btn.textContent = '⏳ Atualizando…';
+      btn.disabled = true; btn.textContent = '⏳ Atualizando…';
       $('#atualizadoEm').textContent = sol.status === 'pendente' ? 'aguardando worker (fila)…' : 'rodando query Oracle…';
-      // Poll usando o ID existente
       POLL_TIMER = setInterval(async () => {
         try {
           const ss = await api('GET', '/api/vendas/status');
@@ -339,8 +283,7 @@ async function solicitarAtualizacao() {
           } else {
             $('#atualizadoEm').textContent = '⚠ ' + (cur.mensagem || 'erro');
           }
-          btn.disabled = false;
-          btn.textContent = '🔄 Atualizar';
+          btn.disabled = false; btn.textContent = '🔄 Atualizar';
         } catch {}
       }, POLL_MS);
     }

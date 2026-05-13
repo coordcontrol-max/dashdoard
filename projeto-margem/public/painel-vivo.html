@@ -44,64 +44,76 @@
       <span class="pv-filtro-hint" id="filtroDataHint">Acumulado é somado até a data selecionada (inclusive).</span>
     </section>
 
-    <!-- ===== 3 KPIs grandes lado a lado ===== -->
-    <section class="pv-hero">
-      <div class="pv-card pv-dia">
-        <div class="pv-card-label">VENDA DO DIA <span class="pv-dia-data" id="kpiDiaData">—</span></div>
-        <div class="pv-card-value" id="kpiDiaVenda">—</div>
-        <div class="pv-card-meta">
-          <span>Meta: <b id="kpiDiaMeta">—</b></span>
-          <span class="pv-card-diff" id="kpiDiaDiff">—</span>
-        </div>
-        <div class="pv-bar"><div class="pv-bar-fill" id="kpiDiaBar"></div></div>
-        <div class="pv-card-pct" id="kpiDiaPct">—</div>
+    <!-- ===== 10 cartões na ordem: Venda Dia | Meta Dia | Venda Mês | Meta Parcial | Projeção | Meta Mensal | Var Ano Ant | Var Mês Ant | Margem Dia | Margem Mês ===== -->
+    <section class="pv-grid">
+      <div class="pv-tile" id="tile-vendaDia">
+        <div class="pv-tile-label">Venda do Dia <span class="pv-tile-tag" id="vendaDiaTag"></span></div>
+        <div class="pv-tile-value" id="vendaDiaVal">—</div>
+      </div>
+      <div class="pv-tile" id="tile-metaDia">
+        <div class="pv-tile-label">Meta do Dia</div>
+        <div class="pv-tile-value" id="metaDiaVal">—</div>
       </div>
 
-      <div class="pv-card pv-mes">
-        <div class="pv-card-label">ACUMULADO DO MÊS</div>
-        <div class="pv-card-value" id="kpiMesVenda">—</div>
-        <div class="pv-card-meta">
-          <span>Meta acumulada: <b id="kpiMesMeta">—</b></span>
-          <span class="pv-card-diff" id="kpiMesDiff">—</span>
-        </div>
-        <div class="pv-bar"><div class="pv-bar-fill" id="kpiMesBar"></div></div>
-        <div class="pv-card-pct" id="kpiMesPct">—</div>
+      <div class="pv-tile" id="tile-vendaMes">
+        <div class="pv-tile-label">Venda do Mês</div>
+        <div class="pv-tile-value" id="vendaMesVal">—</div>
+      </div>
+      <div class="pv-tile" id="tile-metaParcial">
+        <div class="pv-tile-label">Meta Parcial <small>(MTD)</small></div>
+        <div class="pv-tile-value" id="metaParcialVal">—</div>
       </div>
 
-      <div class="pv-card pv-proj">
-        <div class="pv-card-label">PROJEÇÃO DO MÊS</div>
-        <div class="pv-card-value" id="kpiProjVenda">—</div>
-        <div class="pv-card-meta">
-          <span>Meta mensal: <b id="kpiProjMeta">—</b></span>
-          <span class="pv-card-diff" id="kpiProjDiff">—</span>
-        </div>
-        <div class="pv-bar"><div class="pv-bar-fill" id="kpiProjBar"></div></div>
-        <div class="pv-card-pct" id="kpiProjPct">—</div>
+      <div class="pv-tile" id="tile-projecao">
+        <div class="pv-tile-label">Projeção</div>
+        <div class="pv-tile-value" id="projecaoVal">—</div>
+      </div>
+      <div class="pv-tile" id="tile-metaMensal">
+        <div class="pv-tile-label">Meta Mensal</div>
+        <div class="pv-tile-value" id="metaMensalVal">—</div>
+      </div>
+
+      <div class="pv-tile" id="tile-varAno">
+        <div class="pv-tile-label">Var. Mês Ano Ant.</div>
+        <div class="pv-tile-value" id="varAnoVal">—</div>
+      </div>
+      <div class="pv-tile" id="tile-varMes">
+        <div class="pv-tile-label">Var. Mês Anterior</div>
+        <div class="pv-tile-value" id="varMesVal">—</div>
+      </div>
+
+      <div class="pv-tile" id="tile-margemDia">
+        <div class="pv-tile-label">Margem Dia</div>
+        <div class="pv-tile-value" id="margemDiaVal">—</div>
+        <div class="pv-tile-sub" id="margemDiaSub">—</div>
+      </div>
+      <div class="pv-tile" id="tile-margemMes">
+        <div class="pv-tile-label">Margem Mês</div>
+        <div class="pv-tile-value" id="margemMesVal">—</div>
+        <div class="pv-tile-sub" id="margemMesSub">—</div>
       </div>
     </section>
 
-    <!-- ===== Mini-cards: margem ===== -->
-    <section class="pv-strip">
-      <div class="pv-mini">
-        <span class="pv-mini-label">Margem do Dia</span>
-        <span class="pv-mini-value" id="miniMargemDia">—</span>
-        <span class="pv-mini-sub" id="miniMargemDiaPct">—</span>
-      </div>
-      <div class="pv-mini">
-        <span class="pv-mini-label">Margem Acum. Mês</span>
-        <span class="pv-mini-value" id="miniMargemMes">—</span>
-        <span class="pv-mini-sub" id="miniMargemMesPct">—</span>
-      </div>
-      <div class="pv-mini">
-        <span class="pv-mini-label">Margem PDV Acum.</span>
-        <span class="pv-mini-value" id="miniMargemPdv">—</span>
-        <span class="pv-mini-sub" id="miniMargemPdvPct">—</span>
-      </div>
-      <div class="pv-mini">
-        <span class="pv-mini-label">Ritmo Diário</span>
-        <span class="pv-mini-value" id="miniRitmo">—</span>
-        <span class="pv-mini-sub" id="miniRitmoNeed">Precisa: —</span>
-      </div>
+    <!-- ===== Gauge: Realizado Meta do dia ===== -->
+    <section class="pv-gauge-block">
+      <div class="pv-gauge-title">Realizado Meta do dia</div>
+      <svg class="pv-gauge-svg" viewBox="0 0 200 120">
+        <defs>
+          <linearGradient id="gaugeGrad" x1="0%" x2="100%" y1="0%" y2="0%">
+            <stop offset="0%"   stop-color="#dc2626"/>
+            <stop offset="50%"  stop-color="#fbbf24"/>
+            <stop offset="100%" stop-color="#22c55e"/>
+          </linearGradient>
+        </defs>
+        <path d="M 20 105 A 80 80 0 0 1 180 105"
+              stroke="var(--bg-input)" stroke-width="16" fill="none" stroke-linecap="round"/>
+        <path id="gaugeFill"
+              d="M 20 105 A 80 80 0 0 1 180 105"
+              stroke="url(#gaugeGrad)" stroke-width="16" fill="none" stroke-linecap="round"
+              stroke-dasharray="251.3" stroke-dashoffset="251.3"
+              style="transition: stroke-dashoffset .5s ease;"/>
+      </svg>
+      <div class="pv-gauge-pct" id="gaugePct">—</div>
     </section>
 
   </div>
@@ -109,6 +121,6 @@
 </div>
 
 <script src="sidebar.js"></script>
-<script src="painel-vivo.js?v=5"></script>
+<script src="painel-vivo.js?v=6"></script>
 </body>
 </html>

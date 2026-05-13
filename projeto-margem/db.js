@@ -84,6 +84,17 @@ export async function migrate() {
     CREATE UNIQUE INDEX IF NOT EXISTS users_email_unique ON users (LOWER(email)) WHERE email IS NOT NULL;
   `);
 
+  // ===== Inventário Rotativo: itens por loja em tabela própria =====
+  // Storage granular (1 row por loja, JSONB com os itens daquela loja) evita
+  // INSERT de um único JSONB gigante (~16MB) que estourou o pg do Render free.
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS inv_rotativo_itens (
+      nroempresa INTEGER PRIMARY KEY,
+      itens JSONB NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+
   // ===== Dimensões (Configurações > Dimensões) =====
   await pool.query(`
     CREATE TABLE IF NOT EXISTS dim_lojas (

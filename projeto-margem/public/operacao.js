@@ -531,7 +531,10 @@ function renderTabelaInvRot() {
   tbody.innerHTML = html || `<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);">sem dados</td></tr>`;
 }
 
-function abrirModalInvRot(nroempresaStr) {
+// Cache dos itens fetched por loja (memoiza no clique seguinte da mesma loja)
+const INV_ROT_ITENS_CACHE = new Map();
+
+async function abrirModalInvRot(nroempresaStr) {
   if (!INV_ROT) return;
   const nro = parseInt(nroempresaStr, 10);
   const lojaInfo = (INV_ROT.lojas || []).find(l => l.nroempresa === nro);
@@ -539,14 +542,34 @@ function abrirModalInvRot(nroempresaStr) {
   invRotLojaAtiva = nro;
   invRotFiltroComprador = null;
 
-  const itens = (INV_ROT.itens || []).filter(it => it.nroempresa === nro);
+  $('#modalInvRotTitulo').textContent = `Inv. Rotativo — ${lojaInfo.loja_nome || ('Loja ' + nro)} (${nro})`;
+  $('#modalInvRotInfo').innerHTML = `Carregando itens…`;
+  $('#modalInvRotTabs').innerHTML = '';
+  $('#tbodyInvRotComp').innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text-muted);">Carregando…</td></tr>`;
+  $('#modalInvRot').classList.add('open');
 
+  let itens = INV_ROT_ITENS_CACHE.get(nro);
+  if (!itens) {
+    try {
+      const r = await api('GET', `/api/inv-rotativo/loja/${nro}`);
+      itens = (r.itens || []).map(it => ({ ...it, nroempresa: nro }));
+      INV_ROT_ITENS_CACHE.set(nro, itens);
+    } catch (err) {
+      $('#modalInvRotInfo').innerHTML = `<span style="color:var(--neg);">Erro: ${escapeHtml(err.message)}</span>`;
+      return;
+    }
+  }
+
+  // Só essa loja, depois o filtro vem do invRotFiltroComprador
+  if (invRotLojaAtiva !== nro) return; // user já clicou em outra coisa
+
+  // Tabs de comprador agregam pelo VALOR de inventário (sem nulls)
   const comps = {};
   for (const it of itens) {
     const c = it.comprador || '—';
     if (!comps[c]) comps[c] = { valor: 0, qtd: 0, count: 0 };
     comps[c].valor += it.valor || 0;
-    comps[c].qtd += it.qtd || 0;
+    comps[c].qtd   += it.qtd || 0;
     comps[c].count++;
   }
   const compsOrdenados = Object.entries(comps).sort((a, b) => Math.abs(b[1].valor) - Math.abs(a[1].valor));
@@ -557,19 +580,17 @@ function abrirModalInvRot(nroempresaStr) {
   }
   $('#modalInvRotTabs').innerHTML = tabs;
 
-  $('#modalInvRotTitulo').textContent = `Inv. Rotativo — ${lojaInfo.loja_nome || ('Loja ' + nro)} (${nro})`;
   $('#modalInvRotInfo').innerHTML = `
     <b>${itens.length}</b> itens · Total: <b>${fmtRs(lojaInfo.valor)}</b> · Venda: <b>${fmtRs(lojaInfo.venda)}</b> · ${Object.keys(comps).length} compradores
   `;
 
   renderModalInvRotLista();
-  $('#modalInvRot').classList.add('open');
 }
 
 function renderModalInvRotLista() {
-  if (!INV_ROT) return;
-  const itens = (INV_ROT.itens || [])
-    .filter(it => it.nroempresa === invRotLojaAtiva)
+  if (!INV_ROT || invRotLojaAtiva == null) return;
+  const itensLoja = INV_ROT_ITENS_CACHE.get(invRotLojaAtiva) || [];
+  const itens = itensLoja
     .filter(it => !invRotFiltroComprador || it.comprador === invRotFiltroComprador);
 
   // Total filtrado = soma do INVENTÁRIO (não da venda). Itens só-venda têm valor null e não contam aqui.

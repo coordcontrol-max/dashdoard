@@ -394,7 +394,7 @@ app.get('/api/ruptura', authRequired, async (req, res) => {
 });
 
 // ===== Inventário Rotativo =====
-// Aplica dim_lojas na lista de lojas (adiciona campo `loja_nome`) e nos itens.
+// Aplica dim_lojas adicionando loja_nome em lojas[] (e em itens[] se vier).
 async function aplicarDimLojasInvRotativo(inv) {
   if (!inv) return inv;
   const rows = await query('SELECT nroempresa, nome FROM dim_lojas');
@@ -411,15 +411,35 @@ async function aplicarDimLojasInvRotativo(inv) {
   return out;
 }
 
+// GET meta (lojas + total + periodo) — SEM itens, leve. Itens vão por endpoint próprio.
 app.get('/api/inv-rotativo', authRequired, async (req, res) => {
   if (!DATA_INV_ROTATIVO) return res.status(404).json({ error: 'inventário rotativo ainda não foi carregado' });
   try {
     const enriched = await aplicarDimLojasInvRotativo(DATA_INV_ROTATIVO);
+    // Por segurança, garante que itens não vai (deveria estar vazio no DATA_INV_ROTATIVO mesmo).
+    delete enriched.itens;
     res.json(enriched);
   } catch (err) {
     console.error('aplicarDimLojasInvRotativo falhou:', err.message);
-    res.json(DATA_INV_ROTATIVO);
+    const fallback = { ...DATA_INV_ROTATIVO };
+    delete fallback.itens;
+    res.json(fallback);
   }
+});
+
+// GET itens de uma loja específica (lazy load no drill).
+app.get('/api/inv-rotativo/loja/:nroempresa', authRequired, async (req, res) => {
+  const nro = parseInt(req.params.nroempresa, 10);
+  if (!Number.isInteger(nro) || nro <= 0) return res.status(400).json({ error: 'NROEMPRESA inválido' });
+  const row = await queryOne('SELECT itens, updated_at FROM inv_rotativo_itens WHERE nroempresa = $1', [nro]);
+  if (!row) return res.json({ nroempresa: nro, itens: [], updated_at: null });
+  const lojaRow = await queryOne('SELECT nome FROM dim_lojas WHERE nroempresa = $1', [nro]);
+  res.json({
+    nroempresa: nro,
+    loja_nome: lojaRow?.nome || `Loja ${nro}`,
+    itens: row.itens || [],
+    updated_at: row.updated_at,
+  });
 });
 
 // ===== Vagas (Google Sheets) =====
@@ -1240,9 +1260,45 @@ app.post('/api/admin/upload-dados', adminRequired, async (req, res) => {
     atualizados.push(`estrategia (${req.body.estrategia.lojas?.length || 0} lojas)`);
   }
   if (req.body.inv_rotativo && typeof req.body.inv_rotativo === 'object') {
-    await salvar('inv_rotativo', req.body.inv_rotativo);
-    DATA_INV_ROTATIVO = req.body.inv_rotativo;
-    atualizados.push(`inv_rotativo (${req.body.inv_rotativo.lojas?.length || 0} lojas, ${req.body.inv_rotativo.itens?.length || 0} itens)`);
+    // Split: meta (lojas/total/periodo/gerado_em, pequeno) vai pra app_data.
+    // Itens (potencialmente ~16MB) vão pra inv_rotativo_itens granular por loja
+    // — 1 row por loja, ~600KB cada, evita JSONB gigante que estoura o pg.
+    const inv = req.body.inv_rotativo;
+    const itensAll = Array.isArray(inv.itens) ? inv.itens : [];
+    const meta = { ...inv };
+    delete meta.itens;
+    await salvar('inv_rotativo', meta);
+
+    // Agrupa itens por nroempresa
+    const porLoja = new Map();
+    for (const it of itensAll) {
+      const nro = it.nroempresa;
+      if (!Number.isInteger(nro)) continue;
+      if (!porLoja.has(nro)) porLoja.set(nro, []);
+      // Drop nroempresa do item interno pra economizar bytes (já tá na chave da tabela)
+      const { nroempresa: _drop, ...rest } = it;
+      porLoja.get(nro).push(rest);
+    }
+    // Apaga lojas que não vieram no upload e UPSERT as que vieram
+    const lojasVindas = Array.from(porLoja.keys());
+    if (lojasVindas.length > 0) {
+      await run(
+        `DELETE FROM inv_rotativo_itens WHERE nroempresa NOT IN (${lojasVindas.map((_, i) => '$' + (i + 1)).join(',')})`,
+        lojasVindas
+      );
+    } else {
+      await run('TRUNCATE inv_rotativo_itens', []);
+    }
+    for (const [nro, lista] of porLoja.entries()) {
+      await run(
+        `INSERT INTO inv_rotativo_itens (nroempresa, itens, updated_at)
+         VALUES ($1, $2::jsonb, NOW())
+         ON CONFLICT (nroempresa) DO UPDATE SET itens = EXCLUDED.itens, updated_at = NOW()`,
+        [nro, JSON.stringify(lista)]
+      );
+    }
+    DATA_INV_ROTATIVO = meta;
+    atualizados.push(`inv_rotativo (${meta.lojas?.length || 0} lojas, ${itensAll.length} itens distribuídos em ${porLoja.size} tabelas-loja)`);
   }
   if (atualizados.length === 0) return res.status(400).json({ error: 'nenhum dado válido enviado' });
   console.log(`↻ upload-dados por ${req.user.username}: ${atualizados.join(', ')}`);

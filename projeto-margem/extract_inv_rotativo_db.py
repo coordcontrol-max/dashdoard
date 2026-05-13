@@ -103,7 +103,11 @@ GROUP BY
 
 # ============================================================
 # Q2 — Vendas (mesmo período/escopo)
-# Idêntica à 'Vendas' do Power Query, parametrizando data.
+# Idêntica à 'Vendas' do Power Query: preserva TODOS os JOINs originais
+# (incluindo MAP_PRODUTO PB, MRL_CUSTODIA Y, LEFT JOIN MAP_PRODACRESCCUSTORELAC PR)
+# porque são INNER JOINs que filtram o escopo de linhas — sem eles o
+# total de VENDA não bate. Só dropamos as colunas MARGEM/VERBA do SELECT
+# (não usadas pelo relatório), mantendo a estrutura idêntica.
 # ============================================================
 SQL_VENDAS = f"""
 SELECT
@@ -119,9 +123,13 @@ FROM  MAXV_ABCDISTRIBBASE      V
 JOIN  MAX_EMPRESA               E   ON  E.NROEMPRESA       = V.NROEMPRESA
 JOIN  MAX_DIVISAO               DV  ON  DV.NRODIVISAO      = E.NRODIVISAO
 JOIN  MAP_PRODUTO               A   ON  A.SEQPRODUTO       = V.SEQPRODUTO
+JOIN  MAP_PRODUTO               PB  ON  PB.SEQPRODUTO      = V.SEQPRODUTOCUSTO
 JOIN  MAP_FAMDIVISAO            D   ON  D.SEQFAMILIA       = A.SEQFAMILIA
                                     AND D.NRODIVISAO       = V.NRODIVISAO
 JOIN  MAX_COMPRADOR             O   ON  O.SEQCOMPRADOR     = D.SEQCOMPRADOR
+JOIN  MRL_CUSTODIA              Y   ON  Y.NROEMPRESA       = NVL(E.NROEMPCUSTOABC, E.NROEMPRESA)
+                                    AND Y.DTAENTRADASAIDA  = V.DTAVDA
+                                    AND Y.SEQPRODUTO       = PB.SEQPRODUTO
 JOIN  MAP_FAMDIVCATEG           U   ON  U.SEQFAMILIA       = D.SEQFAMILIA
                                     AND U.NRODIVISAO       = D.NRODIVISAO
                                     AND U.STATUS           = 'A'
@@ -130,6 +138,8 @@ JOIN  MAXV_CATEGORIA            G   ON  G.SEQCATEGORIA     = U.SEQCATEGORIA
                                     AND G.NIVELHIERARQUIA  = 3
                                     AND G.TIPCATEGORIA     = 'M'
                                     AND G.STATUSCATEGOR   != 'I'
+LEFT JOIN MAP_PRODACRESCCUSTORELAC PR ON  PR.SEQPRODUTO      = V.SEQPRODUTO
+                                      AND PR.DTAMOVIMENTACAO = V.DTAVDA
 WHERE V.DTAVDA BETWEEN {INV_DATA_INI} AND {INV_DATA_FIM}
   AND DECODE(V.TIPTABELA, 'S', V.CGOACMCOMPRAVENDA, V.ACMCOMPRAVENDA) IN ('S','I')
   AND D.SEQCOMPRADOR != 14

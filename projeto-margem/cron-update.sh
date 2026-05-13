@@ -75,6 +75,10 @@ LOG="logs/$(date +%Y-%m-%d).log"
   ~/.venv-oracle/bin/python3 extract_estrategia_db.py
 
   echo
+  echo "→ rodando extract_inv_rotativo_db.py (Inventário Rotativo · Operação aba 8)…"
+  ~/.venv-oracle/bin/python3 extract_inv_rotativo_db.py
+
+  echo
   echo "→ enviando dados pro site (Render)…"
   ./scripts/upload-dados.sh ambos
 

@@ -366,18 +366,22 @@
             <div class="dim-card">
               <div class="dim-card-header">
                 <h3>Lojas</h3>
-                <span class="dim-count" id="dimLojasCount">—</span>
+                <div style="display:flex;gap:8px;align-items:center;">
+                  <span class="dim-count" id="dimLojasCount">—</span>
+                  <button class="btn primary" id="btnNovaLoja" style="padding:6px 12px;font-size:12px;">+ Nova loja</button>
+                </div>
               </div>
               <div class="dim-card-body">
                 <div class="users-card">
                   <table class="users-table">
                     <thead>
                       <tr>
-                        <th style="width:140px;">NROEMPRESA</th>
+                        <th style="width:130px;">NROEMPRESA</th>
                         <th>NOME DA LOJA</th>
+                        <th class="center" style="width:110px;">Ações</th>
                       </tr>
                     </thead>
-                    <tbody id="dimLojasTbody"><tr><td colspan="2" style="text-align:center;padding:18px;color:var(--text-muted);">Carregando…</td></tr></tbody>
+                    <tbody id="dimLojasTbody"><tr><td colspan="3" style="text-align:center;padding:18px;color:var(--text-muted);">Carregando…</td></tr></tbody>
                   </table>
                 </div>
               </div>
@@ -515,6 +519,40 @@
       <button type="button" class="btn" data-close-link>Fechar</button>
       <button type="button" class="btn primary" id="btnCopiarLink">Copiar link</button>
     </div>
+  </div>
+</div>
+
+<!-- Modal de criar/editar loja -->
+<div class="modal-backdrop" id="modalLoja">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modalLojaTitle">Nova loja</h3>
+      <button class="modal-close" data-close-loja>&times;</button>
+    </div>
+    <form id="formLoja">
+      <div class="modal-body">
+        <input type="hidden" id="lojaIdOriginal">
+        <div class="field-row">
+          <div class="field">
+            <label>NROEMPRESA *</label>
+            <input id="fLojaNro" type="number" min="1" step="1" required placeholder="Ex: 101">
+          </div>
+          <div class="field" style="grid-column: span 1;">
+            <label style="visibility:hidden;">.</label>
+            <div style="color:var(--text-muted);font-size:11px;padding-top:10px;">Pode editar o número também</div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Nome da loja *</label>
+          <input id="fLojaNome" type="text" required placeholder="Ex: NSP MATRIZ">
+        </div>
+        <div class="err" id="formLojaErr"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" data-close-loja>Cancelar</button>
+        <button type="submit" class="btn primary" id="btnSalvarLoja">Salvar</button>
+      </div>
+    </form>
   </div>
 </div>
 

@@ -1251,6 +1251,46 @@ app.get('/api/dim/meses', authRequired, async (req, res) => {
   res.json(rows);
 });
 
+// Edição de Lojas (admin)
+app.post('/api/dim/lojas', adminRequired, async (req, res) => {
+  const nroempresa = parseInt(req.body?.nroempresa, 10);
+  const nome = String(req.body?.nome || '').trim();
+  if (!Number.isInteger(nroempresa) || nroempresa <= 0) return res.status(400).json({ error: 'NROEMPRESA precisa ser um inteiro positivo' });
+  if (!nome) return res.status(400).json({ error: 'Nome é obrigatório' });
+  const exists = await queryOne('SELECT nroempresa FROM dim_lojas WHERE nroempresa = $1', [nroempresa]);
+  if (exists) return res.status(409).json({ error: `Já existe loja com NROEMPRESA ${nroempresa}` });
+  await run('INSERT INTO dim_lojas (nroempresa, nome) VALUES ($1, $2)', [nroempresa, nome]);
+  res.json({ nroempresa, nome });
+});
+
+app.put('/api/dim/lojas/:nroempresa', adminRequired, async (req, res) => {
+  const oldId = parseInt(req.params.nroempresa, 10);
+  if (!Number.isInteger(oldId) || oldId <= 0) return res.status(400).json({ error: 'NROEMPRESA inválido' });
+  const newId = req.body?.nroempresa != null ? parseInt(req.body.nroempresa, 10) : oldId;
+  const nome = req.body?.nome != null ? String(req.body.nome).trim() : null;
+  if (!Number.isInteger(newId) || newId <= 0) return res.status(400).json({ error: 'novo NROEMPRESA precisa ser um inteiro positivo' });
+  if (nome != null && !nome) return res.status(400).json({ error: 'Nome não pode ser vazio' });
+
+  const cur = await queryOne('SELECT * FROM dim_lojas WHERE nroempresa = $1', [oldId]);
+  if (!cur) return res.status(404).json({ error: 'loja não encontrada' });
+
+  if (newId !== oldId) {
+    const dup = await queryOne('SELECT nroempresa FROM dim_lojas WHERE nroempresa = $1', [newId]);
+    if (dup) return res.status(409).json({ error: `Já existe loja com NROEMPRESA ${newId}` });
+  }
+
+  await run('UPDATE dim_lojas SET nroempresa = $1, nome = COALESCE($2, nome) WHERE nroempresa = $3', [newId, nome, oldId]);
+  res.json({ nroempresa: newId, nome: nome ?? cur.nome });
+});
+
+app.delete('/api/dim/lojas/:nroempresa', adminRequired, async (req, res) => {
+  const id = parseInt(req.params.nroempresa, 10);
+  if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'NROEMPRESA inválido' });
+  const r = await run('DELETE FROM dim_lojas WHERE nroempresa = $1', [id]);
+  if (!r.rowCount) return res.status(404).json({ error: 'loja não encontrada' });
+  res.json({ ok: true });
+});
+
 app.get('/api/users', adminRequired, async (req, res) => {
   const rows = await query(`
     SELECT id, username, nome, email, telefone, cpf, cargo, nivel, ativo, is_admin, senha_definida, token_primeiro_acesso, token_expira_em, created_at

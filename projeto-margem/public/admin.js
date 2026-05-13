@@ -348,6 +348,33 @@ function ativarDimSubtab(nome) {
 }
 
 let DIM_GERAL_CARREGADA = false;
+let LOJAS_CACHE = [];
+
+function renderLojasTabela() {
+  const tb = $('#dimLojasTbody');
+  if (!LOJAS_CACHE.length) {
+    tb.innerHTML = `<tr><td colspan="3" style="text-align:center;padding:18px;color:var(--text-muted);">Sem lojas cadastradas</td></tr>`;
+  } else {
+    tb.innerHTML = LOJAS_CACHE.map(l => `
+      <tr data-loja-nro="${l.nroempresa}">
+        <td style="font-variant-numeric: tabular-nums; font-weight: 600;">${l.nroempresa}</td>
+        <td>${escapeHtml(l.nome)}</td>
+        <td>
+          <div class="actions-cell" style="justify-content:center;">
+            <button class="icon-btn blue" title="Editar loja" data-action="loja-edit" data-id="${l.nroempresa}">✏️</button>
+            <button class="icon-btn red" title="Excluir loja" data-action="loja-del" data-id="${l.nroempresa}">🗑</button>
+          </div>
+        </td>
+      </tr>`).join('');
+  }
+  $('#dimLojasCount').textContent = `${LOJAS_CACHE.length} ${LOJAS_CACHE.length === 1 ? 'loja' : 'lojas'}`;
+}
+
+async function recarregarLojas() {
+  LOJAS_CACHE = await api('GET', '/api/dim/lojas');
+  renderLojasTabela();
+}
+
 async function carregarDimensoesGeral() {
   if (DIM_GERAL_CARREGADA) return;
   try {
@@ -357,15 +384,8 @@ async function carregarDimensoesGeral() {
       api('GET', '/api/dim/meses'),
     ]);
 
-    const tbLojas = $('#dimLojasTbody');
-    tbLojas.innerHTML = lojas.length
-      ? lojas.map(l => `
-          <tr>
-            <td style="font-variant-numeric: tabular-nums; font-weight: 600;">${l.nroempresa}</td>
-            <td>${escapeHtml(l.nome)}</td>
-          </tr>`).join('')
-      : `<tr><td colspan="2" style="text-align:center;padding:18px;color:var(--text-muted);">Sem lojas cadastradas</td></tr>`;
-    $('#dimLojasCount').textContent = `${lojas.length} ${lojas.length === 1 ? 'loja' : 'lojas'}`;
+    LOJAS_CACHE = lojas;
+    renderLojasTabela();
 
     const tbAnos = $('#dimAnosTbody');
     tbAnos.innerHTML = anos.length
@@ -388,6 +408,71 @@ async function carregarDimensoesGeral() {
     console.error('Erro carregando dimensões:', err);
   }
 }
+
+// ===== CRUD de Lojas =====
+function abrirModalLoja(loja) {
+  $('#lojaIdOriginal').value = loja?.nroempresa ?? '';
+  $('#fLojaNro').value = loja?.nroempresa ?? '';
+  $('#fLojaNome').value = loja?.nome ?? '';
+  $('#modalLojaTitle').textContent = loja ? `Editar loja · NROEMPRESA ${loja.nroempresa}` : 'Nova loja';
+  $('#formLojaErr').textContent = '';
+  $('#modalLoja').classList.add('open');
+  setTimeout(() => $('#fLojaNro').focus(), 30);
+}
+function fecharModalLoja() { $('#modalLoja').classList.remove('open'); }
+
+$$('[data-close-loja]').forEach(b => b.addEventListener('click', fecharModalLoja));
+$('#modalLoja').addEventListener('click', e => { if (e.target.id === 'modalLoja') fecharModalLoja(); });
+
+$('#btnNovaLoja').addEventListener('click', () => abrirModalLoja(null));
+
+$('#formLoja').addEventListener('submit', async e => {
+  e.preventDefault();
+  $('#formLojaErr').textContent = '';
+  const original = $('#lojaIdOriginal').value;
+  const nroempresa = parseInt($('#fLojaNro').value, 10);
+  const nome = $('#fLojaNome').value.trim();
+  if (!Number.isInteger(nroempresa) || nroempresa <= 0) {
+    $('#formLojaErr').textContent = 'NROEMPRESA precisa ser um inteiro positivo';
+    return;
+  }
+  if (!nome) {
+    $('#formLojaErr').textContent = 'Nome é obrigatório';
+    return;
+  }
+  try {
+    if (original) {
+      await api('PUT', `/api/dim/lojas/${original}`, { nroempresa, nome });
+    } else {
+      await api('POST', '/api/dim/lojas', { nroempresa, nome });
+    }
+    fecharModalLoja();
+    await recarregarLojas();
+  } catch (err) {
+    $('#formLojaErr').textContent = err.message;
+  }
+});
+
+// Ações por linha (editar/excluir)
+$('#dimLojasTbody').addEventListener('click', async e => {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  const id = parseInt(btn.dataset.id, 10);
+  const action = btn.dataset.action;
+  const loja = LOJAS_CACHE.find(l => l.nroempresa === id);
+  if (!loja) return;
+  if (action === 'loja-edit') {
+    abrirModalLoja(loja);
+  } else if (action === 'loja-del') {
+    if (!confirm(`Excluir loja "${loja.nome}" (NROEMPRESA ${loja.nroempresa})?`)) return;
+    try {
+      await api('DELETE', `/api/dim/lojas/${id}`);
+      await recarregarLojas();
+    } catch (err) {
+      alert('Erro: ' + err.message);
+    }
+  }
+});
 $$('.dim-subtab').forEach(btn => {
   btn.addEventListener('click', () => ativarDimSubtab(btn.dataset.dimTab));
 });

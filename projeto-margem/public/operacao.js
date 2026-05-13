@@ -599,7 +599,7 @@ const INV_ROT_TOTAL_EXPANDED = new Set();   // keys de produtos com loja-drill a
 async function abrirModalInvRotTotal() {
   $('#modalInvRotTotalInfo').innerHTML = 'Carregando itens agregados…';
   $('#modalInvRotTotalTabs').innerHTML = '';
-  $('#tbodyInvRotTotal').innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted);">Carregando…</td></tr>`;
+  $('#tbodyInvRotTotal').innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);">Carregando…</td></tr>`;
   $('#modalInvRotTotal').classList.add('open');
   INV_ROT_TOTAL_EXPANDED.clear();
   invRotTotalFiltroComprador = null;
@@ -676,7 +676,6 @@ function renderModalInvRotTotalLista() {
     html += `
       <tr class="invrot-total-row${isOpen ? ' open' : ''}" data-produto="${escapeHtml(it.produto)}" style="cursor:pointer;">
         <td><span style="color:var(--text-muted);margin-right:4px;">${chev}</span>${escapeHtml(it.produto)}</td>
-        <td>${escapeHtml(it.comprador || '—')}</td>
         <td class="num">${cell(it.qtd, fmtNum)}</td>
         <td class="num">${cell(it.valor, fmtRs)}</td>
         <td class="num">${cell(it.venda, fmtRs)}</td>
@@ -689,7 +688,7 @@ function renderModalInvRotTotalLista() {
         const pctL = (l.valor != null && l.venda != null && l.venda !== 0) ? l.valor / l.venda : null;
         html += `
           <tr class="invrot-total-loja" style="background: var(--bg-row-hover);">
-            <td colspan="2" style="padding-left:36px;color:var(--text-muted);">↳ ${escapeHtml(l.loja_nome)} <small>(${l.nroempresa})</small></td>
+            <td style="padding-left:36px;color:var(--text-muted);">↳ ${escapeHtml(l.loja_nome)} <small>(${l.nroempresa})</small></td>
             <td class="num">${cell(l.qtd, fmtNum)}</td>
             <td class="num">${cell(l.valor, fmtRs)}</td>
             <td class="num">${cell(l.venda, fmtRs)}</td>
@@ -699,7 +698,7 @@ function renderModalInvRotTotalLista() {
       }
     }
   }
-  $('#tbodyInvRotTotal').innerHTML = html || `<tr><td colspan="6" style="text-align:center;padding:18px;color:var(--text-muted);">sem itens</td></tr>`;
+  $('#tbodyInvRotTotal').innerHTML = html || `<tr><td colspan="5" style="text-align:center;padding:18px;color:var(--text-muted);">sem itens</td></tr>`;
 }
 
 function renderModalInvRotLista() {

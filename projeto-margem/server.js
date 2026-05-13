@@ -62,6 +62,7 @@ let DATA_MARGEM_LOJA = null;
 let DATA_OPERACAO = null;
 let DATA_ESTRATEGIA = null;
 let DATA_INV_ROTATIVO = null;
+let DATA_INV_ROTATIVO_TOTAL = null;   // cache do agregado /api/inv-rotativo/itens-total
 
 async function carregarDadosDoBanco() {
   const rows = await query('SELECT key, data FROM app_data');
@@ -103,6 +104,12 @@ async function seedDadosDeArquivosLocais() {
 
 await seedDadosDeArquivosLocais();
 await carregarDadosDoBanco();
+
+// Pré-computa o agregado de Inv. Rotativo em background pra o primeiro
+// GET /api/inv-rotativo/itens-total ser instantâneo (~ms ao invés de ~5s).
+setImmediate(() => {
+  computarInvRotativoTotal().catch(e => console.error('Boot: erro pré-computando inv-rotativo total:', e.message));
+});
 
 // ===== Ruptura: snapshot diário + evolução =====
 async function salvarSnapshotRuptura(ruptura) {
@@ -427,15 +434,14 @@ app.get('/api/inv-rotativo', authRequired, async (req, res) => {
   }
 });
 
-// GET itens agregados por produto across todas as lojas (TOTAL drill).
-// Resposta: array de itens com totais + breakdown por loja inline pra drilldown.
-app.get('/api/inv-rotativo/itens-total', authRequired, async (req, res) => {
+// Computa e cacheia a agregação por produto across todas as lojas.
+// Roda 1x por upload (não a cada GET) — economiza ~5s no Render free tier.
+async function computarInvRotativoTotal() {
+  const t0 = Date.now();
   const rows = await query('SELECT nroempresa, itens FROM inv_rotativo_itens');
   const dimRows = await query('SELECT nroempresa, nome FROM dim_lojas');
   const nomeLoja = new Map(dimRows.map(r => [r.nroempresa, r.nome]));
 
-  // Agrega por chave produto (string canônica — bate quando o nome bate).
-  // Mantém também o primeiro comprador encontrado pra filtro/exibição.
   const agg = new Map();
   for (const row of rows) {
     const nro = row.nroempresa;
@@ -469,13 +475,23 @@ app.get('/api/inv-rotativo/itens-total', authRequired, async (req, res) => {
       });
     }
   }
-  // Ordena lojas dentro de cada item por nroempresa
-  for (const item of agg.values()) {
-    item.lojas.sort((a, b) => a.nroempresa - b.nroempresa);
+  for (const item of agg.values()) item.lojas.sort((a, b) => a.nroempresa - b.nroempresa);
+
+  DATA_INV_ROTATIVO_TOTAL = { itens: Array.from(agg.values()) };
+  console.log(`✓ inv_rotativo agregado em ${Date.now() - t0}ms: ${DATA_INV_ROTATIVO_TOTAL.itens.length} produtos`);
+}
+
+// GET itens agregados por produto across todas as lojas (TOTAL drill).
+// Serve do cache; se nunca foi computado, computa agora.
+app.get('/api/inv-rotativo/itens-total', authRequired, async (req, res) => {
+  if (!DATA_INV_ROTATIVO_TOTAL) {
+    try { await computarInvRotativoTotal(); }
+    catch (err) {
+      console.error('computarInvRotativoTotal falhou:', err.message);
+      return res.status(500).json({ error: 'falha ao agregar' });
+    }
   }
-  res.json({
-    itens: Array.from(agg.values()),
-  });
+  res.json(DATA_INV_ROTATIVO_TOTAL);
 });
 
 // GET itens de uma loja específica (lazy load no drill).
@@ -1349,6 +1365,8 @@ app.post('/api/admin/upload-dados', adminRequired, async (req, res) => {
       );
     }
     DATA_INV_ROTATIVO = meta;
+    // Recomputa o agregado em background pra próximo GET ser instantâneo
+    computarInvRotativoTotal().catch(e => console.error('Erro pré-computando inv-rotativo total:', e.message));
     atualizados.push(`inv_rotativo (${meta.lojas?.length || 0} lojas, ${itensAll.length} itens distribuídos em ${porLoja.size} tabelas-loja)`);
   }
   if (atualizados.length === 0) return res.status(400).json({ error: 'nenhum dado válido enviado' });

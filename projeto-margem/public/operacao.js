@@ -418,6 +418,178 @@ function renderTudo() {
   renderTabelaQuebraSecao('PERECIVEIS \\ FLV', '#tbodyQuebraFLV');
   renderTabelaCancel();
   renderTabelaSemVendas();
+  renderTabelaInvRot();
+}
+
+// ========== Aba 8 · Inventário Rotativo ==========
+let INV_ROT = null;
+let invRotLojaAtiva = null;
+let invRotFiltroComprador = null;
+
+async function carregarInvRotativo() {
+  try {
+    INV_ROT = await api('GET', '/api/inv-rotativo');
+    renderTabelaInvRot();
+  } catch (err) {
+    INV_ROT = null;
+    const tb = $('#tbodyInvRot');
+    if (tb) tb.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);">${escapeHtml(err.message || 'sem dados')}</td></tr>`;
+  }
+}
+
+// Classe pelo % (negativo = perda; meta tipo -0,60%)
+function classInvRotPct(v) {
+  if (v == null) return '';
+  const abs = Math.abs(v);
+  if (abs <= 0.005) return 'ating-ok';
+  if (abs <= 0.012) return 'ating-warn';
+  return 'ating-bad';
+}
+
+function renderTabelaInvRot() {
+  const tbody = $('#tbodyInvRot');
+  if (!tbody || !INV_ROT) return;
+
+  // Mapa supervisor por nroempresa (vindo de DADOS.lojas)
+  const supByNro = new Map();
+  for (const l of (DADOS?.lojas || [])) {
+    if (l.loja != null) supByNro.set(parseInt(l.loja, 10), l.supervisor);
+  }
+
+  let lojas = (INV_ROT.lojas || []).map(l => ({
+    ...l,
+    supervisor: supByNro.get(l.nroempresa) || null,
+  }));
+  if (filtroSupervisor) lojas = lojas.filter(l => l.supervisor === filtroSupervisor);
+
+  // Rank por |pct| (pior = maior perda relativa = rank 1)
+  const lojasComPct = lojas
+    .map(l => ({ l, abs: l.pct != null ? Math.abs(l.pct) : -1 }))
+    .filter(x => x.abs >= 0)
+    .sort((a, b) => b.abs - a.abs);
+  lojasComPct.forEach((x, i) => x.l._rank = i + 1);
+  const classRank = (rank) => (rank != null && rank <= 3) ? 'rank-bad' : '';
+
+  // Agrupa por supervisor
+  const grupos = {};
+  for (const l of lojas) {
+    const s = l.supervisor || 'Sem supervisor';
+    if (!grupos[s]) grupos[s] = [];
+    grupos[s].push(l);
+  }
+  const ordemSup = Object.keys(DADOS?.supervisores || {}).filter(s => grupos[s]);
+  for (const k of Object.keys(grupos)) if (!ordemSup.includes(k)) ordemSup.push(k);
+
+  let html = '';
+  for (const sup of ordemSup) {
+    const items = grupos[sup];
+    if (!items?.length) continue;
+    const totSup = items.reduce((acc, l) => {
+      acc.valor += l.valor || 0; acc.qtd += l.qtd || 0; acc.venda += l.venda || 0; return acc;
+    }, { valor: 0, qtd: 0, venda: 0 });
+    const pctSupV = totSup.venda > 0 ? totSup.valor / totSup.venda : null;
+    html += `
+      <tr class="supervisor">
+        <td>👤 ${escapeHtml(sup)} · ${items.length} lojas</td>
+        <td class="num">${fmtRs(totSup.valor)}</td>
+        <td class="num">${fmtNum(totSup.qtd)}</td>
+        <td class="num">—</td>
+        <td class="num ${classInvRotPct(pctSupV)}">${fmtPct(pctSupV)}</td>
+      </tr>
+    `;
+    for (const l of items) {
+      html += `
+        <tr>
+          <td>${escapeHtml(l.loja_nome || ('Loja ' + l.nroempresa))} <small style="color:var(--text-muted);">(${l.nroempresa})</small></td>
+          <td class="num"><span class="valor-link" data-loja-invrot="${l.nroempresa}">${fmtRs(l.valor)}</span></td>
+          <td class="num">${fmtNum(l.qtd)}</td>
+          <td class="num"><span class="${classRank(l._rank)}">${l._rank ?? '—'}</span></td>
+          <td class="num ${classInvRotPct(l.pct)}">${fmtPct(l.pct)}</td>
+        </tr>
+      `;
+    }
+  }
+
+  if (!filtroSupervisor && INV_ROT.total) {
+    const t = INV_ROT.total;
+    html += `
+      <tr class="total">
+        <td>TOTAL</td>
+        <td class="num"><b>${fmtRs(t.valor)}</b></td>
+        <td class="num"><b>${fmtNum(t.qtd)}</b></td>
+        <td class="num">—</td>
+        <td class="num ${classInvRotPct(t.pct)}"><b>${fmtPct(t.pct)}</b></td>
+      </tr>
+    `;
+  }
+
+  tbody.innerHTML = html || `<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);">sem dados</td></tr>`;
+}
+
+function abrirModalInvRot(nroempresaStr) {
+  if (!INV_ROT) return;
+  const nro = parseInt(nroempresaStr, 10);
+  const lojaInfo = (INV_ROT.lojas || []).find(l => l.nroempresa === nro);
+  if (!lojaInfo) return;
+  invRotLojaAtiva = nro;
+  invRotFiltroComprador = null;
+
+  const itens = (INV_ROT.itens || []).filter(it => it.nroempresa === nro);
+
+  const comps = {};
+  for (const it of itens) {
+    const c = it.comprador || '—';
+    if (!comps[c]) comps[c] = { valor: 0, qtd: 0, count: 0 };
+    comps[c].valor += it.valor || 0;
+    comps[c].qtd += it.qtd || 0;
+    comps[c].count++;
+  }
+  const compsOrdenados = Object.entries(comps).sort((a, b) => Math.abs(b[1].valor) - Math.abs(a[1].valor));
+
+  let tabs = `<button class="qb-tab active" data-comp-invrot="">Todos (${itens.length})</button>`;
+  for (const [c, info] of compsOrdenados) {
+    tabs += `<button class="qb-tab" data-comp-invrot="${escapeHtml(c)}">${escapeHtml(c)} · ${fmtRs(info.valor)} (${info.count})</button>`;
+  }
+  $('#modalInvRotTabs').innerHTML = tabs;
+
+  $('#modalInvRotTitulo').textContent = `Inv. Rotativo — ${lojaInfo.loja_nome || ('Loja ' + nro)} (${nro})`;
+  $('#modalInvRotInfo').innerHTML = `
+    <b>${itens.length}</b> itens · Total: <b>${fmtRs(lojaInfo.valor)}</b> · Venda: <b>${fmtRs(lojaInfo.venda)}</b> · ${Object.keys(comps).length} compradores
+  `;
+
+  renderModalInvRotLista();
+  $('#modalInvRot').classList.add('open');
+}
+
+function renderModalInvRotLista() {
+  if (!INV_ROT) return;
+  const itens = (INV_ROT.itens || [])
+    .filter(it => it.nroempresa === invRotLojaAtiva)
+    .filter(it => !invRotFiltroComprador || it.comprador === invRotFiltroComprador);
+  const totalFiltrado = itens.reduce((s, x) => s + (x.valor || 0), 0);
+
+  let html = '';
+  for (const it of itens) {
+    const pct = totalFiltrado !== 0 ? it.valor / totalFiltrado : null;
+    html += `
+      <tr>
+        <td>${escapeHtml(it.comprador || '—')}</td>
+        <td>${escapeHtml(it.produto || '—')}</td>
+        <td class="num">${fmtNum(it.qtd)}</td>
+        <td class="num">${fmtRs(it.valor)}</td>
+        <td class="num">${fmtPct(pct)}</td>
+      </tr>
+    `;
+  }
+  html += `
+    <tr class="total">
+      <td colspan="2">TOTAL ${invRotFiltroComprador ? '(' + escapeHtml(invRotFiltroComprador) + ')' : ''}</td>
+      <td class="num"><b>${fmtNum(itens.reduce((s, x) => s + (x.qtd || 0), 0))}</b></td>
+      <td class="num"><b>${fmtRs(totalFiltrado)}</b></td>
+      <td class="num"><b>100,00%</b></td>
+    </tr>
+  `;
+  $('#tbodyInvRotComp').innerHTML = html;
 }
 
 // ========== Aba 9 · Estoque s/ Vendas 10d ==========
@@ -1122,12 +1294,22 @@ async function init() {
     if (linkCancel) { abrirModalCancel(linkCancel.dataset.lojaCancel); return; }
     const linkSV = e.target.closest('[data-loja-semvendas]');
     if (linkSV) { abrirModalSemVendas(linkSV.dataset.lojaSemvendas); return; }
-    const tabQb = e.target.closest('.qb-tab');
-    if (tabQb) {
+    const linkIR = e.target.closest('[data-loja-invrot]');
+    if (linkIR) { abrirModalInvRot(linkIR.dataset.lojaInvrot); return; }
+    const tabQb = e.target.closest('.qb-tab:not([data-comp-invrot])');
+    if (tabQb && tabQb.hasAttribute('data-comp')) {
       $('#modalQuebraTabs').querySelectorAll('.qb-tab').forEach(t => t.classList.remove('active'));
       tabQb.classList.add('active');
       quebraFiltroComprador = tabQb.dataset.comp || null;
       renderModalQuebraLista();
+      return;
+    }
+    const tabIR = e.target.closest('[data-comp-invrot]');
+    if (tabIR) {
+      $('#modalInvRotTabs').querySelectorAll('.qb-tab').forEach(t => t.classList.remove('active'));
+      tabIR.classList.add('active');
+      invRotFiltroComprador = tabIR.dataset.compInvrot || null;
+      renderModalInvRotLista();
       return;
     }
   });
@@ -1149,6 +1331,12 @@ async function init() {
   $('#modalSemVendasClose').addEventListener('click', () => $('#modalSemVendas').classList.remove('open'));
   $('#modalSemVendasFechar').addEventListener('click', () => $('#modalSemVendas').classList.remove('open'));
   $('#modalSemVendas').addEventListener('click', e => { if (e.target.id === 'modalSemVendas') $('#modalSemVendas').classList.remove('open'); });
+  $('#modalInvRotClose').addEventListener('click', () => $('#modalInvRot').classList.remove('open'));
+  $('#modalInvRotFechar').addEventListener('click', () => $('#modalInvRot').classList.remove('open'));
+  $('#modalInvRot').addEventListener('click', e => { if (e.target.id === 'modalInvRot') $('#modalInvRot').classList.remove('open'); });
+
+  // Carrega Inv. Rotativo (independente do Operação principal)
+  carregarInvRotativo();
 
   const s = await api('GET', '/api/operacao/status');
   lastUpdatedAt = s.ultima_atualizacao;

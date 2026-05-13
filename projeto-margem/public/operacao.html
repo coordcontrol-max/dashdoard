@@ -260,11 +260,26 @@
 
   <!-- ABA 8 · Inventário Rotativo Geral -->
   <div class="op-tab-content" data-tab-content="8" hidden>
-    <div class="op-placeholder-big">
-      <h3>📋 Inventário Rotativo Geral</h3>
-      <p>Aguardando planilha no servidor de rede.</p>
-      <p class="hint">Me passe o caminho da planilha quando estiver pronto.</p>
-    </div>
+    <section class="op-bloco">
+      <div class="op-bloco-head">
+        <strong>📋 Inventário Rotativo</strong>
+        <span class="hint">acumulado do período · valores negativos = perda · clique no valor pra ver compradores/produtos</span>
+      </div>
+      <div class="ru-tabela-wrap">
+        <table id="tblInvRot">
+          <thead>
+            <tr>
+              <th>Loja</th>
+              <th class="num">Valor Inventário R$</th>
+              <th class="num">Qtd</th>
+              <th class="num">Rank</th>
+              <th class="num">% Venda</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyInvRot"><tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);">Carregando…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
   </div>
 
   <!-- ABA 9 · Produtos Estoque s/ Vendas 10 Dias -->
@@ -428,6 +443,37 @@
     </div>
     <div class="modal-footer">
       <button class="btn-mini primary" id="modalQuebraFechar">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: drill-down Inv. Rotativo por loja (compradores + produtos) -->
+<div class="modal-backdrop" id="modalInvRot">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <h3 id="modalInvRotTitulo">Inv. Rotativo — Loja</h3>
+      <button class="modal-close" id="modalInvRotClose">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="ru-info-bar" id="modalInvRotInfo"></div>
+      <div class="op-quebra-tabs" id="modalInvRotTabs" style="margin:8px 0;display:flex;gap:6px;flex-wrap:wrap;"></div>
+      <div class="ru-tabela-wrap" style="max-height:55vh;margin-top:8px;">
+        <table id="tblInvRotComp">
+          <thead>
+            <tr>
+              <th>Comprador</th>
+              <th>Produto</th>
+              <th class="num">Qtd</th>
+              <th class="num">Valor</th>
+              <th class="num">% do Total</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyInvRotComp"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-mini primary" id="modalInvRotFechar">Fechar</button>
     </div>
   </div>
 </div>

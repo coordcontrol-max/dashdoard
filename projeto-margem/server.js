@@ -61,6 +61,7 @@ let DATA_KPIS_RAW = null;   // Snapshot original do worker (sem manuais aplicada
 let DATA_MARGEM_LOJA = null;
 let DATA_OPERACAO = null;
 let DATA_ESTRATEGIA = null;
+let DATA_INV_ROTATIVO = null;
 
 async function carregarDadosDoBanco() {
   const rows = await query('SELECT key, data FROM app_data');
@@ -75,6 +76,7 @@ async function carregarDadosDoBanco() {
     else if (r.key === 'margem_loja') DATA_MARGEM_LOJA = r.data;
     else if (r.key === 'operacao') DATA_OPERACAO = r.data;
     else if (r.key === 'estrategia') DATA_ESTRATEGIA = r.data;
+    else if (r.key === 'inv_rotativo') DATA_INV_ROTATIVO = r.data;
   }
   console.log(`✓ DB · margem: ${DATA_MARGEM?.length || 0} cat · vendas: ${DATA_VENDAS?.dias?.length || 0} dias · ruptura: ${DATA_RUPTURA?.itens?.length || 0} itens · troca: ${DATA_TROCA?.itens?.length || 0} itens · vagas: ${DATA_VAGAS?.assistentes?.length || 0} assistentes · kpis: ${DATA_KPIS?.compradores?.length || 0} compradores · margem_loja: ${DATA_MARGEM_LOJA?.linhas?.length || 0} linhas`);
 }
@@ -388,6 +390,35 @@ app.get('/api/ruptura', authRequired, async (req, res) => {
     console.error('aplicarDimLojasRuptura falhou:', err.message);
     // Fallback pra não quebrar o relatório se a query falhar
     res.json(DATA_RUPTURA);
+  }
+});
+
+// ===== Inventário Rotativo =====
+// Aplica dim_lojas na lista de lojas (adiciona campo `loja_nome`) e nos itens.
+async function aplicarDimLojasInvRotativo(inv) {
+  if (!inv) return inv;
+  const rows = await query('SELECT nroempresa, nome FROM dim_lojas');
+  const mapa = new Map(rows.map(r => [r.nroempresa, r.nome]));
+  const nome = (nro) => mapa.get(nro) || `Loja ${nro}`;
+
+  const out = { ...inv };
+  if (Array.isArray(inv.lojas)) {
+    out.lojas = inv.lojas.map(l => ({ ...l, loja_nome: nome(l.nroempresa) }));
+  }
+  if (Array.isArray(inv.itens)) {
+    out.itens = inv.itens.map(it => ({ ...it, loja_nome: nome(it.nroempresa) }));
+  }
+  return out;
+}
+
+app.get('/api/inv-rotativo', authRequired, async (req, res) => {
+  if (!DATA_INV_ROTATIVO) return res.status(404).json({ error: 'inventário rotativo ainda não foi carregado' });
+  try {
+    const enriched = await aplicarDimLojasInvRotativo(DATA_INV_ROTATIVO);
+    res.json(enriched);
+  } catch (err) {
+    console.error('aplicarDimLojasInvRotativo falhou:', err.message);
+    res.json(DATA_INV_ROTATIVO);
   }
 });
 
@@ -1207,6 +1238,11 @@ app.post('/api/admin/upload-dados', adminRequired, async (req, res) => {
     await salvar('estrategia', req.body.estrategia);
     DATA_ESTRATEGIA = req.body.estrategia;
     atualizados.push(`estrategia (${req.body.estrategia.lojas?.length || 0} lojas)`);
+  }
+  if (req.body.inv_rotativo && typeof req.body.inv_rotativo === 'object') {
+    await salvar('inv_rotativo', req.body.inv_rotativo);
+    DATA_INV_ROTATIVO = req.body.inv_rotativo;
+    atualizados.push(`inv_rotativo (${req.body.inv_rotativo.lojas?.length || 0} lojas, ${req.body.inv_rotativo.itens?.length || 0} itens)`);
   }
   if (atualizados.length === 0) return res.status(400).json({ error: 'nenhum dado válido enviado' });
   console.log(`↻ upload-dados por ${req.user.username}: ${atualizados.join(', ')}`);

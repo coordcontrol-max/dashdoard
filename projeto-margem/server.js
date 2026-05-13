@@ -335,6 +335,66 @@ app.get('/api/vendas', authRequired, (req, res) => {
   res.json(DATA_VENDAS);
 });
 
+// ===== Vendas: refresh on-demand (Painel ao Vivo > botão Atualizar) =====
+// Qualquer usuário logado pode pedir um refresh. Se já tem uma pendente/processando,
+// reutiliza ela em vez de criar outra (evita fila gigante).
+app.post('/api/vendas/atualizar', authRequired, async (req, res) => {
+  const existente = await queryOne(
+    `SELECT * FROM vendas_atualizacao WHERE status IN ('pendente','processando') ORDER BY id DESC LIMIT 1`
+  );
+  if (existente) return res.json({ ok: true, jaExistia: true, solicitacao: existente });
+  const { row } = await run(
+    `INSERT INTO vendas_atualizacao (solicitado_por) VALUES ($1) RETURNING *`,
+    [req.user.id]
+  );
+  res.json({ ok: true, solicitacao: row });
+});
+
+// Status: última solicitação (pra poll) + quando vendas foram atualizadas pela última vez.
+app.get('/api/vendas/status', authRequired, async (req, res) => {
+  const ultimaSol = await queryOne(
+    `SELECT s.*, u.username AS solicitado_por_nome
+     FROM vendas_atualizacao s LEFT JOIN users u ON u.id = s.solicitado_por
+     ORDER BY s.id DESC LIMIT 1`
+  );
+  const ultimaAtualiz = await queryOne(
+    `SELECT updated_at FROM app_data WHERE key = 'vendas'`
+  );
+  res.json({
+    ultima_solicitacao: ultimaSol,
+    ultima_atualizacao: ultimaAtualiz?.updated_at || null,
+    tem_dados: DATA_VENDAS != null,
+  });
+});
+
+// === Endpoints do worker (admin) — usados pelo cron-venda-vivo.sh no PC ===
+app.post('/api/admin/vendas/proxima-pendente', adminRequired, async (req, res) => {
+  const { row } = await run(
+    `UPDATE vendas_atualizacao
+       SET status = 'processando', iniciado_em = NOW()
+     WHERE id = (
+       SELECT id FROM vendas_atualizacao
+       WHERE status = 'pendente'
+       ORDER BY id ASC LIMIT 1
+       FOR UPDATE SKIP LOCKED
+     )
+     RETURNING *`
+  );
+  res.json({ pendente: row || null });
+});
+
+app.post('/api/admin/vendas/finalizar', adminRequired, async (req, res) => {
+  const { id, status, mensagem } = req.body || {};
+  if (!id || !['ok', 'erro'].includes(status)) {
+    return res.status(400).json({ error: 'id e status (ok|erro) obrigatórios' });
+  }
+  await run(
+    `UPDATE vendas_atualizacao SET status = $1, processado_em = NOW(), mensagem = $2 WHERE id = $3`,
+    [status, mensagem || null, id]
+  );
+  res.json({ ok: true });
+});
+
 // ----- Reescrita de nomes de loja na Ruptura usando dim_lojas -----
 // As strings vêm do extract com NROEMPRESA no início (ex: "117-NSF 03",
 // "117-117-NSF 03", "131 - SR 02"). Pegamos o primeiro número e tentamos

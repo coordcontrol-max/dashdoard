@@ -17,7 +17,7 @@
 <header class="topbar">
   <div class="brand">
     <h1>Painel ao Vivo <span class="live-dot" title="Atualizando automaticamente"></span></h1>
-    <div class="sub">Venda e Meta · <span id="mesRef">—</span> · atualiza a cada 15 min · <small id="atualizadoEm" style="color:var(--text-muted);">—</small></div>
+    <div class="sub">Venda e Meta · <span id="mesRef">—</span> · clique em <b>Atualizar</b> pra puxar a venda atual · <small id="atualizadoEm" style="color:var(--text-muted);">—</small></div>
   </div>
   <div class="actions">
     <span id="userInfo" class="user-info"></span>
@@ -34,6 +34,16 @@
 <aside class="sidebar"></aside>
 <div class="main-content">
   <div class="pv-wrap">
+    <!-- ===== Filtro de data ===== -->
+    <section class="pv-filtro">
+      <label>
+        <span class="pv-filtro-label">Data de referência</span>
+        <input type="date" id="filtroData">
+      </label>
+      <button class="btn-mini" id="btnHoje" type="button">Hoje</button>
+      <span class="pv-filtro-hint" id="filtroDataHint">Acumulado é somado até a data selecionada (inclusive).</span>
+    </section>
+
     <!-- ===== 3 KPIs grandes lado a lado ===== -->
     <section class="pv-hero">
       <div class="pv-card pv-dia">
@@ -99,6 +109,6 @@
 </div>
 
 <script src="sidebar.js"></script>
-<script src="painel-vivo.js?v=3"></script>
+<script src="painel-vivo.js?v=5"></script>
 </body>
 </html>

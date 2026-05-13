@@ -30,8 +30,14 @@ const fmtData = (iso) => {
   return `${d}/${m}`;
 };
 
-let REFRESH_TIMER = null;
-const REFRESH_MS = 15 * 60 * 1000;  // 15 min — mesmo ciclo da ingestão de Venda Atual no Oracle
+// Atualização on-demand: botão "Atualizar" cria solicitação na fila → worker
+// no PC do João processa em ~1-2 min → frontend polla até status final.
+let POLL_TIMER = null;
+const POLL_MS = 3000;
+
+// Filtro de data: ISO YYYY-MM-DD ou null (= "ao vivo" = primeiro dia não-fechado).
+let DATA_SELECIONADA = null;
+let DADOS_CACHE = null;
 
 async function api(method, url, body) {
   const opts = { method, credentials: 'same-origin', headers: {} };
@@ -103,20 +109,29 @@ function aplicarKPI(prefix, venda, meta, opts = {}) {
   }
 }
 
+// Resolve o "dia ativo" — se DATA_SELECIONADA está setada, usa ela;
+// senão default: primeiro dia não-fechado (ao vivo) ou último dia.
+function resolverDiaAtivo(dias) {
+  if (DATA_SELECIONADA) {
+    const d = dias.find(x => x.data === DATA_SELECIONADA);
+    if (d) return d;
+  }
+  const idxParcial = dias.findIndex(x => !x.fechado);
+  if (idxParcial >= 0) return dias[idxParcial];
+  return dias.length ? dias[dias.length - 1] : null;
+}
+
 function renderHero(dados) {
   const dias = dados.dias || [];
   const total = dados.totais_principal || {};
 
-  // "Dia ao vivo" = primeiro dia não-fechado se houver, senão o último fechado.
-  // (Fechado = noite consolidada; não-fechado = dia em curso.)
-  const idxParcial = dias.findIndex(d => !d.fechado);
-  let diaAtivo = null;
-  if (idxParcial >= 0) diaAtivo = dias[idxParcial];
-  else if (dias.length) diaAtivo = dias[dias.length - 1];
+  // Dia ativo conforme filtro (ou auto-ao-vivo se sem filtro)
+  const diaAtivo = resolverDiaAtivo(dias);
 
   // Card 1 — dia
   if (diaAtivo) {
-    $('#kpiDiaData').textContent = `${fmtData(diaAtivo.data)} · ${diaAtivo.dia_semana || ''}${diaAtivo.fechado ? '' : ' · em curso'}`;
+    const sufixo = DATA_SELECIONADA ? '' : (diaAtivo.fechado ? '' : ' · em curso');
+    $('#kpiDiaData').textContent = `${fmtData(diaAtivo.data)} · ${diaAtivo.dia_semana || ''}${sufixo}`;
     aplicarKPI('kpiDia', diaAtivo.realizado || 0, diaAtivo.meta_venda || 0);
   }
 
@@ -148,8 +163,7 @@ function renderMini(dados) {
   const dias = dados.dias || [];
   const total = dados.totais_principal || {};
 
-  const idxParcial = dias.findIndex(d => !d.fechado);
-  const diaAtivo = idxParcial >= 0 ? dias[idxParcial] : (dias.length ? dias[dias.length - 1] : null);
+  const diaAtivo = resolverDiaAtivo(dias);
 
   // Margem do dia
   if (diaAtivo) {
@@ -194,13 +208,34 @@ function renderMini(dados) {
     : 'Mês encerrado';
 }
 
+function renderTudo() {
+  if (!DADOS_CACHE) return;
+  renderHero(DADOS_CACHE);
+  renderMini(DADOS_CACHE);
+}
+
+// Aplica limites do input[type=date] (min/max) e o valor inicial.
+function configurarFiltro() {
+  const inp = $('#filtroData');
+  if (!inp || !DADOS_CACHE) return;
+  const dias = DADOS_CACHE.dias || [];
+  if (!dias.length) return;
+  inp.min = dias[0].data;
+  inp.max = dias[dias.length - 1].data;
+  // Default = dia ativo (ao vivo) na primeira carga
+  if (!inp.value) {
+    const da = resolverDiaAtivo(dias);
+    if (da) inp.value = da.data;
+  }
+}
+
 async function carregar() {
   try {
     const d = await api('GET', '/api/vendas');
+    DADOS_CACHE = d;
     $('#mesRef').textContent = d.mes_referencia ? `${d.mes_referencia.slice(5,7)}/${d.mes_referencia.slice(0,4)}` : '—';
-
-    renderHero(d);
-    renderMini(d);
+    configurarFiltro();
+    renderTudo();
 
     $('#atualizadoEm').textContent = 'atualizado às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   } catch (err) {
@@ -209,9 +244,48 @@ async function carregar() {
   }
 }
 
-function agendarRefresh() {
-  if (REFRESH_TIMER) clearInterval(REFRESH_TIMER);
-  REFRESH_TIMER = setInterval(carregar, REFRESH_MS);
+// Solicita refresh on-demand (cria pendente na fila) e fica pollando até finalizar.
+async function solicitarAtualizacao() {
+  const btn = $('#btnRefresh');
+  const status = $('#atualizadoEm');
+  btn.disabled = true;
+  btn.textContent = '⏳ Atualizando…';
+  status.textContent = 'pedindo atualização…';
+
+  try {
+    const r = await api('POST', '/api/vendas/atualizar');
+    const id = r.solicitacao?.id;
+    if (!id) throw new Error('sem id da solicitação');
+
+    if (POLL_TIMER) clearInterval(POLL_TIMER);
+    POLL_TIMER = setInterval(async () => {
+      try {
+        const s = await api('GET', '/api/vendas/status');
+        const sol = s.ultima_solicitacao;
+        if (!sol || sol.id < id) return;
+        if (sol.status === 'pendente')   { status.textContent = 'aguardando worker (fila)…'; return; }
+        if (sol.status === 'processando'){ status.textContent = 'rodando query Oracle…';       return; }
+        clearInterval(POLL_TIMER); POLL_TIMER = null;
+        if (sol.status === 'ok') {
+          await carregar();
+          status.textContent = '✓ ' + (sol.mensagem || 'atualizado') + ' às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        } else {
+          status.textContent = '⚠ ' + (sol.mensagem || 'erro');
+        }
+        btn.disabled = false;
+        btn.textContent = '🔄 Atualizar';
+      } catch (err) {
+        clearInterval(POLL_TIMER); POLL_TIMER = null;
+        status.textContent = '⚠ erro no poll: ' + err.message;
+        btn.disabled = false;
+        btn.textContent = '🔄 Atualizar';
+      }
+    }, POLL_MS);
+  } catch (err) {
+    status.textContent = '⚠ ' + err.message;
+    btn.disabled = false;
+    btn.textContent = '🔄 Atualizar';
+  }
 }
 
 (async function bootstrap() {
@@ -222,8 +296,53 @@ function agendarRefresh() {
   } catch { location.href = '/login.html'; return; }
 
   $('#btnLogout').addEventListener('click', async () => { await api('POST', '/api/logout'); location.href = '/login.html'; });
-  $('#btnRefresh').addEventListener('click', carregar);
+  $('#btnRefresh').addEventListener('click', solicitarAtualizacao);
+
+  // Filtro de data
+  $('#filtroData').addEventListener('change', (e) => {
+    DATA_SELECIONADA = e.target.value || null;
+    renderTudo();
+  });
+  $('#btnHoje').addEventListener('click', () => {
+    DATA_SELECIONADA = null;
+    const inp = $('#filtroData');
+    if (DADOS_CACHE) {
+      const da = resolverDiaAtivo(DADOS_CACHE.dias || []);
+      if (da && inp) inp.value = da.data;
+    }
+    renderTudo();
+  });
 
   await carregar();
-  agendarRefresh();
+
+  // Se já tem uma solicitação em andamento de outro usuário, mostra status
+  try {
+    const s = await api('GET', '/api/vendas/status');
+    const sol = s.ultima_solicitacao;
+    if (sol && (sol.status === 'pendente' || sol.status === 'processando')) {
+      // simula click pra acompanhar
+      const btn = $('#btnRefresh');
+      btn.disabled = true;
+      btn.textContent = '⏳ Atualizando…';
+      $('#atualizadoEm').textContent = sol.status === 'pendente' ? 'aguardando worker (fila)…' : 'rodando query Oracle…';
+      // Poll usando o ID existente
+      POLL_TIMER = setInterval(async () => {
+        try {
+          const ss = await api('GET', '/api/vendas/status');
+          const cur = ss.ultima_solicitacao;
+          if (!cur || cur.id < sol.id) return;
+          if (cur.status === 'pendente' || cur.status === 'processando') return;
+          clearInterval(POLL_TIMER); POLL_TIMER = null;
+          if (cur.status === 'ok') {
+            await carregar();
+            $('#atualizadoEm').textContent = '✓ ' + (cur.mensagem || 'atualizado');
+          } else {
+            $('#atualizadoEm').textContent = '⚠ ' + (cur.mensagem || 'erro');
+          }
+          btn.disabled = false;
+          btn.textContent = '🔄 Atualizar';
+        } catch {}
+      }, POLL_MS);
+    }
+  } catch {}
 })();

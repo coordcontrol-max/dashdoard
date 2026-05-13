@@ -180,6 +180,20 @@ export async function migrate() {
     CREATE INDEX IF NOT EXISTS troca_atualizacao_status_idx ON troca_atualizacao (status, solicitado_em);
   `);
 
+  // Mesma estrutura pra Venda Diária / Painel ao Vivo (refresh on-demand)
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS vendas_atualizacao (
+      id SERIAL PRIMARY KEY,
+      solicitado_por INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      solicitado_em  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      iniciado_em    TIMESTAMPTZ,
+      processado_em  TIMESTAMPTZ,
+      status         TEXT NOT NULL DEFAULT 'pendente',
+      mensagem       TEXT
+    );
+    CREATE INDEX IF NOT EXISTS vendas_atualizacao_status_idx ON vendas_atualizacao (status, solicitado_em);
+  `);
+
   // Mesma estrutura pra KPIs Comerciais
   await pool.query(`
     CREATE TABLE IF NOT EXISTS kpis_atualizacao (

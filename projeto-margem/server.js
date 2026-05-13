@@ -226,6 +226,7 @@ const PUBLIC_FILES = new Set(['/login.html', '/login.js', '/primeiro-acesso.html
 app.get('/', (req, res) => paginaProtegida(req, res, 'index.html'));
 app.get('/admin', (req, res) => paginaProtegida(req, res, 'admin.html', true));
 app.get('/venda-diaria', (req, res) => paginaProtegida(req, res, 'venda-diaria.html'));
+app.get('/painel-vivo', (req, res) => paginaProtegida(req, res, 'painel-vivo.html'));
 app.get('/venda-diaria/imprimir', (req, res) => {
   const token = req.cookies[COOKIE_NAME];
   if (!token) return res.redirect('/login.html');
@@ -276,7 +277,7 @@ app.use((req, res, next) => {
   const p = req.path;
   if (PUBLIC_FILES.has(p)) return next();
   // Apenas HTMLs são gateados. JS/CSS são públicos (dados sensíveis ficam na API).
-  const protegidos = ['/index.html', '/admin.html', '/venda-diaria.html', '/venda-diaria-pdf.html', '/ruptura.html', '/troca.html', '/vagas.html', '/kpis.html', '/painel.html', '/metas.html', '/margem-loja.html', '/operacao.html', '/estrategia.html', '/dre.html'];
+  const protegidos = ['/index.html', '/admin.html', '/venda-diaria.html', '/venda-diaria-pdf.html', '/ruptura.html', '/troca.html', '/vagas.html', '/kpis.html', '/painel.html', '/painel-vivo.html', '/metas.html', '/margem-loja.html', '/operacao.html', '/estrategia.html', '/dre.html'];
   if (protegidos.includes(p)) {
     const token = req.cookies[COOKIE_NAME];
     if (!token) return res.redirect('/login.html');

@@ -30,6 +30,7 @@
       name: 'Comercial',
       icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1.5-5h15L21 9"/><path d="M4 9v11a1 1 0 001 1h14a1 1 0 001-1V9"/><path d="M9 21v-6a2 2 0 014 0v6"/></svg>`,
       items: [
+        { label: 'Painel ao Vivo', href: '/painel-vivo' },
         { label: 'Venda Diária', href: '/venda-diaria' },
         { label: 'Ruptura', href: '/ruptura' },
         { label: 'Troca', href: '/troca' },

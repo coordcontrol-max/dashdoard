@@ -251,13 +251,15 @@ app.get('/margem-loja/imprimir', (req, res) => {
   res.set('Cache-Control', 'no-store');
   res.type('html').send(renderPaginaMargemLojaPDF(DATA_MARGEM_LOJA));
 });
-app.get('/ruptura/imprimir', (req, res) => {
+app.get('/ruptura/imprimir', async (req, res) => {
   const token = req.cookies[COOKIE_NAME];
   if (!token) return res.redirect('/login.html');
   try { jwt.verify(token, JWT_SECRET); }
   catch { return res.redirect('/login.html'); }
   res.set('Cache-Control', 'no-store');
-  res.type('html').send(renderPaginaRupturaPDF(DATA_RUPTURA));
+  let dados = DATA_RUPTURA;
+  try { dados = await aplicarDimLojasRuptura(DATA_RUPTURA); } catch {}
+  res.type('html').send(renderPaginaRupturaPDF(dados));
 });
 app.get('/primeiro-acesso', (req, res) => res.sendFile(path.join(__dirname, 'public', 'primeiro-acesso.html')));
 
@@ -323,9 +325,70 @@ app.get('/api/vendas', authRequired, (req, res) => {
   res.json(DATA_VENDAS);
 });
 
-app.get('/api/ruptura', authRequired, (req, res) => {
+// ----- Reescrita de nomes de loja na Ruptura usando dim_lojas -----
+// As strings vêm do extract com NROEMPRESA no início (ex: "117-NSF 03",
+// "117-117-NSF 03", "131 - SR 02"). Pegamos o primeiro número e tentamos
+// achar o nome canônico em dim_lojas; se achar, substituímos.
+function _nroFromLojaStr(s) {
+  if (s == null) return null;
+  const m = String(s).match(/^\s*(\d+)/);
+  return m ? parseInt(m[1], 10) : null;
+}
+async function aplicarDimLojasRuptura(rupt) {
+  if (!rupt) return rupt;
+  const rows = await query('SELECT nroempresa, nome FROM dim_lojas');
+  const mapa = new Map(rows.map(r => [r.nroempresa, r.nome]));
+  const mapear = (s) => {
+    const nro = _nroFromLojaStr(s);
+    const can = nro != null ? mapa.get(nro) : null;
+    return can || s;
+  };
+
+  const out = { ...rupt };
+
+  if (Array.isArray(rupt.itens)) {
+    out.itens = rupt.itens.map(it => {
+      const novo = mapear(it.loja);
+      return novo === it.loja ? it : { ...it, loja: novo };
+    });
+  }
+
+  if (rupt.ranking_lojas && typeof rupt.ranking_lojas === 'object') {
+    out.ranking_lojas = {};
+    for (const escopo of Object.keys(rupt.ranking_lojas)) {
+      const arr = rupt.ranking_lojas[escopo] || [];
+      // Agrupa por nome canônico, somando skus/zerados
+      const agg = new Map();
+      for (const r of arr) {
+        const nome = mapear(r.nome);
+        const cur = agg.get(nome) || { nome, skus: 0, zerados: 0 };
+        cur.skus += Number(r.skus) || 0;
+        cur.zerados += Number(r.zerados) || 0;
+        agg.set(nome, cur);
+      }
+      const lista = Array.from(agg.values()).map(g => ({
+        ...g,
+        pct: g.skus ? g.zerados / g.skus : 0,
+      }));
+      lista.sort((a, b) => (b.pct || 0) - (a.pct || 0));
+      lista.forEach((r, i) => { r.rank = i + 1; });
+      out.ranking_lojas[escopo] = lista;
+    }
+  }
+
+  return out;
+}
+
+app.get('/api/ruptura', authRequired, async (req, res) => {
   if (!DATA_RUPTURA) return res.status(404).json({ error: 'ruptura ainda não foi carregada — rode atualizar_ruptura.sh' });
-  res.json(DATA_RUPTURA);
+  try {
+    const enriched = await aplicarDimLojasRuptura(DATA_RUPTURA);
+    res.json(enriched);
+  } catch (err) {
+    console.error('aplicarDimLojasRuptura falhou:', err.message);
+    // Fallback pra não quebrar o relatório se a query falhar
+    res.json(DATA_RUPTURA);
+  }
 });
 
 // ===== Vagas (Google Sheets) =====

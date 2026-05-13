@@ -480,6 +480,38 @@
   </div>
 </div>
 
+<!-- Modal: Inv. Rotativo TOTAL — todos os itens agregados across lojas -->
+<div class="modal-backdrop" id="modalInvRotTotal">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <h3 id="modalInvRotTotalTitulo">Inv. Rotativo · Todos os itens</h3>
+      <button class="modal-close" id="modalInvRotTotalClose">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="ru-info-bar" id="modalInvRotTotalInfo"></div>
+      <div class="ru-tabela-wrap" style="max-height:60vh;margin-top:8px;">
+        <table id="tblInvRotTotal">
+          <thead>
+            <tr>
+              <th class="sortable" data-sort-total="produto">Produto <span class="sort-ico"></span></th>
+              <th class="sortable" data-sort-total="comprador">Comprador <span class="sort-ico"></span></th>
+              <th class="num sortable" data-sort-total="qtd">Qtd <span class="sort-ico"></span></th>
+              <th class="num sortable" data-sort-total="valor">Inventário <span class="sort-ico"></span></th>
+              <th class="num sortable" data-sort-total="venda">Venda <span class="sort-ico"></span></th>
+              <th class="num sortable" data-sort-total="pct_venda">% Venda <span class="sort-ico"></span></th>
+              <th class="num sortable" data-sort-total="n_lojas">Lojas <span class="sort-ico"></span></th>
+            </tr>
+          </thead>
+          <tbody id="tbodyInvRotTotal"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-mini primary" id="modalInvRotTotalFechar">Fechar</button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal: drill-down Estoque sem Vendas por loja (produtos) -->
 <div class="modal-backdrop" id="modalSemVendas">
   <div class="modal modal-lg">
@@ -621,6 +653,6 @@
 </div>
 
 <script src="sidebar.js"></script>
-<script src="operacao.js?v=21"></script>
+<script src="operacao.js?v=22"></script>
 </body>
 </html>

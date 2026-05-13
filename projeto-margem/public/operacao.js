@@ -521,7 +521,7 @@ function renderTabelaInvRot() {
     html += `
       <tr class="total">
         <td>TOTAL</td>
-        <td class="num"><b>${fmtRs(t.valor)}</b></td>
+        <td class="num"><span class="valor-link" data-invrot-total="1"><b>${fmtRs(t.valor)}</b></span></td>
         <td class="num"><b>${fmtNum(t.qtd)}</b></td>
         <td class="num">—</td>
         <td class="num ${classInvRotPct(t.pct)}"><b>${fmtPct(t.pct)}</b></td>
@@ -586,6 +586,101 @@ async function abrirModalInvRot(nroempresaStr) {
   `;
 
   renderModalInvRotLista();
+}
+
+// ====== Modal TOTAL · todos itens agregados across lojas ======
+let INV_ROT_TOTAL = null;
+let invRotTotalSortField = 'valor';
+let invRotTotalSortDir = 'desc';
+const INV_ROT_TOTAL_SORT_TEXT = new Set(['produto', 'comprador']);
+const INV_ROT_TOTAL_EXPANDED = new Set();   // keys de produtos com loja-drill aberto
+
+async function abrirModalInvRotTotal() {
+  $('#modalInvRotTotalInfo').innerHTML = 'Carregando itens agregados…';
+  $('#tbodyInvRotTotal').innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text-muted);">Carregando…</td></tr>`;
+  $('#modalInvRotTotal').classList.add('open');
+  INV_ROT_TOTAL_EXPANDED.clear();
+
+  if (!INV_ROT_TOTAL) {
+    try {
+      const r = await api('GET', '/api/inv-rotativo/itens-total');
+      INV_ROT_TOTAL = r.itens || [];
+    } catch (err) {
+      $('#modalInvRotTotalInfo').innerHTML = `<span style="color:var(--neg);">Erro: ${escapeHtml(err.message)}</span>`;
+      return;
+    }
+  }
+
+  const totalItens = INV_ROT_TOTAL.length;
+  const inv = INV_ROT_TOTAL.reduce((s, x) => s + (x.valor || 0), 0);
+  const ven = INV_ROT_TOTAL.reduce((s, x) => s + (x.venda || 0), 0);
+  $('#modalInvRotTotalInfo').innerHTML = `
+    <b>${fmtNum(totalItens)}</b> produtos distintos · Inventário: <b>${fmtRs(inv)}</b> · Venda: <b>${fmtRs(ven)}</b> · ${fmtPct(ven ? inv / ven : null)}
+  `;
+  renderModalInvRotTotalLista();
+}
+
+function renderModalInvRotTotalLista() {
+  if (!INV_ROT_TOTAL) return;
+  // Decora
+  const decorados = INV_ROT_TOTAL.map(it => ({
+    ...it,
+    n_lojas: it.lojas ? it.lojas.length : 0,
+    pct_venda: (it.valor != null && it.venda != null && it.venda !== 0) ? it.valor / it.venda : null,
+  }));
+
+  // Ordena
+  const f = invRotTotalSortField, dir = invRotTotalSortDir;
+  const sign = dir === 'asc' ? 1 : -1;
+  decorados.sort((a, b) => {
+    const av = a[f], bv = b[f];
+    if (av == null && bv == null) return 0;
+    if (av == null) return 1;
+    if (bv == null) return -1;
+    if (INV_ROT_TOTAL_SORT_TEXT.has(f)) return sign * String(av).localeCompare(String(bv), 'pt-BR');
+    return sign * (av - bv);
+  });
+
+  // Sort indicator
+  $$('#tblInvRotTotal th.sortable').forEach(th => {
+    th.classList.remove('sort-asc', 'sort-desc');
+    if (th.dataset.sortTotal === f) th.classList.add(dir === 'asc' ? 'sort-asc' : 'sort-desc');
+  });
+
+  const cell = (v, fmt) => v == null ? '<span style="color:var(--text-muted);">—</span>' : fmt(v);
+  let html = '';
+  for (const it of decorados) {
+    const isOpen = INV_ROT_TOTAL_EXPANDED.has(it.produto);
+    const chev = isOpen ? '▾' : '▸';
+    html += `
+      <tr class="invrot-total-row${isOpen ? ' open' : ''}" data-produto="${escapeHtml(it.produto)}" style="cursor:pointer;">
+        <td><span style="color:var(--text-muted);margin-right:4px;">${chev}</span>${escapeHtml(it.produto)}</td>
+        <td>${escapeHtml(it.comprador || '—')}</td>
+        <td class="num">${cell(it.qtd, fmtNum)}</td>
+        <td class="num">${cell(it.valor, fmtRs)}</td>
+        <td class="num">${cell(it.venda, fmtRs)}</td>
+        <td class="num">${cell(it.pct_venda, fmtPct)}</td>
+        <td class="num">${fmtNum(it.n_lojas)}</td>
+      </tr>
+    `;
+    if (isOpen) {
+      const lojas = (it.lojas || []).slice().sort((a, b) => Math.abs(b.valor || 0) - Math.abs(a.valor || 0));
+      for (const l of lojas) {
+        const pctL = (l.valor != null && l.venda != null && l.venda !== 0) ? l.valor / l.venda : null;
+        html += `
+          <tr class="invrot-total-loja" style="background: var(--bg-row-hover);">
+            <td colspan="2" style="padding-left:36px;color:var(--text-muted);">↳ ${escapeHtml(l.loja_nome)} <small>(${l.nroempresa})</small></td>
+            <td class="num">${cell(l.qtd, fmtNum)}</td>
+            <td class="num">${cell(l.valor, fmtRs)}</td>
+            <td class="num">${cell(l.venda, fmtRs)}</td>
+            <td class="num">${cell(pctL, fmtPct)}</td>
+            <td class="num">—</td>
+          </tr>
+        `;
+      }
+    }
+  }
+  $('#tbodyInvRotTotal').innerHTML = html;
 }
 
 function renderModalInvRotLista() {
@@ -1360,6 +1455,8 @@ async function init() {
     if (linkSV) { abrirModalSemVendas(linkSV.dataset.lojaSemvendas); return; }
     const linkIR = e.target.closest('[data-loja-invrot]');
     if (linkIR) { abrirModalInvRot(linkIR.dataset.lojaInvrot); return; }
+    const linkIRT = e.target.closest('[data-invrot-total]');
+    if (linkIRT) { abrirModalInvRotTotal(); return; }
     const tabQb = e.target.closest('.qb-tab:not([data-comp-invrot])');
     if (tabQb && tabQb.hasAttribute('data-comp')) {
       $('#modalQuebraTabs').querySelectorAll('.qb-tab').forEach(t => t.classList.remove('active'));
@@ -1398,6 +1495,32 @@ async function init() {
   $('#modalInvRotClose').addEventListener('click', () => $('#modalInvRot').classList.remove('open'));
   $('#modalInvRotFechar').addEventListener('click', () => $('#modalInvRot').classList.remove('open'));
   $('#modalInvRot').addEventListener('click', e => { if (e.target.id === 'modalInvRot') $('#modalInvRot').classList.remove('open'); });
+  // Modal TOTAL (todos itens)
+  $('#modalInvRotTotalClose').addEventListener('click', () => $('#modalInvRotTotal').classList.remove('open'));
+  $('#modalInvRotTotalFechar').addEventListener('click', () => $('#modalInvRotTotal').classList.remove('open'));
+  $('#modalInvRotTotal').addEventListener('click', e => { if (e.target.id === 'modalInvRotTotal') $('#modalInvRotTotal').classList.remove('open'); });
+  // Sort por clique nas colunas do modal TOTAL
+  $('#tblInvRotTotal thead').addEventListener('click', e => {
+    const th = e.target.closest('th.sortable');
+    if (!th) return;
+    const field = th.dataset.sortTotal;
+    if (invRotTotalSortField === field) {
+      invRotTotalSortDir = invRotTotalSortDir === 'asc' ? 'desc' : 'asc';
+    } else {
+      invRotTotalSortField = field;
+      invRotTotalSortDir = INV_ROT_TOTAL_SORT_TEXT.has(field) ? 'asc' : 'desc';
+    }
+    renderModalInvRotTotalLista();
+  });
+  // Expand row no modal TOTAL → mostra breakdown por loja
+  $('#tbodyInvRotTotal').addEventListener('click', e => {
+    const row = e.target.closest('tr.invrot-total-row');
+    if (!row) return;
+    const produto = row.dataset.produto;
+    if (INV_ROT_TOTAL_EXPANDED.has(produto)) INV_ROT_TOTAL_EXPANDED.delete(produto);
+    else INV_ROT_TOTAL_EXPANDED.add(produto);
+    renderModalInvRotTotalLista();
+  });
   // Sort por clique nas colunas do modal Inv. Rotativo
   $('#tblInvRotComp thead').addEventListener('click', e => {
     const th = e.target.closest('th.sortable');

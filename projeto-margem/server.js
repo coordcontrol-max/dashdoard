@@ -427,6 +427,57 @@ app.get('/api/inv-rotativo', authRequired, async (req, res) => {
   }
 });
 
+// GET itens agregados por produto across todas as lojas (TOTAL drill).
+// Resposta: array de itens com totais + breakdown por loja inline pra drilldown.
+app.get('/api/inv-rotativo/itens-total', authRequired, async (req, res) => {
+  const rows = await query('SELECT nroempresa, itens FROM inv_rotativo_itens');
+  const dimRows = await query('SELECT nroempresa, nome FROM dim_lojas');
+  const nomeLoja = new Map(dimRows.map(r => [r.nroempresa, r.nome]));
+
+  // Agrega por chave produto (string canônica — bate quando o nome bate).
+  // Mantém também o primeiro comprador encontrado pra filtro/exibição.
+  const agg = new Map();
+  for (const row of rows) {
+    const nro = row.nroempresa;
+    const lista = row.itens || [];
+    for (const it of lista) {
+      const k = it.produto || '';
+      if (!k) continue;
+      let cur = agg.get(k);
+      if (!cur) {
+        cur = {
+          produto: k,
+          comprador: it.comprador || '',
+          qtd:   it.qtd   != null ? Number(it.qtd)   : null,
+          valor: it.valor != null ? Number(it.valor) : null,
+          venda: it.venda != null ? Number(it.venda) : null,
+          lojas: [],
+        };
+        agg.set(k, cur);
+      } else {
+        const sum = (a, b) => (a == null && b == null) ? null : (a || 0) + (b || 0);
+        cur.qtd   = sum(cur.qtd,   it.qtd);
+        cur.valor = sum(cur.valor, it.valor);
+        cur.venda = sum(cur.venda, it.venda);
+      }
+      cur.lojas.push({
+        nroempresa: nro,
+        loja_nome:  nomeLoja.get(nro) || `Loja ${nro}`,
+        qtd:   it.qtd   != null ? Number(it.qtd)   : null,
+        valor: it.valor != null ? Number(it.valor) : null,
+        venda: it.venda != null ? Number(it.venda) : null,
+      });
+    }
+  }
+  // Ordena lojas dentro de cada item por nroempresa
+  for (const item of agg.values()) {
+    item.lojas.sort((a, b) => a.nroempresa - b.nroempresa);
+  }
+  res.json({
+    itens: Array.from(agg.values()),
+  });
+});
+
 // GET itens de uma loja específica (lazy load no drill).
 app.get('/api/inv-rotativo/loja/:nroempresa', authRequired, async (req, res) => {
   const nro = parseInt(req.params.nroempresa, 10);
